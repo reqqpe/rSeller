@@ -1,0 +1,27 @@
+levels:
+  1:
+    coin-multiplier: 1.0
+    point-multiplier: 1.0
+    required-points: 0
+  2:
+    coin-multiplier: 1.1
+    point-multiplier: 1.1
+    required-points: 100
+  3:
+    coin-multiplier: 1.2
+    point-multiplier: 1.1
+    required-points: 250
+  4:
+    coin-multiplier: 1.3
+    point-multiplier: 1.2
+    required-points: 500
+
+messages:
+  reload: "&aПлагин успешно перезагружен"
+  no-permission: "&cУ вас нет прав использовать эту команду"
+  no-arguments: "&cНе достаточно аргументов"
+  points-usage: "&cИспользование: /sa points <add/remove/set> <кол-во> [игрок]"
+  un-int: "&cВы указали неверное число: {value}"
+  not-found-player: "&cНе удалось найти игрока"
+  update-points-sender: "&aУ игрока &f{player} &aтеперь &f{value} &aочков прокачки"
+  update-points-target: "&aВаши очки прокачки были обновлены до &f{value}"

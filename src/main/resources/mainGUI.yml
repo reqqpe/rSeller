@@ -1,0 +1,48 @@
+title: "&8Скупщик"
+sell-slots:
+  - 0-44
+items:
+  sell_item:
+    material: EMERALD_BLOCK
+    name: "&aПродать"
+    slot: 49
+    lore:
+      - "&7Нажмите, чтобы продать все предметы"
+      - "&fВы получите: &a%sell_price%"
+  level_info:
+    slot: 48
+    material: BOOK
+    name: "&eИнформация об уровне"
+    lore:
+      - "&7Уровень: &a%level%"
+      - "&7Очков до следующего: &a%points_needed%"
+      - "&7Бустер монет: &a%coin_multiplier%x"
+      - "&7Бустер очков: &a%point_multiplier%x"
+  decorate1:
+    material: GRAY_STAINED_GLASS_PANE
+    name: "&f"
+    slot: 45
+  decorate2:
+    material: GRAY_STAINED_GLASS_PANE
+    name: "&f"
+    slot: 46
+  decorate3:
+    material: GRAY_STAINED_GLASS_PANE
+    name: "&f"
+    slot: 47
+  decorate4:
+    material: GRAY_STAINED_GLASS_PANE
+    name: "&f"
+    slot: 50
+  decorate5:
+    material: GRAY_STAINED_GLASS_PANE
+    name: "&f"
+    slot: 51
+  decorate6:
+    material: GRAY_STAINED_GLASS_PANE
+    name: "&f"
+    slot: 52
+  decorate7:
+    material: GRAY_STAINED_GLASS_PANE
+    name: "&f"
+    slot: 53

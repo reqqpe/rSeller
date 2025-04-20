@@ -1,0 +1,10 @@
+items:
+  DIAMOND:
+    price: 50
+    points: 1
+  GOLD_INGOT:
+    price: 25
+    points: 1
+  IRON_INGOT:
+    price: 10
+    points: 1

@@ -1,0 +1,11 @@
+name: rSeller
+version: '${project.version}'
+main: my.reqqpe.rseller.Main
+api-version: '1.16'
+authors: [reqqpe]
+commands:
+  sell:
+    description: Открыть меню скупщика
+    aliases: [buyer, seller]
+  rseller:
+    aliases: [sa, ba, buyadmin, selladmin, rs]
