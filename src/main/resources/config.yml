@@ -1,3 +1,12 @@
+#Настройки пула соединений, если не знаете что это рекомендуется не менять
+database:
+  max-pool-size: 10
+  #В миллисекундах
+  keep-alive: 120000
+  idle-timeout: 60000
+  connection-timeout: 30000
+  max-life-time: 1800000
+
 levels:
   1:
     coin-multiplier: 1.0

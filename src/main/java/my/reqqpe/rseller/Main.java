@@ -1,25 +1,24 @@
 package my.reqqpe.rseller;
 
 import my.reqqpe.rseller.commands.SellCommand;
-import my.reqqpe.rseller.commands.SelladminCommand;
+import my.reqqpe.rseller.commands.SellAdminCommand;
 import my.reqqpe.rseller.configurations.CustomConfigs;
-import my.reqqpe.rseller.configurations.DataBase;
+import my.reqqpe.rseller.database.Database;
+import my.reqqpe.rseller.database.DatabaseListener;
 import my.reqqpe.rseller.managers.LevelManager;
 import my.reqqpe.rseller.managers.SellManager;
 import my.reqqpe.rseller.menu.SellMenu;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.sql.SQLException;
-import java.util.UUID;
-
 
 public final class Main extends JavaPlugin {
 
     private CustomConfigs itemsConfig;
     private CustomConfigs mainGUI;
     private SellMenu sellMenu;
-    private DataBase dataBase;
+    private Database database;
     private LevelManager levelManager;
     private SellManager sellManager;
 
@@ -44,46 +43,31 @@ public final class Main extends JavaPlugin {
         mainGUI.setup();
         getLogger().info("mainGUI.yml успешно загружен");
 
+        database = new Database(this);
+        for (Player pl : Bukkit.getOnlinePlayers()) database.loadPlayerData(pl.getUniqueId());
 
-        // DataBase
-        try {
 
-            if (!getDataFolder().exists()) {
-                getDataFolder().mkdir();
-            }
-
-            dataBase = new DataBase(this, getDataFolder().getAbsolutePath() + "/data.db");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            getLogger().severe("Не удалось подключиться к базе данных");
-            getPluginLoader().disablePlugin(this);
-            return;
-        }
         // managers
-        levelManager = new LevelManager(this);
-        sellManager = new SellManager(this);
+        levelManager = new LevelManager(this, database);
+        sellManager = new SellManager(this, database);
 
         // events
 
-        sellMenu = new SellMenu(this, sellManager);
-        getServer().getPluginManager().registerEvents(sellMenu, this);
+        sellMenu = new SellMenu(this, sellManager, database);
+        PluginManager pm = getServer().getPluginManager();
+        pm.registerEvents(sellMenu, this);
+        pm.registerEvents(new DatabaseListener(database), this);
 
         //commands
         getCommand("sell").setExecutor(new SellCommand(sellMenu));
-        getCommand("rseller").setExecutor(new SelladminCommand(this));
+        getCommand("rseller").setExecutor(new SellAdminCommand(this, database));
 
 
     }
 
     @Override
     public void onDisable() {
-
-        // close connection data_base
-        try {
-            dataBase.closeConnection();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        database.saveAll();
     }
 
     public CustomConfigs getItemsConfig() {
@@ -92,10 +76,6 @@ public final class Main extends JavaPlugin {
 
     public CustomConfigs getMainGUI() {
         return mainGUI;
-    }
-
-    public DataBase getDataBase() {
-        return dataBase;
     }
 
     public LevelManager getLevelManager() {

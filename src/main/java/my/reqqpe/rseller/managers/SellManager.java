@@ -2,7 +2,8 @@ package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.configurations.DataBase;
+import my.reqqpe.rseller.database.Database;
+import my.reqqpe.rseller.database.PlayerData;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -11,20 +12,19 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class SellManager {
 
     private final Main plugin;
     private final Economy economy;
-    private final DataBase dataBase;
+    private final Database database;
     private final LevelManager levelManager;
 
-    public SellManager(Main plugin) {
+    public SellManager(Main plugin, Database database) {
         this.plugin = plugin;
         this.economy = EconomySetup.getEconomy();
-        this.dataBase = plugin.getDataBase();
+        this.database = database;
         this.levelManager = plugin.getLevelManager();
     }
 
@@ -65,12 +65,10 @@ public class SellManager {
             economy.depositPlayer(player, totalCoins);
         }
 
+
         if (totalPoints > 0) {
-            try {
-                dataBase.addPoints(player, totalPoints);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            PlayerData data = database.getPlayerData(player.getUniqueId());
+            data.addPoints(totalPoints);
         }
 
         if (totalCoins > 0 || totalPoints > 0) {
