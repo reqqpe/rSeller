@@ -85,4 +85,8 @@ public class LevelManager {
         int currentLevel = getLevel(player);
         return getPointsForNextLevel(currentLevel);
     }
+    public void reloadLevels() {
+        levels.clear();
+        loadLevels();
+    }
 }

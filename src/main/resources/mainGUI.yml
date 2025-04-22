@@ -7,8 +7,9 @@ items:
     name: "&aПродать"
     slot: 49
     lore:
-      - "&7Нажмите, чтобы продать все предметы"
-      - "&fВы получите: &a%sell_price%"
+      - "&7Вы получите:"
+      - "&eМонеты: &f%sell_price%"
+      - "&bОчки: &f%sell_points%"
   level_info:
     slot: 48
     material: BOOK

@@ -34,3 +34,5 @@ messages:
   not-found-player: "&cНе удалось найти игрока"
   update-points-sender: "&aУ игрока &f{player} &aтеперь &f{value} &aочков прокачки"
   update-points-target: "&aВаши очки прокачки были обновлены до &f{value}"
+  no-sell-items: "&cНет предметов, которые можно продать"
+  sell-items: "&aВы успешно продали предметы на сумму {coins} и получили {points} очков"

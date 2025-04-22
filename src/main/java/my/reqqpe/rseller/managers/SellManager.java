@@ -4,8 +4,10 @@ import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -70,13 +72,15 @@ public class SellManager {
             PlayerData data = database.getPlayerData(player.getUniqueId());
             data.addPoints(totalPoints);
         }
-
+        ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
         if (totalCoins > 0 || totalPoints > 0) {
-            player.sendMessage(ChatColor.GREEN + "Вы продали вещи на сумму " +
-                    ChatColor.GOLD + totalCoins + ChatColor.GREEN +
-                    " и получили " + ChatColor.YELLOW + totalPoints + ChatColor.GREEN + " очков!");
+            String message = Colorizer.color(sec.getString("sell-items")
+                    .replace("{coins}", String.valueOf(totalCoins))
+                    .replace("{points}", String.valueOf(totalPoints)));
+            player.sendMessage(message);
         } else {
-            player.sendMessage(ChatColor.RED + "Нет предметов, которые можно продать.");
+            String message = Colorizer.color(sec.getString("no-sell-items"));
+            player.sendMessage();
         }
     }
 }

@@ -41,13 +41,11 @@ public class Database {
         createTable();
     }
 
-    // Подробнее о пуле можешь почитать на гитхабе - https://github.com/brettwooldridge/HikariCP
     private void initPool(FileConfiguration config) {
-        String path = plugin.getDataFolder() + "/database.db";
+        String path = plugin.getDataFolder() + "/data.db";
         HikariConfig hc = new HikariConfig();
         hc.setJdbcUrl("jdbc:sqlite:" + path);
-        //Обрати внимание на то как нужно работать с конфигами
-        //Почитай - https://spigotmc.ru/resources/oshibki-nachinajuschix-razrabotchikov-majnkraft-plaginov-i-kak-ix-ne-dopuskat.2997/
+
         ConfigurationSection data = config.getConfigurationSection("database");
         hc.setMaximumPoolSize(data.getInt("max-pool-size"));
         hc.setIdleTimeout(data.getLong("idle-timeout"));

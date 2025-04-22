@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,25 +25,31 @@ public class SellAdminCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
 
+        ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
+
         if (!commandSender.hasPermission("rseller.admin")) {
-            String message = plugin.getConfig().getString("messages.no-permission");
+            String message = sec.getString("no-permission");
             commandSender.sendMessage(Colorizer.color(message));
             return true;
         }
 
         if (args.length == 0) {
-            commandSender.sendMessage(Colorizer.color(plugin.getConfig().getString("messages.no-arguments")));
+            String message = sec.getString("no-argument");
+            commandSender.sendMessage(Colorizer.color(message));
             return true;
         }
         if (args[0].equalsIgnoreCase("reload")) {
             plugin.getMainGUI().reloadConfig();
             plugin.getItemsConfig().reloadConfig();
+            plugin.getLevelManager().reloadLevels();
             plugin.reloadConfig();
-            commandSender.sendMessage(Colorizer.color(plugin.getConfig().getString("messages.reload")));
+            String message = sec.getString("reload");
+            commandSender.sendMessage(Colorizer.color(message));
         }
         if (args[0].equalsIgnoreCase("points")) {
             if (args.length < 3) {
-                commandSender.sendMessage(Colorizer.color(plugin.getConfig().getString("messages.points-usage")));
+                String message = sec.getString("points-usage");
+                commandSender.sendMessage(Colorizer.color(message));
                 return true;
             }
 
@@ -52,7 +59,8 @@ public class SellAdminCommand implements CommandExecutor {
             try {
                 amount = Integer.parseInt(args[2]);
             } catch (NumberFormatException e) {
-                commandSender.sendMessage(Colorizer.color(plugin.getConfig().getString("messages.un-int").replace("{valuer}", args[2])));
+                String message = sec.getString("un-int").replace("{value}", args[2]);
+                commandSender.sendMessage(Colorizer.color(message));
                 return true;
             }
 
@@ -60,7 +68,8 @@ public class SellAdminCommand implements CommandExecutor {
                     (commandSender instanceof Player ? (Player) commandSender : null);
 
             if (target == null) {
-                commandSender.sendMessage(Colorizer.color(plugin.getConfig().getString("messages.not-found-player")));
+                String message = sec.getString("not-found-player");
+                commandSender.sendMessage(Colorizer.color(message));
                 return true;
             }
             PlayerData data = database.getPlayerData(target.getUniqueId());
@@ -72,12 +81,13 @@ public class SellAdminCommand implements CommandExecutor {
             }
 
             int newPoints = data.getPoints();
-            commandSender.sendMessage(Colorizer.color(plugin.getConfig().getString("messages.update-points-sender")
+            String message = sec.getString("update-points-sender")
                     .replace("{player}", target.getName())
-                    .replace("{value}", String.valueOf(newPoints))));
+                    .replace("{value}", String.valueOf(newPoints));;
+            commandSender.sendMessage(Colorizer.color(message));
             if (!target.equals(commandSender)) {
-                commandSender.sendMessage(Colorizer.color(plugin.getConfig().getString("messages.update-points-sender")
-                        .replace("{value}", String.valueOf(newPoints))));
+                String message2 = sec.getString("update-points-target").replace("{value}", String.valueOf(newPoints));
+                target.sendMessage(Colorizer.color(message2));
             }
         }
         return true;
