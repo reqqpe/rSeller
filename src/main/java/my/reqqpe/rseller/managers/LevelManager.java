@@ -1,19 +1,24 @@
 package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.Main;
+import my.reqqpe.rseller.database.Database;
+import my.reqqpe.rseller.database.PlayerData;
 import org.bukkit.entity.Player;
 import org.bukkit.configuration.ConfigurationSection;
 
+import javax.xml.crypto.Data;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class LevelManager {
 
     private final Main plugin;
+    private final Database database;
     private final TreeMap<Integer, LevelInfo> levels = new TreeMap<>();
 
-    public LevelManager(Main plugin) {
+    public LevelManager(Main plugin, Database database) {
         this.plugin = plugin;
+        this.database = database;
         loadLevels();
     }
 
@@ -38,13 +43,8 @@ public class LevelManager {
     }
 
     public LevelInfo getLevelInfo(Player player) {
-        int points;
-        try {
-            points = plugin.getDataBase().getPoints(player);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new LevelInfo(1, 1.0, 1.0, 0); // fallback
-        }
+        PlayerData data = database.getPlayerData(player.getUniqueId());
+        int points = data.getPoints();
 
         LevelInfo current = levels.firstEntry().getValue();
         for (Map.Entry<Integer, LevelInfo> entry : levels.entrySet()) {
@@ -72,14 +72,7 @@ public class LevelManager {
 
     public record LevelInfo(int level, double coinMultiplier, double pointMultiplier, int requiredPoints) {
     }
-    public int getPlayerPoints(Player player) {
-        try {
-            return plugin.getDataBase().getPoints(player);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
+
     public int getPointsForNextLevel(int currentLevel) {
         for (Map.Entry<Integer, LevelInfo> entry : levels.entrySet()) {
             if (entry.getKey() > currentLevel) {

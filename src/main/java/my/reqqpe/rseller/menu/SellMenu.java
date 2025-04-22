@@ -1,6 +1,8 @@
 package my.reqqpe.rseller.menu;
 
 import my.reqqpe.rseller.Main;
+import my.reqqpe.rseller.database.Database;
+import my.reqqpe.rseller.database.PlayerData;
 import my.reqqpe.rseller.managers.SellManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,7 +17,6 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,9 +24,12 @@ public class SellMenu implements Listener {
 
     private final Main plugin;
     private final SellManager sellManager;
-    public SellMenu(Main plugin, SellManager sellManager) {
+    private final Database database;
+
+    public SellMenu(Main plugin, SellManager sellManager, Database database) {
         this.plugin = plugin;
         this.sellManager = sellManager;
+        this.database = database;
     }
 
     public void openMenu(Player player) {
@@ -92,7 +96,8 @@ public class SellMenu implements Listener {
                     if (infoMeta != null) {
                         var levelInfo = plugin.getLevelManager().getLevelInfo(player);
                         int currentLevel = levelInfo.level();
-                        int currentPoints = plugin.getLevelManager().getPlayerPoints(player);
+                        PlayerData data = database.getPlayerData(player.getUniqueId());
+                        int currentPoints = data.getPoints();
                         int nextLevelPoints = plugin.getLevelManager().getPointsForNextLevel(currentLevel);
                         int pointsToNext = Math.max(0, nextLevelPoints - currentPoints);
 

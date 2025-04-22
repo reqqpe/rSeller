@@ -9,3 +9,5 @@ commands:
     aliases: [buyer, seller]
   rseller:
     aliases: [sa, ba, buyadmin, selladmin, rs]
+libraries:
+  - com.zaxxer:HikariCP:6.3.0
