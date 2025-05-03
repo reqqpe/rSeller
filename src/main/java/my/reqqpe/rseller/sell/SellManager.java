@@ -1,12 +1,12 @@
-package my.reqqpe.rseller.managers;
+package my.reqqpe.rseller.sell;
 
 import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.managers.LevelManager;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -80,7 +80,7 @@ public class SellManager {
             player.sendMessage(message);
         } else {
             String message = Colorizer.color(sec.getString("no-sell-items"));
-            player.sendMessage();
+            player.sendMessage(message);
         }
     }
 }

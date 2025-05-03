@@ -3,7 +3,8 @@ package my.reqqpe.rseller.menu;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
-import my.reqqpe.rseller.managers.SellManager;
+import my.reqqpe.rseller.sell.SellManager;
+import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -18,7 +19,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SellMenu implements Listener {
 
@@ -65,19 +65,7 @@ public class SellMenu implements Listener {
                 ItemMeta meta = item.getItemMeta();
 
                 if (meta != null) {
-                    meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', guiConfig.getString(path + ".name", "")));
-
-                    List<String> lore = guiConfig.getStringList(path + ".lore");
-                    if (lore != null && !lore.isEmpty()) {
-                        List<String> finalLore = lore.stream()
-                                .map(line -> ChatColor.translateAlternateColorCodes('&',
-                                        line.replace("%sell_price%", String.format("%.2f", preview.totalCoins))
-                                                .replace("%sell_points%", String.valueOf(preview.totalPoints))))
-                                .collect(Collectors.toList());
-                        meta.setLore(finalLore);
-                    }
-
-                    item.setItemMeta(meta);
+                    unDuplicate(guiConfig, preview, path, item, meta);
                 }
 
                 inv.setItem(slot, item);
@@ -101,19 +89,17 @@ public class SellMenu implements Listener {
                         int nextLevelPoints = plugin.getLevelManager().getPointsForNextLevel(currentLevel);
                         int pointsToNext = Math.max(0, nextLevelPoints - currentPoints);
 
-                        infoMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&',
-                                guiConfig.getString(levelPath + ".name", "")));
+                        String name = guiConfig.getString(levelPath + ".name", "");
+                        infoMeta.setDisplayName(Colorizer.color(name));
 
                         List<String> lore = guiConfig.getStringList(levelPath + ".lore");
                         if (lore != null && !lore.isEmpty()) {
-                            List<String> finalLore = lore.stream()
-                                    .map(line -> ChatColor.translateAlternateColorCodes('&',
-                                            line.replace("%level%", String.valueOf(currentLevel))
-                                                    .replace("%points_needed%", String.valueOf(pointsToNext))
-                                                    .replace("%coin_multiplier%", String.format("%.2f", levelInfo.coinMultiplier()))
-                                                    .replace("%point_multiplier%", String.valueOf(levelInfo.pointMultiplier()))))
-                                    .collect(Collectors.toList());
-                            infoMeta.setLore(finalLore);
+                            List<String> finalLore = lore.stream().map(line -> line.replace("%level%", String.valueOf(currentLevel))
+                                    .replace("%points_needed%", String.valueOf(pointsToNext))
+                                    .replace("%coin_multiplier%", String.format("%.2f", levelInfo.coinMultiplier()))
+                                    .replace("%point_multiplier%", String.format("%.2f", levelInfo.pointMultiplier())))
+                                    .toList();
+                            infoMeta.setLore(Colorizer.colorizeAll(finalLore));
                         }
 
                         infoItem.setItemMeta(infoMeta);
@@ -126,6 +112,23 @@ public class SellMenu implements Listener {
 
         player.openInventory(inv);
     }
+
+    private void unDuplicate(FileConfiguration guiConfig, SellPreview preview, String path, ItemStack item, ItemMeta meta) {
+        String name = guiConfig.getString(path + ".name", "");
+        meta.setDisplayName(Colorizer.color(name));
+
+        List<String> lore = guiConfig.getStringList(path + ".lore");
+        if (lore != null && !lore.isEmpty()) {
+            List<String> finalLore = lore.stream().map(line ->
+                            line.replace("%sell_price%", String.format("%.2f", preview.totalCoins))
+                                    .replace("%sell_points%", String.format("%.2f", (double) preview.totalPoints)))
+                    .toList();
+            meta.setLore(Colorizer.colorizeAll(finalLore));
+        }
+
+        item.setItemMeta(meta);
+    }
+
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
         if (!(e.getPlayer() instanceof Player player)) return;
@@ -203,20 +206,7 @@ public class SellMenu implements Listener {
 
             SellPreview preview = calculatePreviewInfo(player, inv);
 
-            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&',
-                    guiConfig.getString(path + ".name", "")));
-
-            List<String> lore = guiConfig.getStringList(path + ".lore");
-            if (lore != null && !lore.isEmpty()) {
-                List<String> finalLore = lore.stream()
-                        .map(line -> ChatColor.translateAlternateColorCodes('&',
-                                line.replace("%sell_price%", String.format("%.2f", preview.totalCoins))
-                                        .replace("%sell_points%", String.valueOf(preview.totalPoints))))
-                        .collect(Collectors.toList());
-                meta.setLore(finalLore);
-            }
-
-            item.setItemMeta(meta);
+            unDuplicate(guiConfig, preview, path, item, meta);
         }
 
         int slot = guiConfig.getInt(path + ".slot", 49);

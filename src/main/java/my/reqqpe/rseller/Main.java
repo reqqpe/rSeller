@@ -6,7 +6,7 @@ import my.reqqpe.rseller.configurations.CustomConfigs;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.DatabaseListener;
 import my.reqqpe.rseller.managers.LevelManager;
-import my.reqqpe.rseller.managers.SellManager;
+import my.reqqpe.rseller.sell.SellManager;
 import my.reqqpe.rseller.menu.SellMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
