@@ -34,7 +34,7 @@ public class SellAdminCommand implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            String message = sec.getString("no-argument");
+            String message = sec.getString("no-arguments");
             commandSender.sendMessage(Colorizer.color(message));
             return true;
         }

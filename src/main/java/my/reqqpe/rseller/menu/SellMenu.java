@@ -3,7 +3,7 @@ package my.reqqpe.rseller.menu;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
-import my.reqqpe.rseller.sell.SellManager;
+import my.reqqpe.rseller.managers.SellManager;
 import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

@@ -7,6 +7,10 @@ database:
   connection-timeout: 30000
   max-life-time: 1800000
 
+
+autosell-enable: true # Переключение работает только при перезагрузке плагина
+autosell-check: 40 # Раз в сколько тиков будет проверяться инвентарь. 20 тиков - 1 секунда
+
 levels:
   1:
     coin-multiplier: 1.0
@@ -36,3 +40,9 @@ messages:
   update-points-target: "&aВаши очки прокачки были обновлены до &f{value}"
   no-sell-items: "&cНет предметов, которые можно продать"
   sell-items: "&aВы успешно продали предметы на сумму {coins} и получили {points} очков"
+  auto-sell: "&aАвтоскупка: {coins}$ и {points} очков начислено."
+  usage-auto-sell: "&cИспользование: /autosell <материал>"
+  not-found-material: "&cНеизвестный материал"
+  autosell-enable: "&aвключена"
+  autosell-disable: "&aвыключена"
+  autosell-message: "&7Автоскупка для &e{material} &7{status}"

@@ -1,10 +1,9 @@
-package my.reqqpe.rseller.sell;
+package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
-import my.reqqpe.rseller.managers.LevelManager;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.configuration.ConfigurationSection;
@@ -81,6 +80,49 @@ public class SellManager {
         } else {
             String message = Colorizer.color(sec.getString("no-sell-items"));
             player.sendMessage(message);
+        }
+    }
+
+    public void autoSell(Player player) {
+        FileConfiguration itemConfig = plugin.getItemsConfig().getConfig();
+        Inventory inv = player.getInventory();
+        PlayerData data = database.getPlayerData(player.getUniqueId());
+
+        double totalCoins = 0;
+        int totalPoints = 0;
+
+        for (int i = 0; i < inv.getSize(); i++) {
+            ItemStack item = inv.getItem(i);
+            if (item == null || item.getType() == Material.AIR) continue;
+
+            Material mat = item.getType();
+            if (!data.isAutosell(mat)) continue;
+
+            String key = "items." + mat.name();
+            if (!itemConfig.contains(key)) continue;
+
+            double price = itemConfig.getDouble(key + ".price", 0);
+            int points = itemConfig.getInt(key + ".points", 0);
+            int amount = item.getAmount();
+
+            totalCoins += price * amount;
+            totalPoints += points * amount;
+
+            inv.setItem(i, null); // удаляем предмет
+        }
+
+        LevelManager.LevelInfo levelInfo = levelManager.getLevelInfo(player);
+        totalCoins *= levelInfo.coinMultiplier();
+        totalPoints *= levelInfo.pointMultiplier();
+
+        if (totalCoins > 0) economy.depositPlayer(player, totalCoins);
+        if (totalPoints > 0) data.addPoints(totalPoints);
+
+        if (totalCoins > 0 || totalPoints > 0) {
+            String msg = Colorizer.color(plugin.getConfig().getString("messages.auto-sell")
+                    .replace("{coins}", String.valueOf(totalCoins))
+                    .replace("{points}", String.valueOf(totalPoints)));
+            player.sendMessage(msg);
         }
     }
 }

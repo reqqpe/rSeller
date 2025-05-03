@@ -59,7 +59,8 @@ public class Database {
     private void createTable() {
         String sql = "CREATE TABLE IF NOT EXISTS players (" +
                 "uuid TEXT PRIMARY KEY, " +
-                "points INTEGER NOT NULL DEFAULT 0)";
+                "points INTEGER NOT NULL DEFAULT 0, " +
+                "autosell TEXT DEFAULT '{}')";
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try (Connection c = dataSource.getConnection();
                  PreparedStatement ps = c.prepareStatement(sql)) {
@@ -71,7 +72,7 @@ public class Database {
     }
 
     public void loadPlayerData(UUID uuid) {
-        String sql = "SELECT points FROM players WHERE uuid=?";
+        String sql = "SELECT points, autosell FROM players WHERE uuid=?";
         PlayerData data = create(uuid);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try (Connection c = dataSource.getConnection();
@@ -80,6 +81,7 @@ public class Database {
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         data.setPoints(rs.getInt("points"));
+                        data.deserializeAutosell(rs.getString("autosell"));
                     }
                 }
             } catch (SQLException e) {
@@ -89,12 +91,13 @@ public class Database {
     }
 
     public void savePlayerData(UUID uuid) {
-        String sql = "INSERT OR REPLACE INTO players (uuid, points) VALUES (?,?)";
+        String sql = "INSERT OR REPLACE INTO players (uuid, points, autosell) VALUES (?,?,?)";
         PlayerData data = getPlayerData(uuid);
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, String.valueOf(uuid));
             ps.setInt(2, data.getPoints());
+            ps.setString(3, data.serializeAutosell());
             ps.executeUpdate();
         } catch (SQLException e) {
             plugin.getLogger().warning("Ошибка при сохранении данных игрока " + e);
