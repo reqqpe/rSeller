@@ -1,3 +1,13 @@
+#                 .__               .__
+# _______  ______ |  |  __ __  ____ |__| ____   ______
+# \_  __ \ \____ \|  | |  |  \/ ___\|  |/    \ /  ___/
+#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \
+#  |__|    |   __/|____/____/\___  /|__|___|  /____  >
+#          |__|             /_____/         \/     \/
+#
+
+
+
 #Настройки пула соединений, если не знаете что это рекомендуется не менять
 database:
   max-pool-size: 10
@@ -7,27 +17,27 @@ database:
   connection-timeout: 30000
   max-life-time: 1800000
 
-
-autosell-enable: true # Переключение работает только при перезагрузке плагина
-autosell-check: 40 # Раз в сколько тиков будет проверяться инвентарь. 20 тиков - 1 секунда
+autosell:
+  enable: true # Переключение работает только при перезагрузке плагина
+  check-interval-tick: 40 # Раз в сколько тиков будет проверяться инвентарь. 20 тиков - 1 секунда
 
 levels:
   1:
     coin-multiplier: 1.0
     point-multiplier: 1.0
-    required-points: 0
+    required-points: 0.0
   2:
     coin-multiplier: 1.1
     point-multiplier: 1.1
-    required-points: 100
+    required-points: 100.0
   3:
     coin-multiplier: 1.2
     point-multiplier: 1.1
-    required-points: 250
+    required-points: 250.0
   4:
     coin-multiplier: 1.3
     point-multiplier: 1.2
-    required-points: 500
+    required-points: 500.0
 
 messages:
   reload: "&aПлагин успешно перезагружен"
@@ -46,3 +56,7 @@ messages:
   autosell-enable: "&aвключена"
   autosell-disable: "&aвыключена"
   autosell-message: "&7Автоскупка для &e{material} &7{status}"
+  negative-value: "&cНельзя использовать отрицательные значения!"
+  negative-set: "&cНельзя установить отрицательное количество поинтов!"
+  not-enough-points: "&cУ игрока недостаточно поинтов! Текущие: {current}"
+  not-item-in-conf: "&cНе удалось включить авто продажу для этого предмета"

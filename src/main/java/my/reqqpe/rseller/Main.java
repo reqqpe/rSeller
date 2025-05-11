@@ -19,21 +19,25 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
+
+    private AutoSellTask autoSellTask;
+    private SellManager sellManager;
+    private SellMenu sellMenu;
+    private Database database;
+
     @Getter
     private CustomConfigs itemsConfig;
     @Getter
     private CustomConfigs mainGUI;
-    private SellMenu sellMenu;
-    private Database database;
     @Getter
     private LevelManager levelManager;
-    private SellManager sellManager;
     @Getter
     private ItemManager itemManager;
-    private AutoSellTask autoSellTask;
+    @Getter CustomConfigs autoSellGUI;
 
     @Override
     public void onEnable() {
+
         EconomySetup.setupEconomy(this);
 
         if (EconomySetup.getEconomy() == null) {
@@ -43,27 +47,18 @@ public final class Main extends JavaPlugin {
         }
 
         // configs
-        saveDefaultConfig();
 
-        itemsConfig = new CustomConfigs(this, "items.yml");
-        itemsConfig.setup();
-        getLogger().info("items.yml успешно загружен");
-
-        mainGUI = new CustomConfigs(this, "mainGUI.yml");
-        mainGUI.setup();
-        getLogger().info("mainGUI.yml успешно загружен");
-
-        database = new Database(this);
-        for (Player pl : Bukkit.getOnlinePlayers()) database.loadPlayerData(pl.getUniqueId());
-
+        loadConfigs();
 
         // managers
         levelManager = new LevelManager(this, database);
         sellManager = new SellManager(this, database);
         itemManager = new ItemManager(this);
-        // events
 
+        // menus
         sellMenu = new SellMenu(this, sellManager, database);
+
+        // events
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(sellMenu, this);
         pm.registerEvents(new DatabaseListener(database), this);
@@ -74,19 +69,36 @@ public final class Main extends JavaPlugin {
         getCommand("autosell").setExecutor(new AutoSellCommand(this, database));
 
         // tab complite
-
         getCommand("rseller").setTabCompleter(new TabCompliteAdmin());
 
         // tasks
         autoSellTask = new AutoSellTask(this, sellManager);
-        if (getConfig().getBoolean("autosell-enable")) {
+        if (getConfig().getBoolean("autosell.enable")) {
             autoSellTask.autoSellTask();
         }
     }
 
     @Override
     public void onDisable() {
+
         database.saveAll();
     }
+    private void loadConfigs() {
+        saveDefaultConfig();
 
+        itemsConfig = new CustomConfigs(this, "items.yml");
+        itemsConfig.setup();
+        getLogger().info("items.yml успешно загружен");
+
+        mainGUI = new CustomConfigs(this, "mainGUI.yml");
+        mainGUI.setup();
+        getLogger().info("mainGUI.yml успешно загружен");
+
+        //autoSellGUI = new CustomConfigs(this, "autoSellGUI.yml");
+        //mainGUI.setup();
+        //getLogger().info("autoSellGUI.yml успешно загружен");
+
+        database = new Database(this);
+        for (Player pl : Bukkit.getOnlinePlayers()) database.loadPlayerData(pl.getUniqueId());
+    }
 }

@@ -36,7 +36,7 @@ public class LevelManager {
 
             double coinMultiplier = section.getDouble(key + ".coin-multiplier", 1.0);
             double pointMultiplier = section.getDouble(key + ".point-multiplier", 1.0);
-            int requiredPoints = section.getInt(key + ".required-points", 0);
+            double requiredPoints = section.getDouble(key + ".required-points", 0);
 
             levels.put(level, new LevelInfo(level, coinMultiplier, pointMultiplier, requiredPoints));
         }
@@ -44,7 +44,7 @@ public class LevelManager {
 
     public LevelInfo getLevelInfo(Player player) {
         PlayerData data = database.getPlayerData(player.getUniqueId());
-        int points = data.getPoints();
+        double points = data.getPoints();
 
         LevelInfo current = levels.firstEntry().getValue();
         for (Map.Entry<Integer, LevelInfo> entry : levels.entrySet()) {
@@ -70,10 +70,10 @@ public class LevelManager {
         return getLevelInfo(player).level;
     }
 
-    public record LevelInfo(int level, double coinMultiplier, double pointMultiplier, int requiredPoints) {
+    public record LevelInfo(int level, double coinMultiplier, double pointMultiplier, double requiredPoints) {
     }
 
-    public int getPointsForNextLevel(int currentLevel) {
+    public double getPointsForNextLevel(int currentLevel) {
         for (Map.Entry<Integer, LevelInfo> entry : levels.entrySet()) {
             if (entry.getKey() > currentLevel) {
                 return entry.getValue().requiredPoints;
@@ -81,7 +81,7 @@ public class LevelManager {
         }
         return -1; // нет следующего уровня
     }
-    public int getPointsForNextLevel(Player player) {
+    public double getPointsForNextLevel(Player player) {
         int currentLevel = getLevel(player);
         return getPointsForNextLevel(currentLevel);
     }

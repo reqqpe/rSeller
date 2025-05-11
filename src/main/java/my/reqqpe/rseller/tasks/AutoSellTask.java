@@ -14,7 +14,7 @@ public class AutoSellTask {
 
     public AutoSellTask(Main plugin, SellManager sellManager) {
         this.plugin = plugin;
-        this.updateTime = plugin.getConfig().getLong("autosell-check");
+        this.updateTime = plugin.getConfig().getLong("autosell.check-interval-tick");
         this.sellManager = sellManager;
     }
 

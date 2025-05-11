@@ -22,7 +22,7 @@ public class ItemManager {
             if (section == null) continue;
 
             double price = section.getDouble("price");
-            int points = section.getInt("points");
+            double points = section.getDouble("points");
 
             itemMap.put(material, new ItemInfo(price, points));
         }
@@ -39,6 +39,6 @@ public class ItemManager {
     public Set<Material> getAllSellableMaterials() {
         return itemMap.keySet();
     }
-    public record ItemInfo(double price, int points) {}
+    public record ItemInfo(double price, double points) {}
 }
 

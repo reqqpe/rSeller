@@ -15,21 +15,18 @@ public class PlayerData {
     private static final Gson GSON = new Gson();
 
     private final UUID uuid;
-    private int points = 0;
-
-
-    // Карта авто-скупки
+    private double points = 0;
     private Map<String, Boolean> autosellMap = new HashMap<>();
 
     public Player toPlayer() {
         return Bukkit.getPlayer(uuid);
     }
 
-    public void addPoints(int p) {
+    public void addPoints(double p) {
         this.points += p;
     }
 
-    public void removePoints(int p) {
+    public void removePoints(double p) {
         this.points -= p;
     }
 
@@ -49,4 +46,5 @@ public class PlayerData {
         if (json == null || json.isEmpty()) return;
         autosellMap = GSON.fromJson(json, Map.class);
     }
+
 }

@@ -20,24 +20,19 @@ public class CustomConfigs {
         this.configFile = new File(plugin.getDataFolder(), fileName);
     }
 
-    // Настройка конфига (аналог setup)
     public void setup() {
-        // Проверяем, существует ли папка плагина, если нет — создаем
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdirs();
         }
 
-        // Копируем файл из resources, если он не существует
         if (!configFile.exists()) {
             plugin.saveResource(fileName, false);
             plugin.getLogger().info(fileName + " был создан!");
         }
 
-        // Загружаем конфиг
         config = YamlConfiguration.loadConfiguration(configFile);
     }
 
-    // Получение конфига
     public FileConfiguration getConfig() {
         if (config == null) {
             setup();
@@ -45,7 +40,6 @@ public class CustomConfigs {
         return config;
     }
 
-    // Сохранение конфига
     public void saveConfig() {
         if (config == null || configFile == null) {
             plugin.getLogger().warning("Cannot save " + fileName + ": config is not initialized!");
@@ -53,20 +47,14 @@ public class CustomConfigs {
         }
         try {
             config.save(configFile);
-            plugin.getLogger().info(fileName + " has been saved!");
+            plugin.getLogger().info(fileName + " был сохранён!");
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Could not save " + fileName, e);
         }
     }
-
-    // Перезагрузка конфига
     public void reloadConfig() {
+        saveConfig();
         config = YamlConfiguration.loadConfiguration(configFile);
-        plugin.getLogger().info(fileName + " has been reloaded!");
-    }
-
-    // Проверка существования файла
-    public boolean exists() {
-        return configFile.exists();
+        plugin.getLogger().info(fileName + " был перезагружен!");
     }
 }

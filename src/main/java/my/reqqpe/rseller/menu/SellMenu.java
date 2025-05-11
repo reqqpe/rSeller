@@ -34,7 +34,7 @@ public class SellMenu implements Listener {
 
     public void openMenu(Player player) {
         FileConfiguration guiConfig = plugin.getMainGUI().getConfig();
-        String title = ChatColor.translateAlternateColorCodes('&', guiConfig.getString("title", "Скупщик"));
+        String title = Colorizer.color(guiConfig.getString("title", "Скупщик"));
         Inventory inv = Bukkit.createInventory(new CustomInventoryHolder("SELL_MENU"), 54, title);
 
         List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("sell-slots"));
@@ -85,9 +85,9 @@ public class SellMenu implements Listener {
                         var levelInfo = plugin.getLevelManager().getLevelInfo(player);
                         int currentLevel = levelInfo.level();
                         PlayerData data = database.getPlayerData(player.getUniqueId());
-                        int currentPoints = data.getPoints();
-                        int nextLevelPoints = plugin.getLevelManager().getPointsForNextLevel(currentLevel);
-                        int pointsToNext = Math.max(0, nextLevelPoints - currentPoints);
+                        double currentPoints = data.getPoints();
+                        double nextLevelPoints = plugin.getLevelManager().getPointsForNextLevel(currentLevel);
+                        double pointsToNext = Math.max(0, nextLevelPoints - currentPoints);
 
                         String name = guiConfig.getString(levelPath + ".name", "");
                         infoMeta.setDisplayName(Colorizer.color(name));
@@ -95,9 +95,9 @@ public class SellMenu implements Listener {
                         List<String> lore = guiConfig.getStringList(levelPath + ".lore");
                         if (lore != null && !lore.isEmpty()) {
                             List<String> finalLore = lore.stream().map(line -> line.replace("%level%", String.valueOf(currentLevel))
-                                    .replace("%points_needed%", String.valueOf(pointsToNext))
-                                    .replace("%coin_multiplier%", String.format("%.2f", levelInfo.coinMultiplier()))
-                                    .replace("%point_multiplier%", String.format("%.2f", levelInfo.pointMultiplier())))
+                                            .replace("%points_needed%", String.valueOf(pointsToNext))
+                                            .replace("%coin_multiplier%", String.format("%.2f", levelInfo.coinMultiplier()))
+                                            .replace("%point_multiplier%", String.format("%.2f", levelInfo.pointMultiplier())))
                                     .toList();
                             infoMeta.setLore(Colorizer.colorizeAll(finalLore));
                         }
@@ -121,7 +121,7 @@ public class SellMenu implements Listener {
         if (lore != null && !lore.isEmpty()) {
             List<String> finalLore = lore.stream().map(line ->
                             line.replace("%sell_price%", String.format("%.2f", preview.totalCoins))
-                                    .replace("%sell_points%", String.format("%.2f", (double) preview.totalPoints)))
+                                    .replace("%sell_points%", String.format("%.2f", preview.totalPoints)))
                     .toList();
             meta.setLore(Colorizer.colorizeAll(finalLore));
         }
@@ -164,23 +164,6 @@ public class SellMenu implements Listener {
             }
         }
         return result;
-    }
-    private int calculateTotalSellPrice(Inventory inv) {
-        FileConfiguration itemsConfig = plugin.getItemsConfig().getConfig();
-        List<Integer> sellSlots = parseSlotList(plugin.getMainGUI().getConfig().getStringList("sell-slots"));
-
-        int total = 0;
-        for (int slot : sellSlots) {
-            ItemStack item = inv.getItem(slot);
-            if (item == null || item.getType() == Material.AIR) continue;
-
-            String path = "items." + item.getType().name();
-            if (!itemsConfig.contains(path + ".price")) continue;
-
-            int pricePerItem = itemsConfig.getInt(path + ".price");
-            total += pricePerItem * item.getAmount();
-        }
-        return total;
     }
     private void updateSellButton(Inventory inv) {
         FileConfiguration guiConfig = plugin.getMainGUI().getConfig();
@@ -269,9 +252,9 @@ public class SellMenu implements Listener {
     }
     private class SellPreview {
         double totalCoins;
-        int totalPoints;
+        double totalPoints;
 
-        public SellPreview(double coins, int points) {
+        public SellPreview(double coins, double points) {
             this.totalCoins = coins;
             this.totalPoints = points;
         }
@@ -281,7 +264,7 @@ public class SellMenu implements Listener {
         List<Integer> sellSlots = parseSlotList(plugin.getMainGUI().getConfig().getStringList("sell-slots"));
 
         double totalCoins = 0;
-        int totalPoints = 0;
+        double totalPoints = 0;
 
         for (int slot : sellSlots) {
             ItemStack item = inv.getItem(slot);
@@ -291,7 +274,7 @@ public class SellMenu implements Listener {
             if (!itemsConfig.contains(key)) continue;
 
             double price = itemsConfig.getDouble(key + ".price", 0);
-            int points = itemsConfig.getInt(key + ".points", 0);
+            double points = itemsConfig.getInt(key + ".points", 0);
 
             int amount = item.getAmount();
             totalCoins += price * amount;

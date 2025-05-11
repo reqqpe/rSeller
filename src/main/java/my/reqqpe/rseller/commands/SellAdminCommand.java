@@ -39,10 +39,11 @@ public class SellAdminCommand implements CommandExecutor {
             return true;
         }
         if (args[0].equalsIgnoreCase("reload")) {
+            plugin.reloadConfig();
             plugin.getMainGUI().reloadConfig();
             plugin.getItemsConfig().reloadConfig();
-            plugin.getLevelManager().reloadLevels();
             plugin.reloadConfig();
+            plugin.getLevelManager().reloadLevels();
             String message = sec.getString("reload");
             commandSender.sendMessage(Colorizer.color(message));
         }
@@ -54,10 +55,10 @@ public class SellAdminCommand implements CommandExecutor {
             }
 
             String action = args[1].toLowerCase();
-            int amount;
+            double amount;
 
             try {
-                amount = Integer.parseInt(args[2]);
+                amount = Double.parseDouble(args[2]);
             } catch (NumberFormatException e) {
                 String message = sec.getString("un-int").replace("{value}", args[2]);
                 commandSender.sendMessage(Colorizer.color(message));
@@ -73,14 +74,47 @@ public class SellAdminCommand implements CommandExecutor {
                 return true;
             }
             PlayerData data = database.getPlayerData(target.getUniqueId());
+            data.getPoints();
+
             switch (action) {
-                case "add" -> data.addPoints(amount);
-                case "remove" -> data.removePoints(amount);
-                case "set" -> data.setPoints(amount);
-                default -> commandSender.sendMessage(Colorizer.color("&cНеизвестное действие: " + action));
+                case "add" -> {
+                    if (amount < 0) {
+                        String message = sec.getString("negative-value");
+                        commandSender.sendMessage(Colorizer.color(message));
+                        return true;
+                    }
+                    data.addPoints(amount);
+                }
+                case "remove" -> {
+                    double current = data.getPoints();
+                    if (amount < 0) {
+                        String message = sec.getString("negative-value");
+                        commandSender.sendMessage(Colorizer.color(message));
+                        return true;
+                    }
+                    if (current - amount < 0) {
+                        String message = sec.getString("not-enough-points")
+                                .replace("{current}", String.valueOf(current));
+                        commandSender.sendMessage(Colorizer.color(message));
+                        return true;
+                    }
+                    data.removePoints(amount);
+                }
+                case "set" -> {
+                    if (amount < 0) {
+                        String message = sec.getString("negative-set");
+                        commandSender.sendMessage(Colorizer.color(message));
+                        return true;
+                    }
+                    data.setPoints(amount);
+                }
+                default -> {
+                    commandSender.sendMessage(Colorizer.color("&cНеизвестное действие: " + action));
+                    return true;
+                }
             }
 
-            int newPoints = data.getPoints();
+            double newPoints = data.getPoints();
             String message = sec.getString("update-points-sender")
                     .replace("{player}", target.getName())
                     .replace("{value}", String.valueOf(newPoints));;
@@ -92,4 +126,5 @@ public class SellAdminCommand implements CommandExecutor {
         }
         return true;
     }
+
 }

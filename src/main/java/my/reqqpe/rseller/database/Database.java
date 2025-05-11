@@ -59,7 +59,7 @@ public class Database {
     private void createTable() {
         String sql = "CREATE TABLE IF NOT EXISTS players (" +
                 "uuid TEXT PRIMARY KEY, " +
-                "points INTEGER NOT NULL DEFAULT 0, " +
+                "points REAL NOT NULL DEFAULT 0, " +
                 "autosell TEXT DEFAULT '{}')";
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try (Connection c = dataSource.getConnection();
@@ -80,7 +80,7 @@ public class Database {
                 ps.setString(1, String.valueOf(uuid));
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        data.setPoints(rs.getInt("points"));
+                        data.setPoints(rs.getDouble("points"));
                         data.deserializeAutosell(rs.getString("autosell"));
                     }
                 }
@@ -96,7 +96,7 @@ public class Database {
         try (Connection c = dataSource.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, String.valueOf(uuid));
-            ps.setInt(2, data.getPoints());
+            ps.setDouble(2, data.getPoints());
             ps.setString(3, data.serializeAutosell());
             ps.executeUpdate();
         } catch (SQLException e) {

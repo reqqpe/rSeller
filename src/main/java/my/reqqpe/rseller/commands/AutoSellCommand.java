@@ -45,6 +45,11 @@ public class AutoSellCommand implements CommandExecutor {
             return true;
         }
 
+        if (!plugin.getItemManager().isSellable(material)) {
+            player.sendMessage(Colorizer.color(sec.getString("not-item-in-conf")));
+            return true;
+        }
+
         PlayerData data = database.getPlayerData(player.getUniqueId());
 
         boolean newState = !data.isAutosell(material);

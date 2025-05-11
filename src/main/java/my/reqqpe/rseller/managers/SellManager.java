@@ -33,7 +33,7 @@ public class SellManager {
         FileConfiguration itemConfig = plugin.getItemsConfig().getConfig();
 
         double totalCoins = 0;
-        int totalPoints = 0;
+        double totalPoints = 0;
 
         for (int slot : sellSlots) {
             ItemStack item = inv.getItem(slot);
@@ -43,7 +43,7 @@ public class SellManager {
             if (!itemConfig.contains(key)) continue;
 
             double price = itemConfig.getDouble(key + ".price", 0);
-            int points = itemConfig.getInt(key + ".points", 0);
+            double points = itemConfig.getDouble(key + ".points", 0);
 
             int amount = item.getAmount();
 
@@ -52,8 +52,7 @@ public class SellManager {
 
             inv.setItem(slot, null);
         }
-
-        // Применение бустеров
+        // применяю бусты
         LevelManager.LevelInfo levelInfo = levelManager.getLevelInfo(player);
 
         double coinBoost = levelInfo.coinMultiplier();
@@ -66,7 +65,6 @@ public class SellManager {
             economy.depositPlayer(player, totalCoins);
         }
 
-
         if (totalPoints > 0) {
             PlayerData data = database.getPlayerData(player.getUniqueId());
             data.addPoints(totalPoints);
@@ -74,8 +72,8 @@ public class SellManager {
         ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
         if (totalCoins > 0 || totalPoints > 0) {
             String message = Colorizer.color(sec.getString("sell-items")
-                    .replace("{coins}", String.valueOf(totalCoins))
-                    .replace("{points}", String.valueOf(totalPoints)));
+                    .replace("{coins}", String.format("%.2f", totalCoins))
+                    .replace("{points}", String.format("%.2f", totalPoints)));
             player.sendMessage(message);
         } else {
             String message = Colorizer.color(sec.getString("no-sell-items"));
@@ -89,7 +87,7 @@ public class SellManager {
         PlayerData data = database.getPlayerData(player.getUniqueId());
 
         double totalCoins = 0;
-        int totalPoints = 0;
+        double totalPoints = 0;
 
         for (int i = 0; i < inv.getSize(); i++) {
             ItemStack item = inv.getItem(i);
@@ -102,15 +100,16 @@ public class SellManager {
             if (!itemConfig.contains(key)) continue;
 
             double price = itemConfig.getDouble(key + ".price", 0);
-            int points = itemConfig.getInt(key + ".points", 0);
+            double points = itemConfig.getDouble(key + ".points", 0);
             int amount = item.getAmount();
 
             totalCoins += price * amount;
             totalPoints += points * amount;
 
-            inv.setItem(i, null); // удаляем предмет
+            inv.setItem(i, null);
         }
 
+        // применяю бусты
         LevelManager.LevelInfo levelInfo = levelManager.getLevelInfo(player);
         totalCoins *= levelInfo.coinMultiplier();
         totalPoints *= levelInfo.pointMultiplier();
@@ -120,8 +119,8 @@ public class SellManager {
 
         if (totalCoins > 0 || totalPoints > 0) {
             String msg = Colorizer.color(plugin.getConfig().getString("messages.auto-sell")
-                    .replace("{coins}", String.valueOf(totalCoins))
-                    .replace("{points}", String.valueOf(totalPoints)));
+                    .replace("{coins}", String.format("%.2f", totalCoins))
+                    .replace("{points}", String.format("%.2f", totalPoints)));
             player.sendMessage(msg);
         }
     }
