@@ -53,7 +53,6 @@ public class CustomConfigs {
         }
     }
     public void reloadConfig() {
-        saveConfig();
         config = YamlConfiguration.loadConfiguration(configFile);
         plugin.getLogger().info(fileName + " был перезагружен!");
     }
