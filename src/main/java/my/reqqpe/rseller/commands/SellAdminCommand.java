@@ -40,10 +40,11 @@ public class SellAdminCommand implements CommandExecutor {
         }
         if (args[0].equalsIgnoreCase("reload")) {
             plugin.reloadConfig();
+            plugin.getAutoSellGUI().reloadConfig();
             plugin.getMainGUI().reloadConfig();
             plugin.getItemsConfig().reloadConfig();
-            plugin.reloadConfig();
             plugin.getLevelManager().reloadLevels();
+            plugin.getAutoSellManager().loadConfig();
             String message = sec.getString("reload");
             commandSender.sendMessage(Colorizer.color(message));
         }

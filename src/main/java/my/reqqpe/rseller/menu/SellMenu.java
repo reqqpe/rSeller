@@ -35,7 +35,11 @@ public class SellMenu implements Listener {
     public void openMenu(Player player) {
         FileConfiguration guiConfig = plugin.getMainGUI().getConfig();
         String title = Colorizer.color(guiConfig.getString("title", "Скупщик"));
-        Inventory inv = Bukkit.createInventory(new CustomInventoryHolder("SELL_MENU"), 54, title);
+        int size = guiConfig.getInt("size", 54);
+        if (size % 9 != 0 || size < 9 || size > 54) {
+            size = 54;
+        }
+        Inventory inv = Bukkit.createInventory(new CustomInventoryHolder("SELL_MENU"), size, title);
 
         List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("sell-slots"));
         ConfigurationSection itemsSection = guiConfig.getConfigurationSection("items");
@@ -51,13 +55,13 @@ public class SellMenu implements Listener {
                 if (slot < 0 || slot >= inv.getSize()) continue;
 
                 if (usedSlots.contains(slot)) {
-                    plugin.getLogger().warning("Пропущен предмет '" + key + "' из-за конфликта слота: " + slot);
+                    plugin.getLogger().warning("[mainGUI] Пропущен предмет '" + key + "' из-за конфликта слота: " + slot);
                     continue;
                 }
 
                 Material material = Material.matchMaterial(guiConfig.getString(path + ".material", "STONE"));
                 if (material == null) {
-                    plugin.getLogger().warning("Неизвестный материал для предмета '" + key + "'");
+                    plugin.getLogger().warning("[mainGUI] Неизвестный материал для предмета '" + key + "'");
                     continue;
                 }
 
@@ -69,7 +73,7 @@ public class SellMenu implements Listener {
                 }
 
                 inv.setItem(slot, item);
-                usedSlots.add(slot); // Больше этот слот не трогать
+                usedSlots.add(slot);
             }
             String levelPath = "items.level_info";
             if (guiConfig.contains(levelPath)) {
@@ -94,10 +98,11 @@ public class SellMenu implements Listener {
 
                         List<String> lore = guiConfig.getStringList(levelPath + ".lore");
                         if (lore != null && !lore.isEmpty()) {
+                            ConfigurationSection formats = plugin.getConfig().getConfigurationSection("numbers_format.mainGUI");
                             List<String> finalLore = lore.stream().map(line -> line.replace("%level%", String.valueOf(currentLevel))
-                                            .replace("%points_needed%", String.valueOf(pointsToNext))
-                                            .replace("%coin_multiplier%", String.format("%.2f", levelInfo.coinMultiplier()))
-                                            .replace("%point_multiplier%", String.format("%.2f", levelInfo.pointMultiplier())))
+                                            .replace("%points_needed%", String.format(formats.getString("points_needed", "%.2f"), pointsToNext))
+                                            .replace("%coin_multiplier%", String.format(formats.getString("coin_multiplier", "%.2f"), levelInfo.coinMultiplier()))
+                                            .replace("%point_multiplier%", String.format(formats.getString("point_multiplier", "%.2f"), levelInfo.pointMultiplier())))
                                     .toList();
                             infoMeta.setLore(Colorizer.colorizeAll(finalLore));
                         }
@@ -118,10 +123,11 @@ public class SellMenu implements Listener {
         meta.setDisplayName(Colorizer.color(name));
 
         List<String> lore = guiConfig.getStringList(path + ".lore");
+        ConfigurationSection formats = plugin.getConfig().getConfigurationSection("numbers_format.mainGUI");
         if (lore != null && !lore.isEmpty()) {
             List<String> finalLore = lore.stream().map(line ->
-                            line.replace("%sell_price%", String.format("%.2f", preview.totalCoins))
-                                    .replace("%sell_points%", String.format("%.2f", preview.totalPoints)))
+                            line.replace("%sell_price%", String.format(formats.getString("sell_price"), preview.totalCoins))
+                                    .replace("%sell_points%", String.format(formats.getString("sell_points"), preview.totalPoints)))
                     .toList();
             meta.setLore(Colorizer.colorizeAll(finalLore));
         }
@@ -177,7 +183,6 @@ public class SellMenu implements Listener {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            // Получаем игрока (через owner инвентаря, это костыльно, лучше передавать явно, но пока ок)
             Player player = null;
             for (HumanEntity viewer : inv.getViewers()) {
                 if (viewer instanceof Player p) {
@@ -223,12 +228,11 @@ public class SellMenu implements Listener {
         Inventory clickedInv = e.getClickedInventory();
         Inventory inv = e.getInventory();
 
-        // Блокировка декоративных слотов
         if (protectedSlots.contains(rawSlot) && clickedInv == inv) {
             e.setCancelled(true);
         }
 
-        // Проверка нажатия на кнопку продажи
+
         int sellButtonSlot = guiConfig.getConfigurationSection("items").getInt("sell_item.slot");
         if (rawSlot == sellButtonSlot) {
             e.setCancelled(true);
@@ -236,7 +240,13 @@ public class SellMenu implements Listener {
             return;
         }
 
-        // Обновление кнопки при клике по sell-слотам или Shift-клике
+        int autosellButtonSlot = guiConfig.getConfigurationSection("items").getInt("autosell.slot");
+        if (rawSlot == autosellButtonSlot) {
+            e.setCancelled(true);
+            plugin.getAutoSellMenu().openMenu(player);
+            return;
+        }
+
         boolean shouldUpdate = false;
         if (sellSlots.contains(rawSlot)) {
             shouldUpdate = true;
@@ -281,7 +291,6 @@ public class SellMenu implements Listener {
             totalPoints += points * amount;
         }
 
-        // Применим бустеры
         var levelInfo = plugin.getLevelManager().getLevelInfo(player);
         totalCoins *= levelInfo.coinMultiplier();
         totalPoints *= levelInfo.pointMultiplier();

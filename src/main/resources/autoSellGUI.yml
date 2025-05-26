@@ -1,0 +1,153 @@
+#                 .__               .__
+# _______  ______ |  |  __ __  ____ |__| ____   ______
+# \_  __ \ \____ \|  | |  |  \/ ___\|  |/    \ /  ___/
+#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \
+#  |__|    |   __/|____/____/\___  /|__|___|  /____  >
+#          |__|             /_____/         \/     \/
+#
+
+
+title: "&8Скупщик -> Авто скупка"
+size: 54
+sell-slots:
+  - 10-16
+  - 19-25
+  - 28-34
+autosell_item:
+  lore:
+    - ""
+    - "&#54A0F4▶ Статус: &f{state_autosell}"
+    - ""
+    - "&#54A0F4* Цена продажи: &a{sell_price}$"
+    - "&#54A0F4* Очки за продажу: &b{sell_points}"
+    - ""
+    - "&fНажмите, чтобы включить или отключить авто-скупку"
+items:
+  category: # Айди не менять
+    material: book
+    name: "&#54A0F4▶ Категории"
+    slot: 4
+    lore:
+      - "&#54A0F4* &fВыбранная категория: &#54A0F4{current_category}"
+      - ""
+      - "&#54A0F4* &fДоступные категории:"
+      - "&#54A0F4▶  &#54A0F4{categories}"
+      - ""
+      - "&#54A0F4* ЛКМ &f— предыдущая категория"
+      - "&#54A0F4* ПКМ &f— следующая категория"
+  prev_page: # Айди не менять
+    material: ARROW
+    name: "&#54A0F4▶ Предыдущая страница"
+    slot: 48
+    lore:
+      - ""
+      - "&fНажмите, чтобы перейти"
+      - "&fна предыдущую страницу"
+      - ""
+  next_page: # Айди не менять
+    material: ARROW
+    name: "&#54A0F4▶ Следующая страница"
+    slot: 50
+    lore:
+      - ""
+      - "&fНажмите, чтобы перейти"
+      - "&fна следующую страницу"
+      - ""
+  back:
+    material: BONE
+    name: "&#54A0F4▶ Главное меню"
+    lore:
+      - ""
+      - "&fНажмите, чтобы вернуться"
+      - "&fв главное меню скупщика"
+      - ""
+    slot: 45
+
+  decorate1:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 0
+  decorate2:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 1
+  decorate3:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 2
+  decorate4:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 3
+  decorate5:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 5
+  decorate6:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 6
+  decorate7:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 7
+  decorate8:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 8
+  decorate9:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 9
+  decorate10:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 17
+  decorate11:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 18
+  decorate12:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 26
+  decorate13:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 27
+  decorate14:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 35
+  decorate15:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 36
+  decorate16:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 44
+  decorate17:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 46
+  decorate18:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 47
+  decorate19:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 49
+  decorate20:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 51
+  decorate21:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 52
+  decorate22:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slot: 53

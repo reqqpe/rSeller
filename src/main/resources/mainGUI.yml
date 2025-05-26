@@ -8,30 +8,46 @@
 
 
 title: "&8Скупщик"
+size: 54
 sell-slots:
   - 0-44
 items: # Можно добавлять свои предметы
-  sell_item:
-    material: EMERALD_BLOCK
-    name: "&aПродать"
+  autosell:
+    material: BONE
+    name: "&#54A0F4▶ Авто-скупка"
+    slot: 45
+    lore:
+      - ""
+      - "&fНажмите, чтобы открыть"
+      - "&fменю авто-скупки"
+      - ""
+  sell_item: # Айди не менять
+    material: EMERALD
+    name: "&#54A0F4▶ Продать"
     slot: 49
     lore:
-      - "&7Вы получите:"
-      - "&eМонеты: &f%sell_price%"
-      - "&bОчки: &f%sell_points%"
-  level_info:
-    slot: 48
+      - "&fНажмите, чтобы продать и получить:"
+      - "&#54A0F4* &fМонет: &#54A0F4%sell_price%"
+      - "&#54A0F4* &fОчков: &#54A0F4%sell_points%"
+  level_info: # Айди не менять
+    slot: 53
     material: BOOK
-    name: "&eИнформация об уровне"
+    name: "&#54A0F4▶ Что такое скупщик?"
     lore:
-      - "&7Уровень: &a%level%"
-      - "&7Очков до следующего: &a%points_needed%"
-      - "&7Бустер монет: &a%coin_multiplier%x"
-      - "&7Бустер очков: &a%point_multiplier%x"
-  decorate1:
-    material: GRAY_STAINED_GLASS_PANE
-    name: "&f"
-    slot: 45
+      - "&#54A0F4Скупщик &f- Это уникальный способ заработка"
+      - "&fНа котором вы можете &#54A0F4быстро&f заработать очень &#54A0F4много монет&f!"
+      - "&fПолучай &#54A0F4очки &fдля прокачки бустера &#54A0F4монет &fи &#54A0F4очков&f."
+      - ""
+      - "&#54A0F4▶ Как что-то продать?"
+      - "&fЧтобы продать сложи предметы которые ты хочешь"
+      - "&fпродать в меню и скупщик сам решит что ему купить"
+      - ""
+      - "&#54A0F4▶ Информация"
+      - "&#54A0F4* &fТекущий Уровень: &#54A0F4%level%"
+      - "&#54A0F4* &fОчков до следующего: &#54A0F4%points_needed%"
+      - ""
+      - "&#54A0F4* &fБустер монет: &7x&#54A0F4%coin_multiplier%"
+      - "&#54A0F4* &fБустер очков: &7x&#54A0F4%point_multiplier%"
   decorate2:
     material: GRAY_STAINED_GLASS_PANE
     name: "&f"
@@ -55,4 +71,4 @@ items: # Можно добавлять свои предметы
   decorate7:
     material: GRAY_STAINED_GLASS_PANE
     name: "&f"
-    slot: 53
+    slot: 48

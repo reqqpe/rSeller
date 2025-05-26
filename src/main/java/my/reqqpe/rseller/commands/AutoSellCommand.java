@@ -3,6 +3,7 @@ package my.reqqpe.rseller.commands;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.menu.AutoSellMenu;
 import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -16,10 +17,12 @@ public class AutoSellCommand implements CommandExecutor {
 
     private final Main plugin;
     private final Database database;
+    private final AutoSellMenu autoSellMenu;
 
-    public AutoSellCommand(Main plugin, Database database) {
+    public AutoSellCommand(Main plugin, Database database, AutoSellMenu autoSellMenu) {
         this.plugin = plugin;
         this.database = database;
+        this.autoSellMenu = autoSellMenu;
     }
 
     @Override
@@ -45,7 +48,7 @@ public class AutoSellCommand implements CommandExecutor {
             return true;
         }
 
-        if (!plugin.getItemManager().isSellable(material)) {
+        if (!plugin.getAutoSellManager().isSellable(material)) {
             player.sendMessage(Colorizer.color(sec.getString("not-item-in-conf")));
             return true;
         }

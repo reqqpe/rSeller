@@ -17,12 +17,24 @@
 
 
 items:
-  DIAMOND:
-    price: 45.5
-    points: 2.0
+  COAL:
+    price: 10
+    points: 0.1
+  LAPIS_LAZULI:
+    price: 12
+    points: 0.1
   GOLD_INGOT:
     price: 25
     points: 1.0
   IRON_INGOT:
-    price: 10
+    price: 20
     points: 1.0
+  DIAMOND:
+    price: 45.0
+    points: 1.5
+  EMERALD:
+    price: 65.0
+    points: 2.0
+  NETHERITE_INGOT:
+    price: 90.0
+    points: 4.0

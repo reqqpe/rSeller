@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
 
 import java.util.List;
+import java.util.Objects;
 
 public class SellManager {
 
@@ -71,9 +72,10 @@ public class SellManager {
         }
         ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
         if (totalCoins > 0 || totalPoints > 0) {
+            ConfigurationSection formats = plugin.getConfig().getConfigurationSection("numbers_format.messages");
             String message = Colorizer.color(sec.getString("sell-items")
-                    .replace("{coins}", String.format("%.2f", totalCoins))
-                    .replace("{points}", String.format("%.2f", totalPoints)));
+                    .replace("{coins}", String.format(Objects.requireNonNull(formats.getString("coins")), totalCoins))
+                    .replace("{points}", String.format(Objects.requireNonNull(formats.getString("points")), totalPoints)));
             player.sendMessage(message);
         } else {
             String message = Colorizer.color(sec.getString("no-sell-items"));
@@ -118,9 +120,10 @@ public class SellManager {
         if (totalPoints > 0) data.addPoints(totalPoints);
 
         if (totalCoins > 0 || totalPoints > 0) {
+            ConfigurationSection formats = plugin.getConfig().getConfigurationSection("numbers_format.messages");
             String msg = Colorizer.color(plugin.getConfig().getString("messages.auto-sell")
-                    .replace("{coins}", String.format("%.2f", totalCoins))
-                    .replace("{points}", String.format("%.2f", totalPoints)));
+                    .replace("{coins}", String.format(Objects.requireNonNull(formats.getString("coins")), totalCoins))
+                    .replace("{points}", String.format(Objects.requireNonNull(formats.getString("points")), totalPoints)));
             player.sendMessage(msg);
         }
     }

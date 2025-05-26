@@ -20,6 +20,50 @@ database:
 autosell:
   enable: true # Переключение работает только при перезагрузке плагина
   check-interval-tick: 40 # Раз в сколько тиков будет проверяться инвентарь. 20 тиков - 1 секунда
+  whitelist:
+    enable: true
+    priority: 1 # Значения не должны повторяться. У одного всегда должно быть или больше, или меньше
+    list:
+#      - STONE
+      - ALL #- все предметы парсит это из конфига
+  blacklist:
+    enable: false
+    priority: 0 # Значения не должны повторяться. У одного всегда должно быть или больше, или меньше
+    list:
+      - ALL
+  start_category: resources # Категория, которая будет открываться при первом открытие
+  categories:
+    all:
+      name: "Все предметы"
+      blocks:
+        - all
+    resources:
+      name: "Ресурсы"
+      blocks:
+        - coal
+        - lapis_lazuli
+        - iron_ingot
+        - gold_ingot
+        - diamond
+        - emerald
+        - netherite_ingot
+
+
+numbers_format:
+  # https://github.com/reqqpe/rSeller/wiki/Руководство-по-настройке-формата-чисел
+  mainGUI:
+    sell_price: "%.2f"
+    sell_points: "%.2f"
+    points_needed: "%.2f"
+    coin_multiplier: "%.2f"
+    point_multiplier: "%.2f"
+  autoSellGUI:
+    sell_price: "%.2f"
+    sell_points: "%.2f"
+  messages:
+    points: "%.2f"
+    coins: "%.2f"
+
 
 levels:
   1:
