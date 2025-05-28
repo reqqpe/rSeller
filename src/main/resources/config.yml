@@ -17,6 +17,9 @@ database:
   connection-timeout: 30000
   max-life-time: 1800000
 
+
+metrics: true
+
 autosell:
   enable: true # Переключение работает только при перезагрузке плагина
   check-interval-tick: 40 # Раз в сколько тиков будет проверяться инвентарь. 20 тиков - 1 секунда

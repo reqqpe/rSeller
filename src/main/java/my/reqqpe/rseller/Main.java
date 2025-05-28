@@ -14,6 +14,7 @@ import my.reqqpe.rseller.managers.SellManager;
 import my.reqqpe.rseller.menu.AutoSellMenu;
 import my.reqqpe.rseller.menu.SellMenu;
 import my.reqqpe.rseller.tasks.AutoSellTask;
+import my.reqqpe.rseller.utils.Bstatsmetrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -84,6 +85,12 @@ public final class Main extends JavaPlugin {
         autoSellTask = new AutoSellTask(this, sellManager);
         if (getConfig().getBoolean("autosell.enable")) {
             autoSellTask.autoSellTask();
+        }
+
+        if (getConfig().getBoolean("metrics", true)) {
+            int pluginId = 25999;
+            Bstatsmetrics metrics = new Bstatsmetrics(this, pluginId);
+            getLogger().info("bStats успешно инициализирован!");
         }
     }
 
