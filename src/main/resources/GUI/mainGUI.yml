@@ -13,7 +13,8 @@ sell-slots:
   - 0-44
 items: # Можно добавлять свои предметы
   autosell:
-    material: BONE
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTcyMjIwZjU0M2E2OTJhM2YyZjk0OWViMmE1MzQzNDk1NjEwMjY0ZTkxNmIxOWI3NzNjN2U0ZDIxYjg1ZDRjNyJ9fX0=
+    model_data: -1 # Не обязательный параметр можно убрать или же поставить -1
     name: "&#54A0F4▶ Авто-скупка"
     slot: 45
     lore:

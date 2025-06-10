@@ -25,6 +25,7 @@ autosell_item:
 items:
   category: # Айди не менять
     material: book
+    model_data: -1 # Не обязательный параметр можно убрать или же поставить -1
     name: "&#54A0F4▶ Категории"
     slot: 4
     lore:

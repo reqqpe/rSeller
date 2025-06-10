@@ -3,6 +3,7 @@ version: '${project.version}'
 main: my.reqqpe.rseller.Main
 api-version: '1.16'
 authors: [reqqpe]
+dependents: [Vault]
 commands:
   sell:
     description: Открыть меню скупщика

@@ -116,24 +116,19 @@ public final class Main extends JavaPlugin {
                     getLogger().severe("Не удалось переименовать config.yml в " + renamedConfigFile.getName());
                 }
             }
-
-
             saveDefaultConfig();
             reloadConfig();
         }
-
-
-
 
         itemsConfig = new CustomConfigs(this, "items.yml");
         itemsConfig.setup();
         getLogger().info("items.yml успешно загружен");
 
-        mainGUI = new CustomConfigs(this, "mainGUI.yml");
+        mainGUI = new CustomConfigs(this, "GUI/mainGUI.yml");
         mainGUI.setup();
         getLogger().info("mainGUI.yml успешно загружен");
 
-        autoSellGUI = new CustomConfigs(this, "autoSellGUI.yml");
+        autoSellGUI = new CustomConfigs(this, "GUI/autoSellGUI.yml");
         autoSellGUI.setup();
         getLogger().info("autoSellGUI.yml успешно загружен");
 

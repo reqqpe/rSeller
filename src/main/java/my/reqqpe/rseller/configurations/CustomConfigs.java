@@ -10,23 +10,25 @@ import java.util.logging.Level;
 
 public class CustomConfigs {
     private final Main plugin;
+    private final String relativePath;
+    private final String fileName;
     private File configFile;
     private FileConfiguration config;
-    private final String fileName;
 
-    public CustomConfigs(Main plugin, String fileName) {
+    public CustomConfigs(Main plugin, String relativePath) {
         this.plugin = plugin;
-        this.fileName = fileName;
-        this.configFile = new File(plugin.getDataFolder(), fileName);
+        this.relativePath = relativePath.replace("\\", "/"); // на всякий случай
+        this.fileName = new File(relativePath).getName();
+        this.configFile = new File(plugin.getDataFolder(), this.relativePath);
     }
 
     public void setup() {
-        if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdirs();
+        if (!configFile.getParentFile().exists()) {
+            configFile.getParentFile().mkdirs();
         }
 
         if (!configFile.exists()) {
-            plugin.saveResource(fileName, false);
+            plugin.saveResource(relativePath, false);
             plugin.getLogger().info(fileName + " был создан!");
         }
 
@@ -42,16 +44,17 @@ public class CustomConfigs {
 
     public void saveConfig() {
         if (config == null || configFile == null) {
-            plugin.getLogger().warning("Cannot save " + fileName + ": config is not initialized!");
+            plugin.getLogger().warning("Cannot save " + relativePath + ": config is not initialized!");
             return;
         }
         try {
             config.save(configFile);
             plugin.getLogger().info(fileName + " был сохранён!");
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "Could not save " + fileName, e);
+            plugin.getLogger().log(Level.SEVERE, "Could not save " + relativePath, e);
         }
     }
+
     public void reloadConfig() {
         config = YamlConfiguration.loadConfiguration(configFile);
         plugin.getLogger().info(fileName + " был перезагружен!");
