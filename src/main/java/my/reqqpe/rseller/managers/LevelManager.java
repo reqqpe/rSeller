@@ -79,7 +79,7 @@ public class LevelManager {
                 return entry.getValue().requiredPoints;
             }
         }
-        return -1; // нет следующего уровня
+        return -1;
     }
     public double getPointsForNextLevel(Player player) {
         int currentLevel = getLevel(player);

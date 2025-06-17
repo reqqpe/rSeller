@@ -3,7 +3,10 @@ package my.reqqpe.rseller.menu;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.managers.ItemManager;
 import my.reqqpe.rseller.managers.SellManager;
+import my.reqqpe.rseller.model.ItemData;
+import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -15,19 +18,23 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
 import java.util.*;
 
 public class SellMenu extends AbstractMenu implements Listener {
 
     private final SellManager sellManager;
     private final Database database;
+    private final ItemManager itemManager;
 
     public SellMenu(Main plugin, SellManager sellManager, Database database) {
         super(plugin);
         this.sellManager = sellManager;
         this.database = database;
+        this.itemManager = plugin.getItemManager();
     }
 
     @Override
@@ -48,9 +55,10 @@ public class SellMenu extends AbstractMenu implements Listener {
         populateSellPreviewAndLevelInfo(player, inv);
     }
 
-
     private void populateSellPreviewAndLevelInfo(Player player, Inventory inv) {
-        SellPreview preview = calculatePreviewInfo(player, inv);
+        List<Integer> sellSlots = parseSlotList(plugin.getMainGUI().getConfig().getStringList("sell-slots"));
+
+        SellManager.SellPrice sellPrice = sellManager.calculateCostPreview(player, inv, sellSlots);
 
         String sellItemPath = "items.sell_item";
         if (guiConfig.contains(sellItemPath)) {
@@ -63,7 +71,7 @@ public class SellMenu extends AbstractMenu implements Listener {
             } else {
                 Material material = Material.matchMaterial(matString);
                 if (material == null) {
-                    plugin.getLogger().warning("[" + getMenuId() + "] Неизвестный материал для sell_item: " + matString + ". Использование STONE.");
+                    plugin.getLogger().warning("[SELL_MENU] Неизвестный материал для sell_item: " + matString + ". Используется STONE.");
                     material = Material.STONE;
                 }
                 sellItem = new ItemStack(material);
@@ -72,13 +80,21 @@ public class SellMenu extends AbstractMenu implements Listener {
             int customModelData = guiConfig.getInt(sellItemPath + ".custom-model-data", -1);
             ConfigurationSection formats = plugin.getConfig().getConfigurationSection("numbers_format.mainGUI");
 
+            if (formats == null) {
+                plugin.getLogger().warning("[SELL_MENU] Отсутствует секция numbers_format.mainGUI в конфигурации!");
+                return;
+            }
+
+            String priceFormat = formats.getString("sell_price", "%.2f");
+            String pointsFormat = formats.getString("sell_points", "%.2f");
+
             sellItem = createGuiItem(
                     sellItem,
                     sellItemPath + ".name",
                     sellItemPath + ".lore",
                     customModelData,
-                    "%sell_price%", String.format(formats.getString("sell_price"), preview.totalCoins),
-                    "%sell_points%", String.format(formats.getString("sell_points"), preview.totalPoints)
+                    "%sell_price%", String.format(priceFormat, sellPrice.getTotalCoins()),
+                    "%sell_points%", String.format(pointsFormat, sellPrice.getTotalPoints())
             );
             int slot = guiConfig.getInt(sellItemPath + ".slot", 49);
             inv.setItem(slot, sellItem);
@@ -97,7 +113,7 @@ public class SellMenu extends AbstractMenu implements Listener {
                 } else {
                     Material levelMaterial = Material.matchMaterial(matString);
                     if (levelMaterial == null) {
-                        plugin.getLogger().warning("[" + getMenuId() + "] Неизвестный материал для level_info: " + matString + ". Использование BOOK.");
+                        plugin.getLogger().warning("[SELL_MENU] Неизвестный материал для level_info: " + matString + ". Используется BOOK.");
                         levelMaterial = Material.BOOK;
                     }
                     infoItem = new ItemStack(levelMaterial);
@@ -114,9 +130,8 @@ public class SellMenu extends AbstractMenu implements Listener {
 
                 ConfigurationSection formats = plugin.getConfig().getConfigurationSection("numbers_format.mainGUI");
 
-                // Передаем созданный infoItem в createGuiItem
                 infoItem = createGuiItem(
-                        infoItem, // Используем уже созданный ItemStack
+                        infoItem,
                         levelPath + ".name",
                         levelPath + ".lore",
                         customModelData,
@@ -129,7 +144,6 @@ public class SellMenu extends AbstractMenu implements Listener {
             }
         }
 
-        // --- Обработка элемента автопродажи (autosell) ---
         String autosellPath = "items.autosell";
         if (guiConfig.contains(autosellPath)) {
             int autosellSlot = guiConfig.getInt(autosellPath + ".slot", -1);
@@ -143,7 +157,7 @@ public class SellMenu extends AbstractMenu implements Listener {
                 } else {
                     Material autosellMaterial = Material.matchMaterial(matString);
                     if (autosellMaterial == null) {
-                        plugin.getLogger().warning("[" + getMenuId() + "] Неизвестный материал для autosell: " + matString + ". Использование COMPARATOR.");
+                        plugin.getLogger().warning("[SELL_MENU] Неизвестный материал для autosell: " + matString + ". Используется COMPARATOR.");
                         autosellMaterial = Material.COMPARATOR;
                     }
                     autosellItem = new ItemStack(autosellMaterial);
@@ -151,9 +165,8 @@ public class SellMenu extends AbstractMenu implements Listener {
 
                 int customModelData = guiConfig.getInt(autosellPath + ".custom-model-data", -1);
 
-                // Передаем созданный autosellItem в createGuiItem
                 autosellItem = createGuiItem(
-                        autosellItem, // Используем уже созданный ItemStack
+                        autosellItem,
                         autosellPath + ".name",
                         autosellPath + ".lore",
                         customModelData
@@ -162,7 +175,6 @@ public class SellMenu extends AbstractMenu implements Listener {
             }
         }
     }
-
 
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
@@ -195,7 +207,6 @@ public class SellMenu extends AbstractMenu implements Listener {
         return slots;
     }
 
-
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
@@ -212,7 +223,7 @@ public class SellMenu extends AbstractMenu implements Listener {
             e.setCancelled(true);
         }
 
-        int sellButtonSlot = guiConfig.getConfigurationSection("items").getInt("sell_item.slot");
+        int sellButtonSlot = guiConfig.getConfigurationSection("items").getInt("sell_item.slot", 49);
         if (rawSlot == sellButtonSlot) {
             e.setCancelled(true);
             sellManager.sellItems(player, menuInv, sellSlots);
@@ -220,7 +231,7 @@ public class SellMenu extends AbstractMenu implements Listener {
             return;
         }
 
-        int autosellButtonSlot = guiConfig.getConfigurationSection("items").getInt("autosell.slot");
+        int autosellButtonSlot = guiConfig.getConfigurationSection("items").getInt("autosell.slot", -1);
         if (rawSlot == autosellButtonSlot) {
             e.setCancelled(true);
             plugin.getAutoSellMenu().openMenu(player);
@@ -230,65 +241,68 @@ public class SellMenu extends AbstractMenu implements Listener {
         boolean shouldUpdate = false;
 
         if (clickedInv == menuInv) {
-            if (sellSlots.contains(rawSlot) ||
-                    e.getAction().name().startsWith("PICKUP") ||
-                    e.getAction().name().startsWith("PLACE") ||
-                    e.getAction() == InventoryAction.SWAP_WITH_CURSOR ||
-                    e.getAction() == InventoryAction.HOTBAR_SWAP)
-            {
-                if (!protectedSlots.contains(rawSlot)) {
+            if (sellSlots.contains(rawSlot)) {
+                shouldUpdate = true;
+            } else if (!protectedSlots.contains(rawSlot)) {
+                InventoryAction action = e.getAction();
+                if (action == InventoryAction.PICKUP_ALL ||
+                        action == InventoryAction.PICKUP_SOME ||
+                        action == InventoryAction.PICKUP_HALF ||
+                        action == InventoryAction.PICKUP_ONE ||
+                        action == InventoryAction.PLACE_ALL ||
+                        action == InventoryAction.PLACE_SOME ||
+                        action == InventoryAction.PLACE_ONE ||
+                        action == InventoryAction.SWAP_WITH_CURSOR ||
+                        action == InventoryAction.HOTBAR_SWAP ||
+                        action == InventoryAction.HOTBAR_MOVE_AND_READD ||
+                        action == InventoryAction.DROP_ALL_SLOT ||
+                        action == InventoryAction.DROP_ONE_SLOT) {
                     shouldUpdate = true;
+                    plugin.getLogger().info("Обновление вызвано: Действие в меню " + action.name() + " в слоте " + rawSlot);
+                } else if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                    shouldUpdate = true;
+                    plugin.getLogger().info("Обновление вызвано: MOVE_TO_OTHER_INVENTORY в слоте меню " + rawSlot + ", запланировано отложенное обновление");
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> populateSellPreviewAndLevelInfo(player, menuInv), 1L);
                 }
             }
         } else {
-            if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY ||
-                    e.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
+            InventoryAction action = e.getAction();
+            if (action == InventoryAction.PICKUP_ALL ||
+                    action == InventoryAction.PICKUP_SOME ||
+                    action == InventoryAction.PICKUP_HALF ||
+                    action == InventoryAction.PICKUP_ONE ||
+                    action == InventoryAction.PLACE_ALL ||
+                    action == InventoryAction.PLACE_SOME ||
+                    action == InventoryAction.PLACE_ONE ||
+                    action == InventoryAction.DROP_ALL_CURSOR ||
+                    action == InventoryAction.DROP_ONE_CURSOR ||
+                    action == InventoryAction.COLLECT_TO_CURSOR) {
                 shouldUpdate = true;
+            } else if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+                shouldUpdate = true;
+                Bukkit.getScheduler().runTaskLater(plugin, () -> populateSellPreviewAndLevelInfo(player, menuInv), 1L);
             }
         }
 
-        if (shouldUpdate) {
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                populateSellPreviewAndLevelInfo(player, menuInv);
-            }, 1L);
+        if (shouldUpdate && e.getAction() != InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+            populateSellPreviewAndLevelInfo(player, menuInv);
         }
     }
 
-    private class SellPreview {
-        double totalCoins;
-        double totalPoints;
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent e) {
+        if (!(e.getWhoClicked() instanceof Player player)) return;
+        if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
+        if (!holder.getId().equals(getMenuId())) return;
 
-        public SellPreview(double coins, double points) {
-            this.totalCoins = coins;
-            this.totalPoints = points;
+        List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("sell-slots"));
+        Set<Integer> affectedSlots = e.getRawSlots();
+
+        for (int slot : affectedSlots) {
+            if (sellSlots.contains(slot)) {
+                Bukkit.getScheduler().runTaskLater(plugin, () -> populateSellPreviewAndLevelInfo(player, e.getInventory()), 1L);
+                break;
+            }
         }
-    }
-    private SellPreview calculatePreviewInfo(Player player, Inventory inv) {
-        FileConfiguration itemsConfig = plugin.getItemsConfig().getConfig();
-        List<Integer> sellSlots = parseSlotList(plugin.getMainGUI().getConfig().getStringList("sell-slots"));
-
-        double totalCoins = 0;
-        double totalPoints = 0;
-
-        for (int slot : sellSlots) {
-            ItemStack item = inv.getItem(slot);
-            if (item == null || item.getType() == Material.AIR) continue;
-
-            String key = "items." + item.getType().name();
-            if (!itemsConfig.contains(key)) continue;
-
-            double price = itemsConfig.getDouble(key + ".price", 0);
-            double points = itemsConfig.getInt(key + ".points", 0);
-
-            int amount = item.getAmount();
-            totalCoins += price * amount;
-            totalPoints += points * amount;
-        }
-
-        var levelInfo = plugin.getLevelManager().getLevelInfo(player);
-        totalCoins *= levelInfo.coinMultiplier();
-        totalPoints *= levelInfo.pointMultiplier();
-
-        return new SellPreview(totalCoins, totalPoints);
     }
 }

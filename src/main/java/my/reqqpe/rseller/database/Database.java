@@ -14,8 +14,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-// Вместо того чтобы постоянно лезть в бд мы будем загружать данные игрока при входе на сервер
-// Создавать объект с полями которого мы будем работать и при выходе игрока с сервера сохранять данные
 public class Database {
     private final Main plugin;
     private final Set<PlayerData> players = new HashSet<>();
@@ -25,7 +23,6 @@ public class Database {
         return players.stream()
                 .filter(data -> data.getUuid().equals(uuid))
                 .findFirst()
-                //Можно поменять на null
                 .orElse(create(uuid));
     }
 
@@ -66,7 +63,7 @@ public class Database {
                  PreparedStatement ps = c.prepareStatement(sql)) {
                 ps.executeUpdate();
             } catch (SQLException e) {
-                plugin.getLogger().warning("Ошибка при создании таблицы " + e);
+                plugin.getLogger().warning("Ошибка при создании таблицы: " + e.getMessage());
             }
         });
     }
@@ -85,7 +82,7 @@ public class Database {
                     }
                 }
             } catch (SQLException e) {
-                plugin.getLogger().warning("Ошибка при загрузке данных игрока " + e);
+                plugin.getLogger().warning("Ошибка при загрузке данных игрока " + uuid + ": " + e.getMessage());
             }
         });
     }
@@ -100,7 +97,7 @@ public class Database {
             ps.setString(3, data.serializeAutosell());
             ps.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка при сохранении данных игрока " + e);
+            plugin.getLogger().warning("Ошибка при сохранении данных игрока " + uuid + ": " + e.getMessage());
         }
     }
 

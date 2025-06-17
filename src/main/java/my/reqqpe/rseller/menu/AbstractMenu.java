@@ -26,7 +26,6 @@ public abstract class AbstractMenu {
     public AbstractMenu(Main plugin) {
         this.plugin = plugin;
     }
-
     protected abstract FileConfiguration getGuiConfig();
     protected abstract String getMenuId();
 

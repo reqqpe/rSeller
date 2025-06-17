@@ -4,6 +4,8 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
 import my.reqqpe.rseller.managers.AutoSellManager;
+import my.reqqpe.rseller.managers.ItemManager;
+import my.reqqpe.rseller.model.ItemData;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
 import org.bukkit.Material;
@@ -17,6 +19,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,14 +28,17 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
     private final Database database;
     private final AutoSellManager autoSellManager;
+    private final ItemManager itemManager;
     private final Map<UUID, String> playerCategory = new HashMap<>();
     private final Map<UUID, Map<String, Integer>> playerCategoryPages = new HashMap<>();
+    private final Map<UUID, Map<Integer, String>> slotToItemId = new HashMap<>();
     private int totalSlots;
 
     public AutoSellMenu(Main plugin, Database database) {
         super(plugin);
         this.database = database;
         this.autoSellManager = plugin.getAutoSellManager();
+        this.itemManager = plugin.getItemManager();
     }
 
     @Override
@@ -48,7 +54,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     @Override
     public void openMenu(Player player) {
         if (!player.hasPermission("rSeller.autosell")) {
-            String message = plugin.getConfig().getString("messages.no-permission");
+            String message = plugin.getConfig().getString("messages.no-permission", "&cУ вас нет прав для использования автопродажи!");
             player.sendMessage(Colorizer.color(message));
             player.closeInventory();
             return;
@@ -60,6 +66,8 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
         List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("sell-slots"));
         this.totalSlots = sellSlots.size();
+
+        slotToItemId.computeIfAbsent(player.getUniqueId(), k -> new HashMap<>()).clear();
 
         populateCategoryButton(player, inv);
         populateAutoSellItems(player, inv, sellSlots);
@@ -82,7 +90,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
         } else {
             Material material = Material.matchMaterial(matString);
             if (material == null) {
-                plugin.getLogger().warning("[" + getMenuId() + "] Неизвестный материал для элемента категории: " + matString + ". Использование BOOK.");
+                plugin.getLogger().warning("[AUTO_SELL_MENU] Неизвестный материал для категории: " + matString + ". Используется BOOK.");
                 material = Material.BOOK;
             }
             item = new ItemStack(material);
@@ -117,9 +125,8 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
             }
         }
 
-
         ItemMeta meta = item.getItemMeta();
-        if(meta != null) {
+        if (meta != null) {
             if (customModelData != -1) {
                 meta.setCustomModelData(customModelData);
             }
@@ -134,54 +141,50 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     private void populateAutoSellItems(Player player, Inventory inv, List<Integer> sellSlots) {
         String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
         int currentPage = getPlayerPage(player, currentCategory);
-        List<Material> itemsPage = getItemsByPage(currentCategory, currentPage);
+        List<ItemStack> itemsPage = getItemsByPage(currentCategory, currentPage);
 
         for (int slot : sellSlots) {
             inv.setItem(slot, null);
         }
 
         PlayerData playerData = database.getPlayerData(player.getUniqueId());
-        FileConfiguration itemsPriceConfig = plugin.getItemsConfig().getConfig();
         ConfigurationSection formats = plugin.getConfig().getConfigurationSection("numbers_format.autoSellGUI");
 
+        Map<Integer, String> playerSlotToItemId = slotToItemId.computeIfAbsent(player.getUniqueId(), k -> new HashMap<>());
+
         for (int i = 0; i < itemsPage.size() && i < sellSlots.size(); i++) {
-            Material material = itemsPage.get(i);
-            if (material == null) continue;
+            ItemStack itemStack = itemsPage.get(i);
+            if (itemStack == null) continue;
 
-            boolean autosellState = playerData.isAutosell(material);
-            String itemConfigPath = "items." + material.name();
-            double price = itemsPriceConfig.getDouble(itemConfigPath + ".price", 0.0);
-            double points = itemsPriceConfig.getDouble(itemConfigPath + ".points", 0.0);
-            int itemCustomModelData = itemsPriceConfig.getInt(itemConfigPath + ".custom-model-data", -1);
-
-            String enabled = Colorizer.color(plugin.getConfig().getString("messages.autosell-enable"));
-            String disable = Colorizer.color(plugin.getConfig().getString("messages.autosell-disable"));
-            String status = autosellState ? enabled : disable;
-
-            ItemStack item = createGuiItem(
-                    material,
-                    "autosell_item.name",
-                    "autosell_item.lore",
-                    itemCustomModelData,
-                    "{state_autosell}", status,
-                    "{sell_price}", String.format(formats.getString("sell_price"), price),
-                    "{sell_points}", String.format(formats.getString("sell_points"), points)
-            );
-
-            ItemMeta meta = item.getItemMeta();
-            if (meta != null && guiConfig.contains("autosell_item.name")) {
-                String itemNameTemplate = guiConfig.getString("autosell_item.name");
-                if (itemNameTemplate != null && itemNameTemplate.contains("{item_name}")) {
-                    String finalItemName = itemNameTemplate.replace("{item_name}", material.name().replace("_", " "));
-                    meta.setDisplayName(Colorizer.color(finalItemName));
-                    item.setItemMeta(meta);
-                }
-            } else if (meta != null && !guiConfig.contains("autosell_item.name")) {
-                meta.setDisplayName(Colorizer.color("&f" + material.name().replace("_", " ")));
-                item.setItemMeta(meta);
+            ItemData itemData = itemManager.getByItemStack(itemStack);
+            if (itemData == null) {
+                plugin.getLogger().warning("[AUTO_SELL_MENU] Не найдены данные предмета для: " + itemStack.getType().name());
+                continue;
             }
 
-            inv.setItem(sellSlots.get(i), item);
+            String itemId = itemData.getId();
+            boolean autosellState = playerData.isAutosell(itemId);
+            double price = itemData.getPrice();
+            double points = itemData.getPoints();
+
+            String enabled = Colorizer.color(plugin.getConfig().getString("messages.autosell-enable", "&aВключено"));
+            String disable = Colorizer.color(plugin.getConfig().getString("messages.autosell-disable", "&cВыключено"));
+            String status = autosellState ? enabled : disable;
+
+            int slot = sellSlots.get(i);
+            ItemStack displayItem = createGuiItem(
+                    itemStack.clone(),
+                    "autosell_item.name",
+                    "autosell_item.lore",
+                    -1,
+                    "{item_name}", itemStack.getType().name().replace("_", " "),
+                    "{state_autosell}", status,
+                    "{sell_price}", String.format(formats.getString("sell_price", "%.2f"), price),
+                    "{sell_points}", String.format(formats.getString("sell_points", "%.2f"), points)
+            );
+
+            inv.setItem(slot, displayItem);
+            playerSlotToItemId.put(slot, itemId);
         }
     }
 
@@ -191,7 +194,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
         if (nextPageSlot >= 0 && nextPageSlot < inv.getSize()) {
             ItemStack item = createGuiItem(
-                    Material.matchMaterial(guiConfig.getString(nextPagePath + ".material", "ARROW")),
+                    new ItemStack(Material.matchMaterial(guiConfig.getString(nextPagePath + ".material", "ARROW"))),
                     nextPagePath + ".name",
                     nextPagePath + ".lore",
                     guiConfig.getInt(nextPagePath + ".custom-model-data", -1)
@@ -204,7 +207,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
         if (prevPageSlot >= 0 && prevPageSlot < inv.getSize()) {
             ItemStack item = createGuiItem(
-                    Material.matchMaterial(guiConfig.getString(prevPagePath + ".material", "ARROW")),
+                    new ItemStack(Material.matchMaterial(guiConfig.getString(prevPagePath + ".material", "ARROW"))),
                     prevPagePath + ".name",
                     prevPagePath + ".lore",
                     guiConfig.getInt(prevPagePath + ".custom-model-data", -1)
@@ -225,24 +228,24 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 .put(category, page);
     }
 
-    private List<Material> getItemsByPage(String category, int page) {
-        List<Material> allMaterials = autoSellManager.getCategory(category)
+    private List<ItemStack> getItemsByPage(String category, int page) {
+        List<ItemStack> allItems = autoSellManager.getCategory(category)
                 .stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
         int startIndex = (page - 1) * totalSlots;
-        int endIndex = Math.min(startIndex + totalSlots, allMaterials.size());
+        int endIndex = Math.min(startIndex + totalSlots, allItems.size());
 
-        if (startIndex >= allMaterials.size()) return Collections.emptyList();
+        if (startIndex >= allItems.size()) return Collections.emptyList();
 
-        return allMaterials.subList(startIndex, endIndex);
+        return allItems.subList(startIndex, endIndex);
     }
 
     private int getTotalPages(String category) {
-        List<Material> materials = autoSellManager.getCategory(category);
-        if (materials.isEmpty()) return 1;
-        return (int) Math.ceil((double) materials.size() / totalSlots);
+        List<ItemStack> items = autoSellManager.getCategory(category);
+        if (items.isEmpty()) return 1;
+        return (int) Math.ceil((double) items.size() / totalSlots);
     }
 
     @EventHandler
@@ -259,40 +262,36 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
         if (e.getClickedInventory() != null && e.getClickedInventory().equals(player.getInventory())) {
             if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-                e.setCancelled(false);
-            }
-            if (e.getAction().name().startsWith("PICKUP") || e.getAction().name().startsWith("SWAP")) {
-                e.setCancelled(false);
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        openMenu(player);
+                    }
+                }.runTaskLater(plugin, 1L);
             }
             return;
         }
 
         if (e.getClickedInventory() != null && e.getClickedInventory().equals(inv)) {
             if (sellSlots.contains(rawSlot)) {
-                ItemStack clickedItem = inv.getItem(rawSlot);
-                if (clickedItem != null && clickedItem.getType() != Material.AIR) {
-                    Material material = clickedItem.getType();
+                String itemId = slotToItemId.getOrDefault(player.getUniqueId(), Collections.emptyMap()).get(rawSlot);
+                if (itemId != null) {
                     PlayerData playerData = database.getPlayerData(player.getUniqueId());
-
-                    boolean currentState = playerData.isAutosell(material);
-                    playerData.setAutosell(material, !currentState);
-
+                    boolean currentState = playerData.isAutosell(itemId);
+                    playerData.setAutosell(itemId, !currentState);
                     openMenu(player);
-                    return;
-                } else {
-                    e.setCancelled(false);
                     return;
                 }
             }
         }
 
-        int backButtonSlot = guiConfig.getInt("items.back.slot");
+        int backButtonSlot = guiConfig.getInt("items.back.slot", -1);
         if (rawSlot == backButtonSlot) {
             plugin.getSellMenu().openMenu(player);
             return;
         }
 
-        int categoryButtonSlot = guiConfig.getInt("items.category.slot");
+        int categoryButtonSlot = guiConfig.getInt("items.category.slot", -1);
         if (rawSlot == categoryButtonSlot) {
             String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
             List<String> categoryIds = new ArrayList<>(autoSellManager.getCategories().keySet());
@@ -316,26 +315,19 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
             return;
         }
 
-        int nextPageSlot = guiConfig.getInt("items.next_page.slot");
-        int prevPageSlot = guiConfig.getInt("items.prev_page.slot");
+        int nextPageSlot = guiConfig.getInt("items.next_page.slot", -1);
+        int prevPageSlot = guiConfig.getInt("items.prev_page.slot", -1);
 
         String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
         int currentPage = getPlayerPage(player, currentCategory);
         int totalPages = getTotalPages(currentCategory);
 
-        if (rawSlot == nextPageSlot) {
-            if (currentPage < totalPages) {
-                setPlayerPage(player, currentCategory, currentPage + 1);
-                openMenu(player);
-            }
-            return;
-        }
-
-        if (rawSlot == prevPageSlot) {
-            if (currentPage > 1) {
-                setPlayerPage(player, currentCategory, currentPage - 1);
-                openMenu(player);
-            }
+        if (rawSlot == nextPageSlot && currentPage < totalPages) {
+            setPlayerPage(player, currentCategory, currentPage + 1);
+            openMenu(player);
+        } else if (rawSlot == prevPageSlot && currentPage > 1) {
+            setPlayerPage(player, currentCategory, currentPage - 1);
+            openMenu(player);
         }
     }
 }
