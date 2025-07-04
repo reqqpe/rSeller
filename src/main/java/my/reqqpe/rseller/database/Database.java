@@ -23,6 +23,7 @@ public class Database {
         return players.stream()
                 .filter(data -> data.getUuid().equals(uuid))
                 .findFirst()
+                //Можно поменять на null
                 .orElse(create(uuid));
     }
 
@@ -63,7 +64,7 @@ public class Database {
                  PreparedStatement ps = c.prepareStatement(sql)) {
                 ps.executeUpdate();
             } catch (SQLException e) {
-                plugin.getLogger().warning("Ошибка при создании таблицы: " + e.getMessage());
+                plugin.getLogger().warning("Ошибка при создании таблицы " + e);
             }
         });
     }
@@ -82,7 +83,7 @@ public class Database {
                     }
                 }
             } catch (SQLException e) {
-                plugin.getLogger().warning("Ошибка при загрузке данных игрока " + uuid + ": " + e.getMessage());
+                plugin.getLogger().warning("Ошибка при загрузке данных игрока " + e);
             }
         });
     }
@@ -97,7 +98,7 @@ public class Database {
             ps.setString(3, data.serializeAutosell());
             ps.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка при сохранении данных игрока " + uuid + ": " + e.getMessage());
+            plugin.getLogger().warning("Ошибка при сохранении данных игрока " + e);
         }
     }
 

@@ -1,7 +1,6 @@
 package my.reqqpe.rseller;
 
 import lombok.Getter;
-import my.reqqpe.rseller.commands.AutoSellCommand;
 import my.reqqpe.rseller.commands.SellCommand;
 import my.reqqpe.rseller.commands.SellAdminCommand;
 import my.reqqpe.rseller.commands.TabCompliteAdmin;
@@ -85,7 +84,6 @@ public final class Main extends JavaPlugin {
         //commands
         getCommand("sell").setExecutor(new SellCommand(sellMenu));
         getCommand("rseller").setExecutor(new SellAdminCommand(this, database));
-        getCommand("autosell").setExecutor(new AutoSellCommand(this, database, autoSellMenu));
 
         // tab complite
         getCommand("rseller").setTabCompleter(new TabCompliteAdmin());

@@ -1,17 +1,19 @@
 package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.model.ItemData;
+import my.reqqpe.rseller.menu.CustomInventoryHolder;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AutoSellManager {
 
     private final Main plugin;
-    private final ItemManager itemManager;
 
     private boolean whitelistEnabled;
     private int whitelistPriority;
@@ -20,15 +22,13 @@ public class AutoSellManager {
     private boolean blacklistEnabled;
     private int blacklistPriority;
     private Set<Material> blacklist;
-
-    private final Map<String, List<ItemStack>> categories = new HashMap<>();
+    private final Map<String, List<Material>> categories = new HashMap<>();
     private final Map<String, String> categoryNames = new HashMap<>();
 
     public AutoSellManager(Main plugin) {
         this.plugin = plugin;
-        this.itemManager = plugin.getItemManager();
+        loadConfig();
     }
-
     public void loadConfig() {
         ConfigurationSection config = plugin.getConfig().getConfigurationSection("autosell");
         if (config == null) {
@@ -44,10 +44,12 @@ public class AutoSellManager {
         this.blacklistPriority = config.getInt("blacklist.priority", 0);
         this.blacklist = parseMaterialList(config.getStringList("blacklist.list"));
 
+
+
         categories.clear();
         categoryNames.clear();
 
-        ConfigurationSection section = config.getConfigurationSection("categories");
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("autosell.categories");
         if (section == null) {
             plugin.getLogger().warning("В конфиге отсутствует раздел 'autosell.categories'");
             return;
@@ -57,48 +59,35 @@ public class AutoSellManager {
             ConfigurationSection catSection = section.getConfigurationSection(key);
             if (catSection == null) continue;
 
-            String name = catSection.getString("name", key);
+            String name = catSection.getString("name", key); // если нет поля name — используем id
             categoryNames.put(key, name);
 
-            List<String> itemList = catSection.getStringList("blocks");
-            List<ItemStack> items = new ArrayList<>();
+            List<String> blockList = catSection.getStringList("blocks");
+            List<Material> materials = new ArrayList<>();
 
-            if (itemList.contains("all")) {
-                for (ItemData item : itemManager.getAllItems()) {
-                    if (isAllowed(item.getItem().getType())) {
-                        items.add(item.getItem().clone());
-                    }
-                }
+            if (blockList.stream().anyMatch(b -> b.equalsIgnoreCase("all"))) {
+                materials.addAll(getSellableMaterials());
             } else {
-                for (String item : itemList) {
-                    item = item.toLowerCase();
-                    ItemData itemData = itemManager.getById(item);
-                    if (itemData != null) {
-                        items.add(itemData.getItem().clone());
-                    } else {
-                        try {
-                            Material material = Material.valueOf(item.toUpperCase());
-                            for (ItemData stack : itemManager.getAllItems()) {
-                                if (stack.getItem().getType() == material && isAllowed(material)) {
-                                    items.add(stack.getItem().clone());
-                                }
-                            }
-                        } catch (IllegalArgumentException e) {
-                            plugin.getLogger().warning("Недопустимый предмет или материал в категории '" + key + "': " + item);
-                        }
+                for (String block : blockList) {
+                    try {
+                        Material mat = Material.valueOf(block.toUpperCase());
+                        materials.add(mat);
+                    } catch (IllegalArgumentException e) {
+                        plugin.getLogger().warning("Категория '" + key + "' содержит недопустимый материал: " + block);
                     }
                 }
             }
 
-            categories.put(key, items);
+            categories.put(key, materials);
         }
+
     }
 
     private Set<Material> parseMaterialList(List<String> list) {
         Set<Material> result = new HashSet<>();
         if (list.contains("ALL")) {
             result.addAll(Arrays.asList(Material.values()));
-        } else if (!list.contains("NONE")) {
+        } else {
             for (String name : list) {
                 try {
                     result.add(Material.valueOf(name.toUpperCase()));
@@ -111,8 +100,8 @@ public class AutoSellManager {
     }
 
     public boolean isAllowed(Material material) {
-        boolean inWhitelist = whitelist.contains(material) || whitelist.contains(Material.valueOf("ALL"));
-        boolean inBlacklist = blacklist.contains(material) || blacklist.contains(Material.valueOf("ALL"));
+        boolean inWhitelist = whitelist.contains(material);
+        boolean inBlacklist = blacklist.contains(material);
 
         if (whitelistPriority > blacklistPriority) {
             return whitelistEnabled && inWhitelist && (!blacklistEnabled || !inBlacklist);
@@ -121,48 +110,41 @@ public class AutoSellManager {
         }
     }
 
-    public boolean isSellable(ItemStack itemStack) {
-        if (itemStack == null) return false;
-        if (!isAllowed(itemStack.getType())) return false;
-
-        ItemData item = itemManager.getByItemStack(itemStack);
-        if (item == null) {
-            plugin.getLogger().info("ItemManager.getByItemStack вернул null для ItemStack: " + itemStack.getType().name());
-        }
-        return item != null;
+    public boolean isSellable(Material material) {
+        return isAllowed(material) &&
+                plugin.getItemsConfig().getConfig().isConfigurationSection("items." + material.name());
     }
 
-    public List<ItemStack> getAllAllowedItems() {
-        List<ItemStack> result = new ArrayList<>();
-        for (ItemData item : itemManager.getAllItems()) {
-            if (isAllowed(item.getItem().getType())) {
-                result.add(item.getItem().clone());
-            }
-        }
-        return result;
+    public List<Material> getAllAllowedMaterials() {
+        return Arrays.stream(Material.values())
+                .filter(this::isAllowed)
+                .collect(Collectors.toList());
     }
 
-    public List<ItemStack> getSellableItems() {
-        return getAllAllowedItems();
+    public List<Material> getSellableMaterials() {
+        return getAllAllowedMaterials().stream()
+                .filter(this::isSellable)
+                .collect(Collectors.toList());
     }
 
-    public List<ItemStack> getCategory(String category) {
+    public List<Material> getCategory(String category) {
         return categories.getOrDefault(category, Collections.emptyList());
     }
 
-    public Map<String, List<ItemStack>> getCategories() {
+    public Map<String, List<Material>> getCategories() {
         return Collections.unmodifiableMap(categories);
     }
 
     public String getCategoryName(String id) {
         return categoryNames.getOrDefault(id, id);
     }
-
     public String getFirstCategory() {
         String firstCategory = plugin.getConfig().getString("autosell.start_category", "all");
         if (getCategories().containsKey(firstCategory)) {
             return firstCategory;
         }
-        return getCategories().keySet().stream().findFirst().orElse("all");
+        return null;
     }
+
+
 }

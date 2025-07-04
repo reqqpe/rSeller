@@ -3,13 +3,12 @@ package my.reqqpe.rseller.database;
 import com.google.gson.Gson;
 import lombok.Data;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 
 @Data
 public class PlayerData {
@@ -31,12 +30,12 @@ public class PlayerData {
         this.points -= p;
     }
 
-    public void setAutosell(String itemId, boolean enabled) {
-        autosellMap.put(itemId, enabled);
+    public void setAutosell(Material mat, boolean enabled) {
+        autosellMap.put(mat.name(), enabled);
     }
 
-    public boolean isAutosell(String itemId) {
-        return autosellMap.getOrDefault(itemId, false);
+    public boolean isAutosell(Material mat) {
+        return autosellMap.getOrDefault(mat.name(), false);
     }
 
     public String serializeAutosell() {
@@ -45,14 +44,7 @@ public class PlayerData {
 
     public void deserializeAutosell(String json) {
         if (json == null || json.isEmpty()) return;
-        try {
-            Type type = new TypeToken<Map<String, Boolean>>(){}.getType();
-            Map<String, Boolean> map = GSON.fromJson(json, type);
-            if (map != null) {
-                this.autosellMap = new HashMap<>(map);
-            }
-        } catch (Exception e) {
-            Bukkit.getLogger().warning("Ошибка при десериализации autosell для игрока " + uuid + ": " + e.getMessage());
-        }
+        autosellMap = GSON.fromJson(json, Map.class);
     }
+
 }
