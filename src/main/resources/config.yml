@@ -54,12 +54,15 @@ autosell:
 
 numbers_format:
   # https://github.com/reqqpe/rSeller/wiki/Руководство-по-настройке-формата-чисел
+  placeholders:
+    points: "%.2f"
+    points_needed: "%.2f"
+    multiplier_points: "%.2f"
+    multiplier_coins: "%.2f"
+    points_fornextlevel: "%.2f"
   mainGUI:
     sell_price: "%.2f"
     sell_points: "%.2f"
-    points_needed: "%.2f"
-    coin_multiplier: "%.2f"
-    point_multiplier: "%.2f"
   autoSellGUI:
     sell_price: "%.2f"
     sell_points: "%.2f"

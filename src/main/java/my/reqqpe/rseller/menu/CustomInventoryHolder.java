@@ -4,7 +4,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 public class CustomInventoryHolder implements InventoryHolder {
-    private final String id; // Уникальный идентификатор
+    private final String id;
 
     public CustomInventoryHolder(String id) {
         this.id = id;

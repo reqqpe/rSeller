@@ -1,5 +1,5 @@
 package my.reqqpe.rseller.utils;/*
- * This Bstatsmetrics class was auto-generated and can be copied into your project if you are
+ * This Metrics class was auto-generated and can be copied into your project if you are
  * not using a build tool like Gradle or Maven for dependency management.
  *
  * IMPORTANT: You are not allowed to modify this class, except changing the package.
@@ -40,26 +40,25 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 import javax.net.ssl.HttpsURLConnection;
-
-import my.reqqpe.rseller.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
-public class Bstatsmetrics {
+public class Metrics {
 
-    private final Main plugin;
+    private final Plugin plugin;
 
     private final MetricsBase metricsBase;
 
     /**
-     * Creates a new Bstatsmetrics instance.
+     * Creates a new Metrics instance.
      *
      * @param plugin Your plugin instance.
      * @param serviceId The id of the service. It can be found at <a
      *     href="https://bstats.org/what-is-my-plugin-id">What is my plugin id?</a>
      */
-    public Bstatsmetrics(Main plugin, int serviceId) {
+    public Metrics(Plugin plugin, int serviceId) {
         this.plugin = plugin;
         // Get the config file
         File bStatsFolder = new File(plugin.getDataFolder().getParentFile(), "bStats");
@@ -78,7 +77,7 @@ public class Bstatsmetrics {
                             "bStats (https://bStats.org) collects some basic information for plugin authors, like how\n"
                                     + "many people use their plugin and their total player count. It's recommended to keep bStats\n"
                                     + "enabled, but if you're not comfortable with this, you can turn this setting off. There is no\n"
-                                    + "performance penalty associated with having Bstatsmetrics enabled, and data sent to bStats is fully\n"
+                                    + "performance penalty associated with having metrics enabled, and data sent to bStats is fully\n"
                                     + "anonymous.")
                     .copyDefaults(true);
             try {
@@ -124,16 +123,10 @@ public class Bstatsmetrics {
                         false);
     }
 
-    /** Shuts down the underlying scheduler service. */
     public void shutdown() {
         metricsBase.shutdown();
     }
 
-    /**
-     * Adds a custom chart.
-     *
-     * @param chart The chart to add.
-     */
     public void addCustomChart(CustomChart chart) {
         metricsBase.addCustomChart(chart);
     }
@@ -156,22 +149,18 @@ public class Bstatsmetrics {
 
     private int getPlayerAmount() {
         try {
-            // Around MC 1.8 the return type was changed from an array to a collection,
-            // This fixes java.lang.NoSuchMethodError:
-            // org.bukkit.Bukkit.getOnlinePlayers()Ljava/util/Collection;
             Method onlinePlayersMethod = Class.forName("org.bukkit.Server").getMethod("getOnlinePlayers");
             return onlinePlayersMethod.getReturnType().equals(Collection.class)
                     ? ((Collection<?>) onlinePlayersMethod.invoke(Bukkit.getServer())).size()
                     : ((Player[]) onlinePlayersMethod.invoke(Bukkit.getServer())).length;
         } catch (Exception e) {
-            // Just use the new method if the reflection failed
             return Bukkit.getOnlinePlayers().size();
         }
     }
 
     public static class MetricsBase {
 
-        /** The version of the Bstatsmetrics class. */
+        /** The version of the Metrics class. */
         public static final String METRICS_VERSION = "3.1.0";
 
         private static final String REPORT_URL = "https://bStats.org/api/v2/data/%s";
@@ -247,7 +236,7 @@ public class Bstatsmetrics {
                     new ScheduledThreadPoolExecutor(
                             1,
                             task -> {
-                                Thread thread = new Thread(task, "bStats-Bstatsmetrics");
+                                Thread thread = new Thread(task, "bStats-Metrics");
                                 thread.setDaemon(true);
                                 return thread;
                             });
@@ -306,7 +295,7 @@ public class Bstatsmetrics {
             // distribution of requests on the
             // bStats backend. To circumvent this problem, we introduce some randomness into
             // the initial and second delay.
-            // WARNING: You must not modify and part of this Bstatsmetrics class, including the
+            // WARNING: You must not modify and part of this Metrics class, including the
             // submit delay or frequency!
             // WARNING: Modifying this code will get your plugin banned on bStats. Just
             // don't do it!
@@ -341,7 +330,7 @@ public class Bstatsmetrics {
                         } catch (Exception e) {
                             // Something went wrong! :(
                             if (logErrors) {
-                                errorLogger.accept("Could not submit bStats Bstatsmetrics data", e);
+                                errorLogger.accept("Could not submit bStats metrics data", e);
                             }
                         }
                     });
@@ -349,7 +338,7 @@ public class Bstatsmetrics {
 
         private void sendData(JsonObjectBuilder.JsonObject data) throws Exception {
             if (logSentData) {
-                infoLogger.accept("Sent bStats Bstatsmetrics data: " + data.toString());
+                infoLogger.accept("Sent bStats metrics data: " + data.toString());
             }
             String url = String.format(REPORT_URL, platform);
             HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection();
@@ -361,7 +350,7 @@ public class Bstatsmetrics {
             connection.addRequestProperty("Content-Encoding", "gzip");
             connection.addRequestProperty("Content-Length", String.valueOf(compressedData.length));
             connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("User-Agent", "Bstatsmetrics-Service/1");
+            connection.setRequestProperty("User-Agent", "Metrics-Service/1");
             connection.setDoOutput(true);
             try (DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream())) {
                 outputStream.write(compressedData);
@@ -394,7 +383,7 @@ public class Bstatsmetrics {
                 // package names
                 if (MetricsBase.class.getPackage().getName().startsWith(defaultPackage)
                         || MetricsBase.class.getPackage().getName().startsWith(examplePackage)) {
-                    throw new IllegalStateException("bStats Bstatsmetrics class has not been relocated correctly!");
+                    throw new IllegalStateException("bStats Metrics class has not been relocated correctly!");
                 }
             }
         }

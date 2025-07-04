@@ -1,33 +1,38 @@
 package my.reqqpe.rseller.menu;
 
-
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public abstract class AbstractMenu {
+
     protected final Main plugin;
     protected FileConfiguration guiConfig;
+    protected Map<Integer, String> slotToItemId;
+    protected Set<Integer> special_slots = new HashSet<>();
+
+
 
     public AbstractMenu(Main plugin) {
         this.plugin = plugin;
+        this.slotToItemId = new HashMap<>();
     }
     protected abstract FileConfiguration getGuiConfig();
-    protected abstract String getMenuId();
+    public abstract String getMenuId();
+
+
 
     public void openMenu(Player player) {
         this.guiConfig = getGuiConfig();
@@ -39,23 +44,45 @@ public abstract class AbstractMenu {
         }
         Inventory inv = Bukkit.createInventory(new CustomInventoryHolder(getMenuId()), size, title);
 
-        populateStaticItems(inv);
+        loadItems(inv);
 
         player.openInventory(inv);
     }
 
-    protected void populateStaticItems(Inventory inv) {
+    protected void loadItems(Inventory inv) {
         Set<Integer> usedSlots = new HashSet<>();
-        List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("sell-slots"));
-        usedSlots.addAll(sellSlots);
-
+        List<Integer> specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
+        this.special_slots = new HashSet<>(specialSlots);
+        usedSlots.addAll(specialSlots);
         ConfigurationSection itemsSection = guiConfig.getConfigurationSection("items");
-        if (itemsSection != null) {
-            for (String key : itemsSection.getKeys(false)) {
-                String path = "items." + key;
-                int slot = guiConfig.getInt(path + ".slot", -1);
 
-                if (sellSlots.contains(slot) || slot < 0 || slot >= inv.getSize() || usedSlots.contains(slot)) {
+        if (itemsSection != null) {
+            for (String itemId : itemsSection.getKeys(false)) {
+                String path = "items." + itemId;
+                List<Integer> itemSlots = slotORslots(path);
+                List<Integer> slotsToRemove = new ArrayList<>();
+                List<Integer> validSlots = new ArrayList<>();
+
+                for (int slot : itemSlots) {
+                    if (slot < 0 || slot >= inv.getSize()) {
+                        slotsToRemove.add(slot);
+                        plugin.getLogger().warning(String.format("[%s] Пропущен слот %d для предмета %s: слот выходит за пределы инвентаря (0-%d).",
+                                getMenuId(), slot, itemId, inv.getSize() - 1));
+                        continue;
+                    }
+                    if (specialSlots.contains(slot) || usedSlots.contains(slot)) {
+                        slotsToRemove.add(slot);
+                        plugin.getLogger().warning(String.format("[%s] Пропущен слот %d для предмета %s: слот уже занят специальным слотом или другим предметом.",
+                                getMenuId(), slot, itemId));
+                        continue;
+                    }
+                    validSlots.add(slot);
+                }
+
+                itemSlots.removeAll(slotsToRemove);
+
+                if (validSlots.isEmpty()) {
+                    plugin.getLogger().warning(String.format("[%s] Нет доступных слотов для предмета %s.", getMenuId(), itemId));
                     continue;
                 }
 
@@ -68,7 +95,7 @@ public abstract class AbstractMenu {
                 } else {
                     Material material = Material.matchMaterial(matString);
                     if (material == null) {
-                        plugin.getLogger().warning("[" + getMenuId() + "] Неизвестный материал для предмета '" + key + "'");
+                        plugin.getLogger().warning(String.format("[%s] Неизвестный материал для предмета %s: %s", getMenuId(), itemId, matString));
                         continue;
                     }
                     item = new ItemStack(material);
@@ -90,15 +117,69 @@ public abstract class AbstractMenu {
                     if (customModelData != -1) {
                         meta.setCustomModelData(customModelData);
                     }
+
                     item.setItemMeta(meta);
                 }
 
-                inv.setItem(slot, item);
-                usedSlots.add(slot);
+                ConfigurationSection enchantsSection = guiConfig.getConfigurationSection(path + ".enchants");
+                if (enchantsSection != null) {
+                    for (String enchantName : enchantsSection.getKeys(false)) {
+                        try {
+                            int level = enchantsSection.getInt(enchantName);
+                            Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantName.toLowerCase()));
+                            if (enchantment == null) {
+                                plugin.getLogger().warning(String.format("[%s] Неизвестное зачарование для предмета %s: %s",
+                                        getMenuId(), itemId, enchantName));
+                                continue;
+                            }
+                            if (level <= 0) {
+                                plugin.getLogger().warning(String.format("[%s] Некорректный уровень зачарования для предмета %s: %d (должен быть больше 0)",
+                                        getMenuId(), itemId, level));
+                                continue;
+                            }
+                            item.addUnsafeEnchantment(enchantment, level);
+                        } catch (Exception e) {
+                            plugin.getLogger().warning(String.format("[%s] Ошибка при добавлении зачарования %s:%d для предмета %s: %s",
+                                    getMenuId(), enchantName, enchantsSection.getInt(enchantName, -1), itemId, e.getMessage()));
+                        }
+                    }
+                }
+
+                for (int slot : validSlots) {
+                    inv.setItem(slot, item);
+                    slotToItemId.put(slot, itemId);
+                }
+                usedSlots.addAll(validSlots);
             }
         }
     }
 
+
+
+
+    protected List<Integer> slotORslots(String path) {
+        List<Integer> slots = new ArrayList<>();
+
+
+        int slot = guiConfig.getInt(path + ".slot", -1);
+        if (slot != -1) {
+            slots.add(slot);
+            return slots;
+        }
+
+        if (guiConfig.isList(path + ".slots")) {
+            List<?> slotsConfig = guiConfig.getList(path + ".slots");
+            if (!slotsConfig.isEmpty() && slotsConfig.get(0) instanceof String) {
+
+                slots.addAll(parseSlotList((List<String>) slotsConfig));
+            } else {
+                slots.addAll(guiConfig.getIntegerList(path + ".slots"));
+            }
+            return slots;
+        }
+
+        return slots;
+    }
 
     protected static List<Integer> parseSlotList(List<String> list) {
         List<Integer> result = new ArrayList<>();
@@ -116,64 +197,4 @@ public abstract class AbstractMenu {
         }
         return result;
     }
-
-    protected ItemStack createGuiItem(Material material, String namePath, String lorePath, int customModelData, Object... replacements) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            String name = guiConfig.getString(namePath, "");
-            meta.setDisplayName(Colorizer.color(name));
-
-            List<String> lore = guiConfig.getStringList(lorePath);
-            if (lore != null && !lore.isEmpty()) {
-                List<String> finalLore = lore.stream().map(line -> {
-                    String formattedLine = line;
-                    for (int i = 0; i < replacements.length; i += 2) {
-                        if (i + 1 < replacements.length) {
-                            String placeholder = (String) replacements[i];
-                            String value = String.valueOf(replacements[i+1]);
-                            formattedLine = formattedLine.replace(placeholder, value);
-                        }
-                    }
-                    return formattedLine;
-                }).collect(Collectors.toList());
-                meta.setLore(Colorizer.colorizeAll(finalLore));
-            }
-            if (customModelData != -1) {
-                meta.setCustomModelData(customModelData);
-            }
-            item.setItemMeta(meta);
-        }
-        return item;
-    }
-    protected ItemStack createGuiItem(ItemStack itemStack, String namePath, String lorePath, int customModelData, Object... replacements) {
-        ItemStack item = itemStack.clone();
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            String name = guiConfig.getString(namePath, "");
-            meta.setDisplayName(Colorizer.color(name));
-
-            List<String> lore = guiConfig.getStringList(lorePath);
-            if (lore != null && !lore.isEmpty()) {
-                List<String> finalLore = lore.stream().map(line -> {
-                    String formattedLine = line;
-                    for (int i = 0; i < replacements.length; i += 2) {
-                        if (i + 1 < replacements.length) {
-                            String placeholder = (String) replacements[i];
-                            String value = String.valueOf(replacements[i+1]);
-                            formattedLine = formattedLine.replace(placeholder, value);
-                        }
-                    }
-                    return formattedLine;
-                }).collect(Collectors.toList());
-                meta.setLore(Colorizer.colorizeAll(finalLore));
-            }
-            if (customModelData != -1) {
-                meta.setCustomModelData(customModelData);
-            }
-            item.setItemMeta(meta);
-        }
-        return item;
-    }
 }
-

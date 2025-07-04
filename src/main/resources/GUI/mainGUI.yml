@@ -9,7 +9,7 @@
 
 title: "&8Скупщик"
 size: 54
-sell-slots:
+special-slots:
   - 0-44
 items: # Можно добавлять свои предметы
   autosell:
@@ -22,16 +22,26 @@ items: # Можно добавлять свои предметы
       - "&fНажмите, чтобы открыть"
       - "&fменю авто-скупки"
       - ""
-  sell_item: # Айди не менять
+    left_click_actions:
+      - '[opengui] autoSellGUI'
+    right_click_actions:
+      - '[opengui] autoSellGUI'
+  sell_item:
     material: EMERALD
+    update_interval: 15
     name: "&#54A0F4▶ Продать"
     slot: 49
     lore:
       - "&fНажмите, чтобы продать и получить:"
-      - "&#54A0F4* &fМонет: &#54A0F4%sell_price%"
-      - "&#54A0F4* &fОчков: &#54A0F4%sell_points%"
-  level_info: # Айди не менять
+      - "&#54A0F4* &fМонет: &#54A0F4{sell_price}"
+      - "&#54A0F4* &fОчков: &#54A0F4{sell_points}"
+    left_click_actions:
+      - '[sell]'
+    right_click_actions:
+      - '[sell]'
+  level_info:
     slot: 53
+    update_interval: 30
     material: BOOK
     name: "&#54A0F4▶ Что такое скупщик?"
     lore:
@@ -44,11 +54,11 @@ items: # Можно добавлять свои предметы
       - "&fпродать в меню и скупщик сам решит что ему купить"
       - ""
       - "&#54A0F4▶ Информация"
-      - "&#54A0F4* &fТекущий Уровень: &#54A0F4%level%"
-      - "&#54A0F4* &fОчков до следующего: &#54A0F4%points_needed%"
+      - "&#54A0F4* &fТекущий Уровень: &#54A0F4%rseller_level%"
+      - "&#54A0F4* &fОчков до следующего: &#54A0F4%rseller_points%/%rseller_points_needed%"
       - ""
-      - "&#54A0F4* &fБустер монет: &7x&#54A0F4%coin_multiplier%"
-      - "&#54A0F4* &fБустер очков: &7x&#54A0F4%point_multiplier%"
+      - "&#54A0F4* &fБустер монет: &7x&#54A0F4%rseller_multiplier_coins%"
+      - "&#54A0F4* &fБустер очков: &7x&#54A0F4%rseller_multiplier_points%"
   decorate2:
     material: GRAY_STAINED_GLASS_PANE
     name: "&f"

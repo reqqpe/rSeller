@@ -9,11 +9,12 @@
 
 title: "&8Скупщик -> Авто скупка"
 size: 54
-sell-slots:
+special-slots:
   - 10-16
   - 19-25
   - 28-34
 autosell_item:
+  name: "&f{item_name}"
   lore:
     - ""
     - "&#54A0F4▶ Статус: &f{state_autosell}"
@@ -23,7 +24,7 @@ autosell_item:
     - ""
     - "&fНажмите, чтобы включить или отключить авто-скупку"
 items:
-  category: # Айди не менять
+  category:
     material: book
     model_data: -1 # Не обязательный параметр можно убрать или же поставить -1
     name: "&#54A0F4▶ Категории"
@@ -36,7 +37,11 @@ items:
       - ""
       - "&#54A0F4* ЛКМ &f— предыдущая категория"
       - "&#54A0F4* ПКМ &f— следующая категория"
-  prev_page: # Айди не менять
+    left_click_actions:
+      - '[next_category]'
+    right_click_actions:
+      - '[prev_category]'
+  prev_page:
     material: ARROW
     name: "&#54A0F4▶ Предыдущая страница"
     slot: 48
@@ -45,7 +50,11 @@ items:
       - "&fНажмите, чтобы перейти"
       - "&fна предыдущую страницу"
       - ""
-  next_page: # Айди не менять
+    left_click_actions:
+      - '[prev_page]'
+    right_click_actions:
+      - '[prev_page]'
+  next_page:
     material: ARROW
     name: "&#54A0F4▶ Следующая страница"
     slot: 50
@@ -54,6 +63,10 @@ items:
       - "&fНажмите, чтобы перейти"
       - "&fна следующую страницу"
       - ""
+    left_click_actions:
+      - '[next_page]'
+    right_click_actions:
+      - '[next_page]'
   back:
     material: BONE
     name: "&#54A0F4▶ Главное меню"
@@ -63,6 +76,8 @@ items:
       - "&fв главное меню скупщика"
       - ""
     slot: 45
+    left_click_actions:
+      - '[opengui] mainGUI'
 
   decorate1:
     material: GRAY_STAINED_GLASS_PANE
