@@ -32,6 +32,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     private final Map<UUID, String> playerCategory = new HashMap<>();
     private final Map<UUID, Map<String, Integer>> playerCategoryPages = new HashMap<>();
     private int totalSlots;
+    private final NumberFormatManager numberFormatManager;
 
 
 
@@ -39,6 +40,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
         super(plugin);
         this.database = database;
         this.autoSellManager = plugin.getAutoSellManager();
+        this.numberFormatManager = plugin.getFormatManager();
     }
 
     @Override
@@ -77,7 +79,6 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
         List<Material> pageMaterials = getItemsByPage(category, getPlayerPage(player, category));
 
-        NumberFormatManager formats = new NumberFormatManager(plugin.getConfig());
 
         ConfigurationSection itemSection = plugin.getItemsConfig().getConfig().getConfigurationSection("items");
         if (itemSection == null) return;
@@ -100,6 +101,13 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
             double price = data.getDouble("price", 0.0);
             double points = data.getDouble("points", 0.0);
+
+            String itemName = data.getString("name");
+
+            if (itemName == null || itemName.isEmpty()) {
+                itemName = material.name().replace("_", " ");
+            }
+
             boolean autosell = playerData.isAutosell(material);
 
             String enabled = Colorizer.color(plugin.getConfig().getString("messages.autosell-enable", "&aВключено"));
@@ -112,20 +120,23 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
             ItemStack guiItem = new ItemStack(material);
             ItemMeta meta = guiItem.getItemMeta();
             if (meta != null) {
+                String formattedPrice = numberFormatManager.format("autoSellGUI.sell_price", price);
+                String formattedPoints = numberFormatManager.format("autoSellGUI.sell_points", points);
+
                 meta.setDisplayName(Colorizer.color(name
-                        .replace("{item_name}", material.name().replace("_", " "))
+                        .replace("{item_name}", itemName)
                         .replace("{state_autosell}", status)
-                        .replace("{sell_price}", String.format(formats.format("autoSellGUI.sell_price", price)))
-                        .replace("{sell_points}", String.format(formats.format("autoSellGUI.sell_points", points)))
+                        .replace("{sell_price}", formattedPrice)
+                        .replace("{sell_points}", formattedPoints)
                 ));
 
                 List<String> formattedLore = new ArrayList<>();
                 for (String line : lore) {
                     formattedLore.add(Colorizer.color(line
-                            .replace("{item_name}", material.name().replace("_", " "))
+                            .replace("{item_name}", itemName)
                             .replace("{state_autosell}", status)
-                            .replace("{sell_price}", String.format(formats.format("autoSellGUI.sell_price", price)))
-                            .replace("{sell_points}", String.format(formats.format("autoSellGUI.sell_points", points)))
+                            .replace("{sell_price}", formattedPrice)
+                            .replace("{sell_points}", formattedPoints)
                     ));
                 }
 

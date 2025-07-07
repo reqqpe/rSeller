@@ -4,7 +4,6 @@ import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
-import my.reqqpe.rseller.menu.CustomInventoryHolder;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.configuration.ConfigurationSection;
@@ -15,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
 
 import java.util.List;
-import java.util.Objects;
 
 public class SellManager {
 
@@ -23,12 +21,14 @@ public class SellManager {
     private final Economy economy;
     private final Database database;
     private final LevelManager levelManager;
+    private final NumberFormatManager numberFormatManager;
 
     public SellManager(Main plugin, Database database) {
         this.plugin = plugin;
         this.economy = EconomySetup.getEconomy();
         this.database = database;
         this.levelManager = plugin.getLevelManager();
+        this.numberFormatManager = plugin.getFormatManager();
     }
 
     public void sellItems(Player player, Inventory inv, List<Integer> sellSlots) {
@@ -72,10 +72,13 @@ public class SellManager {
         }
         ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
         if (totalCoins > 0 || totalPoints > 0) {
-            ConfigurationSection formats = plugin.getConfig().getConfigurationSection("numbers_format.messages");
+
+            String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
+            String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
+
             String message = Colorizer.color(sec.getString("sell-items")
-                    .replace("{coins}", String.format(Objects.requireNonNull(formats.getString("coins")), totalCoins))
-                    .replace("{points}", String.format(Objects.requireNonNull(formats.getString("points")), totalPoints)));
+                    .replace("{coins}", coinsFormat)
+                    .replace("{points}", pointsFormat));
             player.sendMessage(message);
         } else {
             String message = Colorizer.color(sec.getString("no-sell-items"));
@@ -111,7 +114,6 @@ public class SellManager {
             inv.setItem(i, null);
         }
 
-        // применяю бусты
         LevelManager.LevelInfo levelInfo = levelManager.getLevelInfo(player);
         totalCoins *= levelInfo.coinMultiplier();
         totalPoints *= levelInfo.pointMultiplier();
@@ -120,10 +122,13 @@ public class SellManager {
         if (totalPoints > 0) data.addPoints(totalPoints);
 
         if (totalCoins > 0 || totalPoints > 0) {
-            ConfigurationSection formats = plugin.getConfig().getConfigurationSection("numbers_format.messages");
+
+            String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
+            String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
+
             String msg = Colorizer.color(plugin.getConfig().getString("messages.auto-sell")
-                    .replace("{coins}", String.format(Objects.requireNonNull(formats.getString("coins")), totalCoins))
-                    .replace("{points}", String.format(Objects.requireNonNull(formats.getString("points")), totalPoints)));
+                    .replace("{coins}", coinsFormat)
+                    .replace("{points}", pointsFormat));
             player.sendMessage(msg);
         }
     }
@@ -153,5 +158,6 @@ public class SellManager {
 
         return new SellResult(boostedCoins, boostedPoints);
     }
+
     public record SellResult(double coins, double points) {}
 }

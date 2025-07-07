@@ -166,7 +166,7 @@ public abstract class AbstractMenu {
             slots.add(slot);
             return slots;
         }
-
+        
         if (guiConfig.isList(path + ".slots")) {
             List<?> slotsConfig = guiConfig.getList(path + ".slots");
             if (!slotsConfig.isEmpty() && slotsConfig.get(0) instanceof String) {

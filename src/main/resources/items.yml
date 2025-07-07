@@ -19,21 +19,28 @@ items:
   COAL:
     price: 10
     points: 0.1
+    name: "&fУголь"
   LAPIS_LAZULI:
     price: 12
     points: 0.1
+    name: "&fЛазурит"
   GOLD_INGOT:
     price: 25
     points: 1.0
+    name: "&fЗолотой слиток"
   IRON_INGOT:
     price: 20
     points: 1.0
+    name: "&fЖелезный слиток"
   DIAMOND:
     price: 45.0
     points: 1.5
+    name: "&fАлмаз"
   EMERALD:
     price: 65.0
     points: 2.0
+    name: "&fИзумруд"
   NETHERITE_INGOT:
     price: 90.0
     points: 4.0
+    name: "&fНезеритовый слиток"

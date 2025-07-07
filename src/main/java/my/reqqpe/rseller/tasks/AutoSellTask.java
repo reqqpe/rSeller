@@ -1,7 +1,6 @@
 package my.reqqpe.rseller.tasks;
 
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.managers.SellManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -27,6 +26,5 @@ public class AutoSellTask {
                 }
             }
         }.runTaskTimer(plugin, 0L, updateTime);
-
     }
 }

@@ -1,12 +1,8 @@
 package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.menu.CustomInventoryHolder;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -59,7 +55,7 @@ public class AutoSellManager {
             ConfigurationSection catSection = section.getConfigurationSection(key);
             if (catSection == null) continue;
 
-            String name = catSection.getString("name", key); // если нет поля name — используем id
+            String name = catSection.getString("name", key);
             categoryNames.put(key, name);
 
             List<String> blockList = catSection.getStringList("blocks");

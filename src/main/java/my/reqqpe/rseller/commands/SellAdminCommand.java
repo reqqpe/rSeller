@@ -45,6 +45,8 @@ public class SellAdminCommand implements CommandExecutor {
             plugin.getItemsConfig().reloadConfig();
             plugin.getLevelManager().reloadLevels();
             plugin.getAutoSellManager().loadConfig();
+            plugin.getFormatManager().reload();
+
             String message = sec.getString("reload");
             commandSender.sendMessage(Colorizer.color(message));
         }
@@ -121,7 +123,8 @@ public class SellAdminCommand implements CommandExecutor {
                     .replace("{value}", String.valueOf(newPoints));;
             commandSender.sendMessage(Colorizer.color(message));
             if (!target.equals(commandSender)) {
-                String message2 = sec.getString("update-points-target").replace("{value}", String.valueOf(newPoints));
+                String message2 = sec.getString("update-points-target")
+                        .replace("{value}", String.valueOf(newPoints));
                 target.sendMessage(Colorizer.color(message2));
             }
         }

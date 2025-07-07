@@ -1,6 +1,5 @@
 package my.reqqpe.rseller.utils;
 
-import my.reqqpe.rseller.Main;
 import org.bukkit.Bukkit;
 
 import java.util.regex.Pattern;

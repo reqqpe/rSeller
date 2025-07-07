@@ -24,10 +24,12 @@ import java.util.*;
 
 public class SellMenu extends AbstractMenu implements Listener {
     private final Map<UUID, List<BukkitTask>> menuUpdateTasks = new HashMap<>();
+    private final NumberFormatManager numberFormatManager;
 
 
     public SellMenu(Main plugin) {
         super(plugin);
+        numberFormatManager = plugin.getFormatManager();
     }
 
     @Override
@@ -55,8 +57,6 @@ public class SellMenu extends AbstractMenu implements Listener {
     }
     private void updatePlaceholders(Player player, Inventory inv) {
         var result = plugin.getSellManager().calculateSellPreview(player, inv, new ArrayList<>(special_slots));
-
-        NumberFormatManager numberFormatManager = new NumberFormatManager(plugin.getConfig());
 
         String coinsFormatted = numberFormatManager.format("mainGUI.sell_price", result.coins());
         String pointsFormatted = numberFormatManager.format("mainGUI.sell_points", result.points());
@@ -99,7 +99,6 @@ public class SellMenu extends AbstractMenu implements Listener {
 
     private void startAutoUpdates(Player player, Inventory inv) {
         FileConfiguration config = getGuiConfig();
-        NumberFormatManager numberFormatManager = new NumberFormatManager(plugin.getConfig());
         List<BukkitTask> tasks = new ArrayList<>();
 
         ConfigurationSection itemsSection = config.getConfigurationSection("items");
@@ -152,7 +151,6 @@ public class SellMenu extends AbstractMenu implements Listener {
                             .replace("{sell_points}", pointsFormatted);
                     if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
                         updatedDisplayName = PlaceholderAPI.setPlaceholders(player, updatedDisplayName);
-                    } else {
                     }
                     if (!updatedDisplayName.equals(meta.hasDisplayName() ? meta.getDisplayName() : "")) {
                         meta.setDisplayName(Colorizer.color(updatedDisplayName));
@@ -167,10 +165,7 @@ public class SellMenu extends AbstractMenu implements Listener {
                                 .replace("{sell_price}", coinsFormatted)
                                 .replace("{sell_points}", pointsFormatted);
                         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                            String beforePAPI = processedLine;
                             processedLine = PlaceholderAPI.setPlaceholders(player, processedLine);
-
-                        } else {
 
                         }
                         newLore.add(processedLine);
@@ -201,7 +196,7 @@ public class SellMenu extends AbstractMenu implements Listener {
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
         if (!holder.getId().equals(getMenuId())) return;
 
-        List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("specials-slots"));
+        List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("special-slots"));
         Inventory inv = e.getInventory();
 
         for (int slot : sellSlots) {

@@ -17,7 +17,7 @@ public class PlaceholderAPI extends PlaceholderExpansion {
     public PlaceholderAPI(Main plugin, Database database) {
         this.plugin = plugin;
         this.database = database;
-        this.numberFormat = new NumberFormatManager(plugin.getConfig());
+        this.numberFormat = plugin.getFormatManager();
     }
 
     @Override
@@ -35,7 +35,7 @@ public class PlaceholderAPI extends PlaceholderExpansion {
     @Override
     @NotNull
     public String getVersion() {
-        return plugin.getDescription().getVersion(); //
+        return plugin.getDescription().getVersion();
     }
 
     @Override
@@ -60,7 +60,7 @@ public class PlaceholderAPI extends PlaceholderExpansion {
                 }
             }
             if (params.equalsIgnoreCase("points_needed")) {
-                double points = plugin.getLevelManager().getPointsForNextLevel(player);
+                double points = Math.max(0, plugin.getLevelManager().getPointsForNextLevel(player)) ;
                 return numberFormat.format("placeholders.points_needed", points);
             }
             if (params.equalsIgnoreCase("points_fornextlevel")) {
