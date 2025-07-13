@@ -6,6 +6,7 @@ import my.reqqpe.rseller.utils.HeadUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -196,5 +197,53 @@ public abstract class AbstractMenu {
             }
         }
         return result;
+    }
+    protected void runMainActions(Player player, String cmdLine) {
+        String cmd = cmdLine.trim();
+        if (cmd.startsWith("[console] ")) {
+            String command = cmd.substring(10).replace("%player%", player.getName());
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        }
+
+        else if (cmd.startsWith("[player] ")) {
+            String command = cmd.substring(9).replace("%player%", player.getName());
+            player.performCommand(command);
+        }
+
+        else if (cmd.startsWith("[text] ")) {
+            String message = Colorizer.color(cmd.substring(7).replace("%player%", player.getName()));
+            player.sendMessage(message);
+        }
+
+        else if (cmd.startsWith("[opengui] ")) {
+            String guiId = cmd.substring(10).trim();
+            if (guiId.equalsIgnoreCase("autoSellGUI")) {
+                plugin.getAutoSellMenu().openMenu(player);
+            }
+            else if (guiId.equalsIgnoreCase("mainGUI")) {
+                plugin.getSellMenu().openMenu(player);
+            }
+        }
+
+        else if (cmd.startsWith("[sound] ")) {
+            String[] parts = cmd.substring(8).split(";");
+            if (parts.length >= 1) {
+                try {
+                    Sound sound = Sound.valueOf(parts[0].toUpperCase());
+                    float volume = parts.length >= 2 ? Float.parseFloat(parts[1]) : 1.0f;
+                    float pitch = parts.length >= 3 ? Float.parseFloat(parts[2]) : 1.0f;
+                    player.playSound(player.getLocation(), sound, volume, pitch);
+                } catch (IllegalArgumentException e) {
+                    player.sendMessage("§cНеизвестный звук: " + parts[0]);
+                } catch (Exception e) {
+                    player.sendMessage("§cОшибка при воспроизведении звука.");
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        else {
+            player.sendMessage(Colorizer.color(cmd));
+        }
     }
 }

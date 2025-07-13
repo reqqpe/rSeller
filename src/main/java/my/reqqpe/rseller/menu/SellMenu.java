@@ -266,7 +266,7 @@ public class SellMenu extends AbstractMenu implements Listener {
             if (!allRequirementsPassed) {
                 List<String> denyCommands = reqSection != null ? reqSection.getStringList("deny_commands") : Collections.emptyList();
                 for (String cmd : denyCommands) {
-                    runCommand(player, cmd);
+                    runMainActions(player, cmd);
                 }
                 return;
             }
@@ -280,30 +280,6 @@ public class SellMenu extends AbstractMenu implements Listener {
             }
         }
     }
-    private void runCommand(Player player, String cmdLine) {
-        String cmd = cmdLine.trim();
-        if (cmd.startsWith("[console] ")) {
-            String command = cmd.substring(10).replace("%player%", player.getName());
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-        } else if (cmd.startsWith("[player] ")) {
-            String command = cmd.substring(9).replace("%player%", player.getName());
-            player.performCommand(command);
-        } else if (cmd.startsWith("[text] ")) {
-            String message = Colorizer.color(cmd.substring(7).replace("%player%", player.getName()));
-            player.sendMessage(message);
-        } else if (cmd.startsWith("[opengui] ")) {
-            String guiId = cmd.substring(10).trim();
-            if (guiId.equalsIgnoreCase("autoSellGUI")) {
-                plugin.getAutoSellMenu().openMenu(player);
-            }
-            else if (guiId.equalsIgnoreCase("mainGUI")) {
-                openMenu(player);
-            }
-        } else {
-            player.sendMessage(Colorizer.color(cmd));
-        }
-    }
-
     private void executeAction(Player player, String action) {
         if (action.equalsIgnoreCase("[sell]")) {
             Inventory inv = player.getOpenInventory().getTopInventory();
@@ -313,7 +289,7 @@ public class SellMenu extends AbstractMenu implements Listener {
             List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("special-slots"));
             plugin.getSellManager().sellItems(player, inv, sellSlots);
         } else {
-            runCommand(player, action);
+            runMainActions(player, action);
         }
     }
 

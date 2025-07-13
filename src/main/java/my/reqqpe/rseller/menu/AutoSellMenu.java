@@ -303,7 +303,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
             if (!allRequirementsPassed) {
                 List<String> denyCommands = reqSection != null ? reqSection.getStringList("deny_commands") : Collections.emptyList();
                 for (String cmd : denyCommands) {
-                    runCommand(player, cmd);
+                    runMainActions(player, cmd);
                 }
                 return;
             }
@@ -315,29 +315,6 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
             for (String action : actions) {
                 executeAction(player, action);
             }
-        }
-    }
-    private void runCommand(Player player, String cmdLine) {
-        String cmd = cmdLine.trim();
-        if (cmd.startsWith("[console] ")) {
-            String command = cmd.substring(10).replace("%player%", player.getName());
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-        } else if (cmd.startsWith("[player] ")) {
-            String command = cmd.substring(9).replace("%player%", player.getName());
-            player.performCommand(command);
-        } else if (cmd.startsWith("[text] ")) {
-            String message = Colorizer.color(cmd.substring(7).replace("%player%", player.getName()));
-            player.sendMessage(message);
-        } else if (cmd.startsWith("[opengui] ")) {
-            String guiId = cmd.substring(10).trim();
-            if (guiId.equalsIgnoreCase("autoSellGUI")) {
-                plugin.getAutoSellMenu().openMenu(player);
-            }
-            else if (guiId.equalsIgnoreCase("mainGUI")) {
-                plugin.getSellMenu().openMenu(player);
-            }
-        } else {
-            player.sendMessage(Colorizer.color(cmd));
         }
     }
 
@@ -358,6 +335,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 openMenu(player);
             }
         }
+
         else if (action.equalsIgnoreCase("[prev_page]")) {
 
             String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
@@ -368,6 +346,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 openMenu(player);
             }
         }
+
         else if (action.equalsIgnoreCase("[next_category]")) {
             String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
             List<String> categoryIds = new ArrayList<>(autoSellManager.getCategories().keySet());
@@ -382,6 +361,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 openMenu(player);
             }
         }
+
         else if (action.equalsIgnoreCase("[prev_category]")) {
             String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
             List<String> categoryIds = new ArrayList<>(autoSellManager.getCategories().keySet());
@@ -396,8 +376,24 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 openMenu(player);
             }
         }
+
+        else if (action.equalsIgnoreCase("[toggle_autosell_category]")) {
+            String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
+            List<Material> materials = autoSellManager.getCategoryMaterials(currentCategory);
+            if (!materials.isEmpty()) {
+                for (Material material : materials) {
+                    PlayerData playerData = database.getPlayerData(player.getUniqueId());
+
+                    boolean currentState = playerData.isAutosell(material);
+                    playerData.setAutosell(material, !currentState);
+
+                    openMenu(player);
+                }
+            }
+        }
+
         else {
-            runCommand(player, action);
+            runMainActions(player, action);
         }
     }
 }

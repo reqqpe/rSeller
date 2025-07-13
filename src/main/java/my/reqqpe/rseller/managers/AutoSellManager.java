@@ -141,6 +141,8 @@ public class AutoSellManager {
         }
         return null;
     }
-
+    public List<Material> getCategoryMaterials(String category) {
+        return categories.getOrDefault(category, Collections.emptyList());
+    }
 
 }

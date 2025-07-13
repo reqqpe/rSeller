@@ -23,7 +23,6 @@ public class Database {
         return players.stream()
                 .filter(data -> data.getUuid().equals(uuid))
                 .findFirst()
-                //Можно поменять на null
                 .orElse(create(uuid));
     }
 
