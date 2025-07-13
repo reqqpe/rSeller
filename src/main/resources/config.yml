@@ -19,6 +19,7 @@ database:
 
 
 metrics: true
+update-check: true
 
 autosell:
   enable: true # Переключение работает только при перезагрузке сервера

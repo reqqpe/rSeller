@@ -234,9 +234,9 @@ public abstract class AbstractMenu {
                     float pitch = parts.length >= 3 ? Float.parseFloat(parts[2]) : 1.0f;
                     player.playSound(player.getLocation(), sound, volume, pitch);
                 } catch (IllegalArgumentException e) {
-                    player.sendMessage("§cНеизвестный звук: " + parts[0]);
+                    plugin.getLogger().warning("Неизвестный звук: " + parts[0]);
                 } catch (Exception e) {
-                    player.sendMessage("§cОшибка при воспроизведении звука.");
+                    plugin.getLogger().warning("Ошибка при воспроизведении звука.");
                     e.printStackTrace();
                 }
             }

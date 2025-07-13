@@ -15,16 +15,14 @@ import my.reqqpe.rseller.managers.SellManager;
 import my.reqqpe.rseller.menu.AutoSellMenu;
 import my.reqqpe.rseller.menu.SellMenu;
 import my.reqqpe.rseller.tasks.AutoSellTask;
+import my.reqqpe.rseller.updateCheker.UpdateChecker;
 import my.reqqpe.rseller.utils.Metrics;
 import my.reqqpe.rseller.utils.PlaceholderAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 
 public final class Main extends JavaPlugin {
 
@@ -117,6 +115,13 @@ public final class Main extends JavaPlugin {
             } else {
                 autoSellTask.autoSellTask();
             }
+        }
+
+        boolean updateCheck = getConfig().getBoolean("update-check", true);
+
+        if (updateCheck) {
+            UpdateChecker updateChecker = new UpdateChecker(this);
+            updateChecker.check();
         }
 
     }
