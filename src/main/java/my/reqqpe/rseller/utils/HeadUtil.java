@@ -24,7 +24,7 @@ public class HeadUtil {
         if (meta == null) return head;
 
         GameProfile profile = profileCache.computeIfAbsent(base64, b64 -> {
-            GameProfile p = new GameProfile(UUID.nameUUIDFromBytes(b64.getBytes()), null);
+            GameProfile p = new GameProfile(UUID.nameUUIDFromBytes(b64.getBytes()), "CustomHead");
             p.getProperties().put("textures", new Property("textures", b64));
             return p;
         });
