@@ -78,92 +78,29 @@ items:
     slot: 45
     left_click_actions:
       - '[opengui] mainGUI'
-
-  decorate1:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 0
-  decorate2:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 1
-  decorate3:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 2
-  decorate4:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 3
-  decorate5:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 5
-  decorate6:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 6
-  decorate7:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 7
-  decorate8:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 8
-  decorate9:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 9
-  decorate10:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 17
-  decorate11:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 18
-  decorate12:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 26
-  decorate13:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 27
-  decorate14:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 35
-  decorate15:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 36
-  decorate16:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 44
-  decorate17:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 46
-  decorate18:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 47
-  decorate19:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 49
-  decorate20:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 51
-  decorate21:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
-    slot: 52
-  decorate22:
-    material: GRAY_STAINED_GLASS_PANE
-    name: ""
+  toggle_category_autosell:
+    material: magma_cream
+    name: "&f"
+    lore:
+      - "&fНажмите, чтобы переключить"
+      - "&fавто-скупку для категории"
+      - ""
+      - "&fСтатус: {state_autosell_category}"
+      - ""
     slot: 53
+    left_click_actions:
+      - '[toggle_autosell_category]'
+
+  decorate:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slots:
+      - 0-3
+      - 5-9
+      - 17-18
+      - 26-27
+      - 35-36
+      - 44-44
+      - 46-47
+      - 49-49
+      - 51-52

@@ -1,8 +1,10 @@
 package my.reqqpe.rseller.menu;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
+import my.reqqpe.rseller.utils.SyntaxParser;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -11,18 +13,24 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
 public abstract class AbstractMenu {
 
+
+
     protected final Main plugin;
     protected FileConfiguration guiConfig;
     protected Map<Integer, String> slotToItemId;
-    protected Set<Integer> special_slots = new HashSet<>();
+    protected List<Integer> special_slots = new ArrayList<>();
+    protected final Map<Integer, UpdatableItem> updatableItems = new HashMap<>();
+    private final Map<UUID, List<BukkitTask>> updateTasks = new HashMap<>();
 
 
 
@@ -30,8 +38,11 @@ public abstract class AbstractMenu {
         this.plugin = plugin;
         this.slotToItemId = new HashMap<>();
     }
+
+
+
     protected abstract FileConfiguration getGuiConfig();
-    public abstract String getMenuId();
+    protected abstract String getMenuId();
 
 
 
@@ -45,15 +56,17 @@ public abstract class AbstractMenu {
         }
         Inventory inv = Bukkit.createInventory(new CustomInventoryHolder(getMenuId()), size, title);
 
-        loadItems(inv);
+        loadItems(inv, player);
 
         player.openInventory(inv);
+        startItemUpdates(player, inv);
     }
 
-    protected void loadItems(Inventory inv) {
+
+    protected void loadItems(Inventory inv, Player player) {
         Set<Integer> usedSlots = new HashSet<>();
         List<Integer> specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
-        this.special_slots = new HashSet<>(specialSlots);
+        this.special_slots = new ArrayList<>(specialSlots);
         usedSlots.addAll(specialSlots);
         ConfigurationSection itemsSection = guiConfig.getConfigurationSection("items");
 
@@ -110,10 +123,15 @@ public abstract class AbstractMenu {
                 ItemMeta meta = item.getItemMeta();
                 if (meta != null) {
                     String name = guiConfig.getString(path + ".name", "");
-                    meta.setDisplayName(Colorizer.color(name));
+                    meta.setDisplayName(Colorizer
+                            .color
+                                    (replacePlaceholders(player, name, inv)));
+
                     List<String> lore = guiConfig.getStringList(path + ".lore");
                     if (lore != null && !lore.isEmpty()) {
-                        meta.setLore(Colorizer.colorizeAll(lore));
+                        meta.setLore(Colorizer
+                                .colorizeAll
+                                        (replacePlaceholders(player, lore, inv)));
                     }
                     if (customModelData != -1) {
                         meta.setCustomModelData(customModelData);
@@ -149,6 +167,12 @@ public abstract class AbstractMenu {
                 for (int slot : validSlots) {
                     inv.setItem(slot, item);
                     slotToItemId.put(slot, itemId);
+
+                    if (guiConfig.getBoolean(path + ".update", false)) {
+                        String name = guiConfig.getString(path + ".name", "");
+                        List<String> lore = guiConfig.getStringList(path + ".lore");
+                        updatableItems.put(slot, new UpdatableItem(slot, name, lore));
+                    }
                 }
                 usedSlots.addAll(validSlots);
             }
@@ -156,48 +180,6 @@ public abstract class AbstractMenu {
     }
 
 
-
-
-    protected List<Integer> slotORslots(String path) {
-        List<Integer> slots = new ArrayList<>();
-
-
-        int slot = guiConfig.getInt(path + ".slot", -1);
-        if (slot != -1) {
-            slots.add(slot);
-            return slots;
-        }
-        
-        if (guiConfig.isList(path + ".slots")) {
-            List<?> slotsConfig = guiConfig.getList(path + ".slots");
-            if (!slotsConfig.isEmpty() && slotsConfig.get(0) instanceof String) {
-
-                slots.addAll(parseSlotList((List<String>) slotsConfig));
-            } else {
-                slots.addAll(guiConfig.getIntegerList(path + ".slots"));
-            }
-            return slots;
-        }
-
-        return slots;
-    }
-
-    protected static List<Integer> parseSlotList(List<String> list) {
-        List<Integer> result = new ArrayList<>();
-        for (String str : list) {
-            if (str.contains("-")) {
-                String[] parts = str.split("-");
-                int start = Integer.parseInt(parts[0]);
-                int end = Integer.parseInt(parts[1]);
-                for (int i = start; i <= end; i++) {
-                    result.add(i);
-                }
-            } else {
-                result.add(Integer.parseInt(str));
-            }
-        }
-        return result;
-    }
     protected void runMainActions(Player player, String cmdLine) {
         String cmd = cmdLine.trim();
         if (cmd.startsWith("[console] ")) {
@@ -246,4 +228,207 @@ public abstract class AbstractMenu {
             player.sendMessage(Colorizer.color(cmd));
         }
     }
+
+
+    protected String replacePlaceholders(Player player, String text, Inventory inventory) {
+        return text;
+    }
+
+
+    protected List<String> replacePlaceholders(Player player, List<String> list, Inventory inventory) {
+
+        List<String> result = new ArrayList<>();
+        for (String text : list) {
+            result.add(replacePlaceholders(player, text, inventory));
+        }
+
+        return list;
+    }
+
+
+    public void handleClick(Player player, InventoryClickEvent e) {
+        if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
+        if (!holder.getId().equals(getMenuId())) return;
+
+        int rawSlot = e.getRawSlot();
+        Inventory clickedInv = e.getClickedInventory();
+        Inventory menuInv = e.getInventory();
+
+
+
+        if (clickedInv == menuInv && rawSlot < menuInv.getSize()) {
+            if (special_slots.contains(rawSlot)) {
+                if (handleSpecialSlotClick(player, e)) return;
+            }
+
+            e.setCancelled(true);
+
+            String itemId = slotToItemId.get(rawSlot);
+            if (itemId == null) return;
+
+            ConfigurationSection itemSection = guiConfig.getConfigurationSection("items." + itemId);
+            if (itemSection == null) return;
+
+            boolean isLeftClick = e.isLeftClick();
+            boolean isRightClick = e.isRightClick();
+
+            ConfigurationSection reqSection = itemSection.getConfigurationSection(
+                    isLeftClick ? "left_click_requaments" :
+                            isRightClick ? "right_click_requaments" : null
+            );
+
+            boolean allRequirementsPassed = true;
+
+            if (reqSection != null) {
+                ConfigurationSection sub = reqSection.getConfigurationSection("requaments");
+                if (sub != null) {
+                    for (String key : sub.getKeys(false)) {
+                        ConfigurationSection entry = sub.getConfigurationSection(key);
+                        if (entry == null) continue;
+
+                        String syntax = entry.getString("syntax");
+                        String typeRaw = entry.getString("type", "AUTO");
+                        SyntaxParser.Type type = SyntaxParser.Type.valueOf(typeRaw.toUpperCase());
+
+                        if (!SyntaxParser.parse(syntax, type)) {
+                            player.sendMessage("§cУсловие не выполнено: " + syntax);
+                            allRequirementsPassed = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!allRequirementsPassed) {
+                List<String> denyCommands = reqSection != null ? reqSection.getStringList("deny_commands") : Collections.emptyList();
+                for (String cmd : denyCommands) {
+                    runMainActions(player, cmd);
+                }
+                return;
+            }
+
+            List<String> actions = itemSection.getStringList(
+                    isLeftClick ? "left_click_actions" :
+                            isRightClick ? "right_click_actions" : null
+            );
+
+            for (String action : actions) {
+                executeAction(player, action);
+            }
+        }
+    }
+
+    protected boolean handleSpecialSlotClick(Player player, InventoryClickEvent e) {
+        e.setCancelled(true);
+        return false;
+    }
+
+
+    protected void executeAction(Player player, String action) {
+        // Свои действия при вызове
+    }
+
+
+    protected void startItemUpdates(Player player, Inventory inv) {
+        int interval = guiConfig.getInt("update_interval", -1);
+        if (interval <= 0 || updatableItems.isEmpty()) return;
+
+        List<BukkitTask> tasks = new ArrayList<>();
+
+        for (Map.Entry<Integer, UpdatableItem> entry : updatableItems.entrySet()) {
+            int slot = entry.getKey();
+            UpdatableItem itemData = entry.getValue();
+
+            BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+                if (!player.isOnline()) return;
+                if (!player.getOpenInventory().getTopInventory().equals(inv)) return;
+
+                ItemStack item = inv.getItem(slot);
+                if (item == null || item.getType() == Material.AIR) return;
+
+                ItemMeta meta = item.getItemMeta();
+                boolean changed = false;
+
+                String newName = Colorizer.color(replacePlaceholders(player, itemData.name(), inv));
+                if (!newName.equals(meta.hasDisplayName() ? meta.getDisplayName() : "")) {
+                    meta.setDisplayName(newName);
+                    changed = true;
+                }
+
+                List<String> newLore = Colorizer.colorizeAll(replacePlaceholders(player, itemData.lore(), inv));
+                if (!newLore.equals(meta.hasLore() ? meta.getLore() : new ArrayList<>())) {
+                    meta.setLore(newLore);
+                    changed = true;
+                }
+
+                if (changed) {
+                    item.setItemMeta(meta);
+                    inv.setItem(slot, item);
+                    player.updateInventory();
+                }
+
+            }, interval, interval);
+
+            tasks.add(task);
+        }
+
+        cancelItemUpdates(player);
+        updateTasks.put(player.getUniqueId(), tasks);
+    }
+
+
+    protected void cancelItemUpdates(Player player) {
+        List<BukkitTask> tasks = updateTasks.remove(player.getUniqueId());
+        if (tasks != null) {
+            tasks.forEach(BukkitTask::cancel);
+        }
+    }
+
+
+
+    protected List<Integer> slotORslots(String path) {
+        List<Integer> slots = new ArrayList<>();
+
+
+        int slot = guiConfig.getInt(path + ".slot", -1);
+        if (slot != -1) {
+            slots.add(slot);
+            return slots;
+        }
+
+        if (guiConfig.isList(path + ".slots")) {
+            List<?> slotsConfig = guiConfig.getList(path + ".slots");
+            if (!slotsConfig.isEmpty() && slotsConfig.get(0) instanceof String) {
+
+                slots.addAll(parseSlotList((List<String>) slotsConfig));
+            } else {
+                slots.addAll(guiConfig.getIntegerList(path + ".slots"));
+            }
+            return slots;
+        }
+
+        return slots;
+    }
+
+
+    protected static List<Integer> parseSlotList(List<String> list) {
+        List<Integer> result = new ArrayList<>();
+        for (String str : list) {
+            if (str.contains("-")) {
+                String[] parts = str.split("-");
+                int start = Integer.parseInt(parts[0]);
+                int end = Integer.parseInt(parts[1]);
+                for (int i = start; i <= end; i++) {
+                    result.add(i);
+                }
+            } else {
+                result.add(Integer.parseInt(str));
+            }
+        }
+        return result;
+    }
+
+
+
+    public record UpdatableItem(int slot, String name, List<String> lore) {}
 }
