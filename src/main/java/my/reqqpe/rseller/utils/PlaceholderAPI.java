@@ -74,11 +74,15 @@ public class PlaceholderAPI extends PlaceholderExpansion {
 
             }
             if (params.equalsIgnoreCase("multiplier_points")) {
-                double multiplier = plugin.getLevelManager().getPointMultiplier(player);
+                double multiplier = plugin.getBoosterManager()
+                        .getBoosterByPlayer(player)
+                        .getPointMultiplier();
                 return numberFormat.format("placeholders.multiplier_points", multiplier);
             }
             if (params.equalsIgnoreCase("multiplier_coins")) {
-                double multiplier = plugin.getLevelManager().getCoinMultiplier(player);
+                double multiplier = plugin.getBoosterManager()
+                        .getBoosterByPlayer(player)
+                        .getCoinMultiplier();
                 return numberFormat.format("placeholders.multiplier_coins", multiplier);
             }
         }

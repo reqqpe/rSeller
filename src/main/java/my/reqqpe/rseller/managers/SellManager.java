@@ -4,6 +4,7 @@ import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.model.Booster;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.configuration.ConfigurationSection;
@@ -54,13 +55,13 @@ public class SellManager {
 
             inv.setItem(slot, null);
         }
-        LevelManager.LevelInfo levelInfo = levelManager.getLevelInfo(player);
+        Booster booster = plugin.getBoosterManager().getBoosterByPlayer(player);
+        if (booster == null) {
+            booster = new Booster(1.0, 1.0);
+        }
 
-        double coinBoost = levelInfo.coinMultiplier();
-        double pointBoost = levelInfo.pointMultiplier();
-
-        totalCoins *= coinBoost;
-        totalPoints *= pointBoost;
+        totalCoins *= Math.max(1.0, booster.getCoinMultiplier());
+        totalPoints *= Math.max(1.0, booster.getPointMultiplier());
 
         if (totalCoins > 0) {
             economy.depositPlayer(player, totalCoins);
@@ -114,9 +115,13 @@ public class SellManager {
             inv.setItem(i, null);
         }
 
-        LevelManager.LevelInfo levelInfo = levelManager.getLevelInfo(player);
-        totalCoins *= levelInfo.coinMultiplier();
-        totalPoints *= levelInfo.pointMultiplier();
+        Booster booster = plugin.getBoosterManager().getBoosterByPlayer(player);
+        if (booster == null) {
+            booster = new Booster(1.0, 1.0);
+        }
+
+        totalCoins *= Math.max(1.0, booster.getCoinMultiplier());
+        totalPoints *= Math.max(1.0, booster.getPointMultiplier());
 
         if (totalCoins > 0) economy.depositPlayer(player, totalCoins);
         if (totalPoints > 0) data.addPoints(totalPoints);
@@ -152,9 +157,13 @@ public class SellManager {
             totalPoints += points * amount;
         }
 
-        LevelManager.LevelInfo levelInfo = levelManager.getLevelInfo(player);
-        double boostedCoins = totalCoins * levelInfo.coinMultiplier();
-        double boostedPoints = totalPoints * levelInfo.pointMultiplier();
+        Booster booster = plugin.getBoosterManager().getBoosterByPlayer(player);
+        if (booster == null) {
+            booster = new Booster(1.0, 1.0);
+        }
+
+        double boostedCoins = totalCoins * Math.max(1.0, booster.getCoinMultiplier());
+        double boostedPoints = totalPoints * Math.max(1.0, booster.getPointMultiplier());
 
         return new SellResult(boostedCoins, boostedPoints);
     }

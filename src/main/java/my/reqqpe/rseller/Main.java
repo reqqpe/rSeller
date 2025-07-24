@@ -8,10 +8,7 @@ import my.reqqpe.rseller.commands.TabCompliteAdmin;
 import my.reqqpe.rseller.configurations.CustomConfigs;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.DatabaseListener;
-import my.reqqpe.rseller.managers.AutoSellManager;
-import my.reqqpe.rseller.managers.LevelManager;
-import my.reqqpe.rseller.managers.NumberFormatManager;
-import my.reqqpe.rseller.managers.SellManager;
+import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menu.AutoSellMenu;
 import my.reqqpe.rseller.menu.SellMenu;
 import my.reqqpe.rseller.tasks.AutoSellTask;
@@ -29,24 +26,16 @@ public final class Main extends JavaPlugin {
     private AutoSellTask autoSellTask;
     private Database database;
 
-    @Getter
-    private SellManager sellManager;
-    @Getter
-    private SellMenu sellMenu;
-    @Getter
-    private AutoSellMenu autoSellMenu;
-    @Getter
-    private AutoSellManager autoSellManager;
-    @Getter
-    private CustomConfigs itemsConfig;
-    @Getter
-    private CustomConfigs mainGUI;
-    @Getter
-    private LevelManager levelManager;
-    @Getter
-    private CustomConfigs autoSellGUI;
-    @Getter
-    private NumberFormatManager formatManager;
+    @Getter private SellManager sellManager;
+    @Getter private SellMenu sellMenu;
+    @Getter private AutoSellMenu autoSellMenu;
+    @Getter private AutoSellManager autoSellManager;
+    @Getter private CustomConfigs itemsConfig;
+    @Getter private CustomConfigs mainGUI;
+    @Getter private LevelManager levelManager;
+    @Getter private CustomConfigs autoSellGUI;
+    @Getter private NumberFormatManager formatManager;
+    @Getter private BoosterManager boosterManager;
 
     @Override
     public void onEnable() {
@@ -64,6 +53,7 @@ public final class Main extends JavaPlugin {
         // managers
         formatManager = new NumberFormatManager(this);
         levelManager = new LevelManager(this, database);
+        boosterManager = new BoosterManager(this);
         sellManager = new SellManager(this, database);
         autoSellManager = new AutoSellManager(this);
 

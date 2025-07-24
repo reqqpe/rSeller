@@ -46,6 +46,7 @@ public class SellAdminCommand implements CommandExecutor {
             plugin.getLevelManager().reloadLevels();
             plugin.getAutoSellManager().loadConfig();
             plugin.getFormatManager().reload();
+            plugin.getBoosterManager().load();
 
             String message = sec.getString("reload");
             commandSender.sendMessage(Colorizer.color(message));

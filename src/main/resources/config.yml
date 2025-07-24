@@ -8,6 +8,11 @@
 
 
 
+# Нужна помощь или хочешь узнавать и предлагать идеи для обновлений?
+# ТГК: https://t.me/reqqpeDev
+
+
+
 #Настройки пула соединений, если не знаете что это рекомендуется не менять
 database:
   max-pool-size: 10
@@ -74,6 +79,25 @@ numbers_format:
   messages:
     points: "%.2f"
     coins: "%.2f"
+
+
+# Бустеры по пермишенам rseller.booster.<key>
+boosters:
+
+  # Не забывайте, если вы укажите donate.vip, то конфигурация будет не правильная (так работает yaml)
+  # Так же если у вас все права, то значит и все бустеры (что не странно потому что они же работают на правах)
+
+
+  donate: # Пермишен rseller.booster.donate
+    coin-multiplier: 2.0 # Если не указывать, то изначально 1.0
+    point-multiplier: 2.0 # Если не указывать, то изначально 1.0
+
+  booster-coin: # rseller.booster.booster-coin
+    coin-multiplier: 1.5
+
+  booster-point:
+    point-multiplier: 1.5
+
 
 
 levels:
