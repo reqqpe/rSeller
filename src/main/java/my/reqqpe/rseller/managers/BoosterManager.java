@@ -32,6 +32,8 @@ public class BoosterManager {
 
         if (section == null) return;
 
+        boosters.clear();
+
         for (String key : section.getKeys(false)) {
             ConfigurationSection boosterSection = section.getConfigurationSection(key);
             if (boosterSection == null) continue;
