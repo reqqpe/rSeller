@@ -201,8 +201,10 @@ public abstract class AbstractMenu {
             if (guiId.equalsIgnoreCase("autoSellGUI")) {
                 plugin.getAutoSellMenu().openMenu(player);
             }
-            else if (guiId.equalsIgnoreCase("mainGUI")) {
-                plugin.getSellMenu().openMenu(player);
+            else if (guiId.equalsIgnoreCase("allSellGUI")) {
+                plugin.getAllSellMenu().openMenu(player);
+            } else if (guiId.equalsIgnoreCase("mainGUI")) {
+                plugin.getMainMenu().openMenu(player);
             }
         }
 
@@ -323,8 +325,15 @@ public abstract class AbstractMenu {
     }
 
 
+
+
     protected void executeAction(Player player, String action) {
-        // Свои действия при вызове
+
+        Inventory inv = player.getOpenInventory().getTopInventory();
+        if (!(inv.getHolder() instanceof CustomInventoryHolder holder)) return;
+        if (!holder.getId().equals(getMenuId())) return;
+
+        runMainActions(player, action);
     }
 
 

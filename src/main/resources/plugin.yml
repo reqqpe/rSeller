@@ -4,6 +4,7 @@ main: my.reqqpe.rseller.Main
 api-version: '1.16'
 authors: [reqqpe]
 depend: [Vault, PlaceholderAPI]
+softdepend: [NBTAPI]
 commands:
   sell:
     description: Открыть меню скупщика

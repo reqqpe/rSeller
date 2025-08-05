@@ -5,9 +5,10 @@
 #  |__|    |   __/|____/____/\___  /|__|___|  /____  >
 #          |__|             /_____/         \/     \/
 #
+# Discord: https://dsc.gg/rplugins
+# Telegram: https://t.me/reqqpeDev
 
-
-title: "&8Скупщик -> Авто скупка"
+title: "&8Скупщик -> Автоскупщик"
 size: 54
 special-slots:
   - 10-16
@@ -15,6 +16,7 @@ special-slots:
   - 28-34
 autosell_item:
   name: "&f{item_name}"
+  autosell-enchanted: true
   lore:
     - ""
     - "&#54A0F4▶ Статус: &f{state_autosell}"
@@ -68,7 +70,7 @@ items:
     right_click_actions:
       - '[next_page]'
   back:
-    material: BONE
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTcyMjIwZjU0M2E2OTJhM2YyZjk0OWViMmE1MzQzNDk1NjEwMjY0ZTkxNmIxOWI3NzNjN2U0ZDIxYjg1ZDRjNyJ9fX0=
     name: "&#54A0F4▶ Главное меню"
     lore:
       - ""
@@ -77,6 +79,8 @@ items:
       - ""
     slot: 45
     left_click_actions:
+      - '[opengui] mainGUI'
+    right_click_actions:
       - '[opengui] mainGUI'
   toggle_category_autosell:
     material: magma_cream

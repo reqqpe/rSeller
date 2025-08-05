@@ -1,18 +1,19 @@
 package my.reqqpe.rseller.commands;
 
-import my.reqqpe.rseller.menu.SellMenu;
+import my.reqqpe.rseller.Main;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 
+
 public class SellCommand implements CommandExecutor {
 
-    private final SellMenu sellMenu;
+    private final Main plugin;
 
-    public SellCommand(SellMenu sellMenu) {
-        this.sellMenu = sellMenu;
+    public SellCommand(Main plugin) {
+        this.plugin = plugin;
     }
 
 
@@ -21,7 +22,12 @@ public class SellCommand implements CommandExecutor {
         if (!(sender instanceof Player)) return false;
 
         Player player = (Player) sender;
-        sellMenu.openMenu(player);
+        String openedGUI = plugin.getOpenedGUI();
+
+        if (openedGUI.equals("allSellGUI")) plugin.getAllSellMenu().openMenu(player);
+        if (openedGUI.equals("autoSellGUI")) plugin.getAutoSellMenu().openMenu(player);
+        if (openedGUI.equals("mainGUI")) plugin.getMainMenu().openMenu(player);
+
         return true;
     }
 }

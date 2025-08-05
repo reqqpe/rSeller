@@ -3,6 +3,7 @@ package my.reqqpe.rseller.managers;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.model.Level;
 import org.bukkit.entity.Player;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -13,7 +14,7 @@ public class LevelManager {
 
     private final Main plugin;
     private final Database database;
-    private final TreeMap<Integer, LevelInfo> levels = new TreeMap<>();
+    private final TreeMap<Integer, Level> levels = new TreeMap<>();
 
     public LevelManager(Main plugin, Database database) {
         this.plugin = plugin;
@@ -37,17 +38,18 @@ public class LevelManager {
             double pointMultiplier = section.getDouble(key + ".point-multiplier", 1.0);
             double requiredPoints = section.getDouble(key + ".required-points", 0);
 
-            levels.put(level, new LevelInfo(level, coinMultiplier, pointMultiplier, requiredPoints));
+
+            levels.put(level, new Level(level, coinMultiplier, pointMultiplier, requiredPoints));
         }
     }
 
-    public LevelInfo getLevelInfo(Player player) {
+    public Level getLevelInfo(Player player) {
         PlayerData data = database.getPlayerData(player.getUniqueId());
         double points = data.getPoints();
 
-        LevelInfo current = levels.firstEntry().getValue();
-        for (Map.Entry<Integer, LevelInfo> entry : levels.entrySet()) {
-            if (points >= entry.getValue().requiredPoints) {
+        Level current = levels.firstEntry().getValue();
+        for (Map.Entry<Integer, Level> entry : levels.entrySet()) {
+            if (points >= entry.getValue().requiredPoints()) {
                 current = entry.getValue();
             } else {
                 break;
@@ -58,24 +60,21 @@ public class LevelManager {
     }
 
     public double getCoinMultiplier(Player player) {
-        return getLevelInfo(player).coinMultiplier;
+        return getLevelInfo(player).coinMultiplier();
     }
 
     public double getPointMultiplier(Player player) {
-        return getLevelInfo(player).pointMultiplier;
+        return getLevelInfo(player).pointMultiplier();
     }
 
     public int getLevel(Player player) {
-        return getLevelInfo(player).level;
-    }
-
-    public record LevelInfo(int level, double coinMultiplier, double pointMultiplier, double requiredPoints) {
+        return getLevelInfo(player).level();
     }
 
     public double getPointsForNextLevel(int currentLevel) {
-        for (Map.Entry<Integer, LevelInfo> entry : levels.entrySet()) {
+        for (Map.Entry<Integer, Level> entry : levels.entrySet()) {
             if (entry.getKey() > currentLevel) {
-                return entry.getValue().requiredPoints;
+                return entry.getValue().requiredPoints();
             }
         }
         return -1;
@@ -84,6 +83,8 @@ public class LevelManager {
         int currentLevel = getLevel(player);
         return getPointsForNextLevel(currentLevel);
     }
+
+
     public void reloadLevels() {
         levels.clear();
         loadLevels();

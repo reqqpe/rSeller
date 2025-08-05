@@ -14,12 +14,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
 public class SellMenu extends AbstractMenu implements Listener {
-    private final Map<UUID, List<BukkitTask>> menuUpdateTasks = new HashMap<>();
     private final NumberFormatManager numberFormatManager;
 
 
@@ -30,7 +28,7 @@ public class SellMenu extends AbstractMenu implements Listener {
 
 
     @Override
-    protected FileConfiguration getGuiConfig() { return plugin.getMainGUI().getConfig(); }
+    protected FileConfiguration getGuiConfig() { return plugin.getAllSellGUIConfig().getConfig(); }
 
 
     @Override
@@ -139,6 +137,4 @@ public class SellMenu extends AbstractMenu implements Listener {
             runMainActions(player, action);
         }
     }
-
-
 }

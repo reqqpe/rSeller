@@ -1,6 +1,7 @@
-package my.reqqpe.rseller.Event;
+package my.reqqpe.rseller.listeners;
 
 import my.reqqpe.rseller.Main;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,6 +19,9 @@ public class PlayerPickupItem implements Listener {
         if (!(event.getEntity() instanceof Player player)) return;
         if (!player.hasPermission("rseller.autosell")) return;
 
-        plugin.getSellManager().autoSell(player);
+        Bukkit.getScheduler().runTask(plugin, () ->
+                plugin.getSellManager().autoSell(player));
+
+
     }
 }

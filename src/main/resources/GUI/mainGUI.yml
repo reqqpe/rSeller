@@ -1,72 +1,58 @@
-#                 .__               .__
+#                 .__               .__               
 # _______  ______ |  |  __ __  ____ |__| ____   ______
 # \_  __ \ \____ \|  | |  |  \/ ___\|  |/    \ /  ___/
-#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \
+#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \ 
 #  |__|    |   __/|____/____/\___  /|__|___|  /____  >
-#          |__|             /_____/         \/     \/
-#
+#          |__|             /_____/         \/     \/ 
+#        
+# Discord: https://dsc.gg/rplugins
+# Telegram: https://t.me/reqqpeDev
 
 
-title: "&8Скупщик"
-size: 54
-special-slots:
-  - 0-44
+title: "&8Скупщик -> Выбор скупщика"
+size: 27
+special-slots: [] # Нет смысла что-то указывать( просто отсутствует обработка )
 
-
-update_interval: 40 # 20 тиков -> 1 секунда (обновляет предметы если есть параметр update: true у предмета)
-
-
-items: # Можно добавлять свои предметы
+items:
   autosell:
-    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTcyMjIwZjU0M2E2OTJhM2YyZjk0OWViMmE1MzQzNDk1NjEwMjY0ZTkxNmIxOWI3NzNjN2U0ZDIxYjg1ZDRjNyJ9fX0=
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTFmYWQ1ZDJiODIyZmNlOGQ1OWJjZTA4NDE0YjlmODdmMjdhYTlkNzdhNzM4MjNhNThkZDUxN2VhODBiMmE1In19fQ==
     model_data: -1 # Не обязательный параметр можно убрать или же поставить -1
-    name: "&#54A0F4▶ Авто-скупка"
-    slot: 45
+    name: "&#54A0F4▶ Автоскупщик"
+    slot: 12
     lore:
       - ""
-      - "&fНажмите, чтобы открыть"
-      - "&fменю авто-скупки"
+      - "&7Нажмите, чтобы открыть систему"
+      - "&7автоматической продажи ресурсов."
+      - ""
+      - "&fВыбранные &fпредметы будут продаваться"
+      - "&f&#54A0F4автоматически &fсразу после подбора."
       - ""
     left_click_actions:
       - '[opengui] autoSellGUI'
     right_click_actions:
       - '[opengui] autoSellGUI'
-  sell_item:
-    material: EMERALD
-    update: true
-    name: "&#54A0F4▶ Продать"
-    slot: 49
+  allsell:
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzhhZjhiN2Q0M2ZlNGRlOWY4Y2JjNGJiNDk1MzQzY2Y3MTVlYjhmZWJhNGJlZDRjZGNlODJjMWIwY2UxNzIyIn19fQ==
+    model_data: -1 # Не обязательный параметр можно убрать или же поставить -1
+    name: "&#54A0F4▶ Универсальный скупщик"
+    slot: 14
     lore:
-      - "&fНажмите, чтобы продать и получить:"
-      - "&#54A0F4* &fМонет: &#54A0F4{sell_price}"
-      - "&#54A0F4* &fОчков: &#54A0F4{sell_points}"
+      - ""
+      - "&7Нажмите, чтобы открыть торговца"
+      - "&7со скупкой любых предметов."
+      - ""
+      - "&fПросто &#54A0F4положите &fлут — &#54A0F4и получите"
+      - "&fмонеты за &#54A0F4всё&f, что можно продать."
+      - ""
     left_click_actions:
-      - '[sell]'
+      - '[opengui] allSellGUI'
     right_click_actions:
-      - '[sell]'
-  level_info:
-    slot: 53
-    update: true
-    material: BOOK
-    name: "&#54A0F4▶ Что такое скупщик?"
-    lore:
-      - "&#54A0F4Скупщик &f- Это уникальный способ заработка"
-      - "&fНа котором вы можете &#54A0F4быстро&f заработать очень &#54A0F4много монет&f!"
-      - "&fПолучай &#54A0F4очки &fдля прокачки бустера &#54A0F4монет &fи &#54A0F4очков&f."
-      - ""
-      - "&#54A0F4▶ Как что-то продать?"
-      - "&fЧтобы продать сложи предметы которые ты хочешь"
-      - "&fпродать в меню и скупщик сам решит что ему купить"
-      - ""
-      - "&#54A0F4▶ Информация"
-      - "&#54A0F4* &fТекущий Уровень: &#54A0F4%rseller_level%"
-      - "&#54A0F4* &fОчков до следующего: &#54A0F4%rseller_points%/%rseller_points_needed%"
-      - ""
-      - "&#54A0F4* &fБустер монет: &7x&#54A0F4%rseller_multiplier_coins%"
-      - "&#54A0F4* &fБустер очков: &7x&#54A0F4%rseller_multiplier_points%"
+      - '[opengui] allSellGUI'
   decorate:
     material: GRAY_STAINED_GLASS_PANE
-    name: "&f"
     slots:
-      - 46-48
-      - 50-52
+      - "0-11"
+      - "15-26"
+  decorate1:
+    material: chain
+    slot: 13

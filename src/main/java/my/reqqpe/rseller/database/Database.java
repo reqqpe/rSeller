@@ -10,25 +10,21 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class Database {
     private final Main plugin;
-    private final Set<PlayerData> players = new HashSet<>();
+    private final Map<UUID, PlayerData> players = new HashMap<>();
     private HikariDataSource dataSource;
 
     public PlayerData getPlayerData(UUID uuid) {
-        return players.stream()
-                .filter(data -> data.getUuid().equals(uuid))
-                .findFirst()
-                .orElse(create(uuid));
+        PlayerData playerData = players.get(uuid);
+        return playerData != null ? playerData : new PlayerData(uuid) ;
     }
 
     public PlayerData create(UUID uuid) {
         PlayerData data = new PlayerData(uuid);
-        players.add(data);
+        players.put(uuid, data);
         return data;
     }
 
@@ -102,7 +98,7 @@ public class Database {
     }
 
     public void saveAll() {
-        for (PlayerData data : players) savePlayerData(data.getUuid());
+        for (PlayerData data : players.values()) savePlayerData(data.getUuid());
         if (dataSource != null) dataSource.close();
     }
 

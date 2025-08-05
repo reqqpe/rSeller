@@ -1,7 +1,7 @@
 package my.reqqpe.rseller;
 
 import lombok.Getter;
-import my.reqqpe.rseller.Event.PlayerPickupItem;
+import my.reqqpe.rseller.listeners.PlayerPickupItem;
 import my.reqqpe.rseller.commands.SellCommand;
 import my.reqqpe.rseller.commands.SellAdminCommand;
 import my.reqqpe.rseller.commands.TabCompliteAdmin;
@@ -10,32 +10,49 @@ import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.DatabaseListener;
 import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menu.AutoSellMenu;
+import my.reqqpe.rseller.menu.MainMenu;
 import my.reqqpe.rseller.menu.SellMenu;
 import my.reqqpe.rseller.tasks.AutoSellTask;
 import my.reqqpe.rseller.updateCheker.UpdateChecker;
 import my.reqqpe.rseller.utils.Metrics;
 import my.reqqpe.rseller.utils.PlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Set;
 
 
 public final class Main extends JavaPlugin {
 
-    private AutoSellTask autoSellTask;
     private Database database;
 
-    @Getter private SellManager sellManager;
-    @Getter private SellMenu sellMenu;
-    @Getter private AutoSellMenu autoSellMenu;
-    @Getter private AutoSellManager autoSellManager;
+    @Getter private String openedGUI;
+
     @Getter private CustomConfigs itemsConfig;
-    @Getter private CustomConfigs mainGUI;
-    @Getter private LevelManager levelManager;
-    @Getter private CustomConfigs autoSellGUI;
+    @Getter private CustomConfigs allSellGUIConfig;
+    @Getter private CustomConfigs autoSellGUIConfig;
+    @Getter private CustomConfigs mainGUIConfig;
+
+    @Getter private SellMenu allSellMenu;
+    @Getter private AutoSellMenu autoSellMenu;
+    @Getter private MainMenu mainMenu;
+
+    @Getter private ItemManager itemManager;
+    @Getter private SellManager sellManager;
+    @Getter private AutoSellManager autoSellManager;
     @Getter private NumberFormatManager formatManager;
     @Getter private BoosterManager boosterManager;
+    @Getter private LevelManager levelManager;
+
 
     @Override
     public void onEnable() {
@@ -54,6 +71,7 @@ public final class Main extends JavaPlugin {
         formatManager = new NumberFormatManager(this);
         levelManager = new LevelManager(this, database);
         boosterManager = new BoosterManager(this);
+        itemManager = new ItemManager(this);
         sellManager = new SellManager(this, database);
         autoSellManager = new AutoSellManager(this);
 
@@ -65,29 +83,33 @@ public final class Main extends JavaPlugin {
             getLogger().info("PlaceHolderAPI найден");
         }
 
-        // menus
-        sellMenu = new SellMenu(this);
+        // menu
+        mainMenu = new MainMenu(this);
+        allSellMenu = new SellMenu(this);
         autoSellMenu = new AutoSellMenu(this, database);
 
         // events
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(sellMenu, this);
+
+        pm.registerEvents(allSellMenu, this);
         pm.registerEvents(autoSellMenu, this);
+        pm.registerEvents(mainMenu, this);
+
         pm.registerEvents(new DatabaseListener(database), this);
 
         //commands
-        getCommand("sell").setExecutor(new SellCommand(sellMenu));
+        getCommand("sell").setExecutor(new SellCommand(this));
+
+        String openedGUIValue = getConfig().getString("sell-command", "mainGUI");
+        Set<String> allowedValue = Set.of("mainGUI", "allSellGUI", "autoSellGUI");
+        if (allowedValue.contains(openedGUIValue)) {
+            openedGUI = openedGUIValue;
+        } else openedGUI = "mainGUI";
 
         getCommand("rseller").setExecutor(new SellAdminCommand(this, database));
 
         // tab complite
         getCommand("rseller").setTabCompleter(new TabCompliteAdmin());
-
-        // tasks
-        autoSellTask = new AutoSellTask(this, sellManager);
-        if (getConfig().getBoolean("autosell.enable")) {
-            autoSellTask.autoSellTask();
-        }
 
         // other
         if (getConfig().getBoolean("metrics", true)) {
@@ -103,7 +125,7 @@ public final class Main extends JavaPlugin {
             if (autoSellOptimizationEnabled) {
                 pm.registerEvents(new PlayerPickupItem(this), this);
             } else {
-                autoSellTask.autoSellTask();
+                new AutoSellTask(this,sellManager).autoSellTask();
             }
         }
 
@@ -127,17 +149,54 @@ public final class Main extends JavaPlugin {
         itemsConfig.setup();
         getLogger().info("items.yml успешно загружен");
 
-        mainGUI = new CustomConfigs(this, "GUI/mainGUI.yml");
-        mainGUI.setup();
-        getLogger().info("mainGUI.yml успешно загружен");
 
-        autoSellGUI = new CustomConfigs(this, "GUI/autoSellGUI.yml");
-        autoSellGUI.setup();
+        allSellGUIConfig = new CustomConfigs(this, "GUI/allSellGUI.yml");
+        allSellGUIConfig.setup();
+        getLogger().info("allSellGUI.yml успешно загружен");
+
+
+        autoSellGUIConfig = new CustomConfigs(this, "GUI/autoSellGUI.yml");
+        autoSellGUIConfig.setup();
         getLogger().info("autoSellGUI.yml успешно загружен");
+
+
+        mainGUIConfig = new CustomConfigs(this, "GUI/mainGUI.yml");
+        mainGUIConfig.setup();
+        getLogger().info("mainGUI.yml успешно загружен");
 
         database = new Database(this);
         for (Player pl : Bukkit.getOnlinePlayers()) database.loadPlayerData(pl.getUniqueId());
     }
 
-    
+    public void registerCommandWithAliases(String name, List<String> aliases, CommandExecutor executor) {
+        PluginCommand command = createPluginCommand(name);
+        if (command == null) {
+            getLogger().warning("Не удалось создать команду: " + name);
+            return;
+        }
+
+        command.setExecutor(executor);
+        command.setAliases(aliases);
+
+        try {
+            Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
+            commandMap.register(getDescription().getName(), command);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private PluginCommand createPluginCommand(String name) {
+        try {
+            Constructor<PluginCommand> constructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
+            constructor.setAccessible(true);
+            return constructor.newInstance(name, this);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

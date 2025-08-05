@@ -3,7 +3,6 @@ package my.reqqpe.rseller.database;
 import com.google.gson.Gson;
 import lombok.Data;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -30,12 +29,12 @@ public class PlayerData {
         this.points -= p;
     }
 
-    public void setAutosell(Material mat, boolean enabled) {
-        autosellMap.put(mat.name(), enabled);
+    public void setAutosell(String id, boolean enabled) {
+        autosellMap.put(id, enabled);
     }
 
-    public boolean isAutosell(Material mat) {
-        return autosellMap.getOrDefault(mat.name(), false);
+    public boolean isAutosell(String id) {
+        return autosellMap.getOrDefault(id, false);
     }
 
     public String serializeAutosell() {

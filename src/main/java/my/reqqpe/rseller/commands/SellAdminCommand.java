@@ -10,6 +10,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class SellAdminCommand implements CommandExecutor {
@@ -23,7 +24,7 @@ public class SellAdminCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
 
@@ -39,18 +40,95 @@ public class SellAdminCommand implements CommandExecutor {
             return true;
         }
         if (args[0].equalsIgnoreCase("reload")) {
+            ConfigurationSection reloadSection = sec.getConfigurationSection("reload");
+            if (args.length > 1) {
+                String type = args[1];
+                if (type.equalsIgnoreCase("items")) {
+                    plugin.getItemsConfig().reloadConfig();
+                    plugin.getItemManager().load();
+                    plugin.getAutoSellManager().loadConfig();
+
+                    String message = sec.getString("reload.items", "&aКонфигурация предметов успешно перезагружена");
+                    commandSender.sendMessage(Colorizer.color(message));
+                    return true;
+                }
+                if (type.equalsIgnoreCase("config")) {
+                    plugin.reloadConfig();
+                    plugin.getAutoSellManager().loadConfig();
+                    plugin.getLevelManager().reloadLevels();
+                    plugin.getBoosterManager().load();
+                    plugin.getFormatManager().reload();
+
+                    String message = sec.getString("reload.config", "&aГлавная конфигурация успешно перезагружена");
+                    commandSender.sendMessage(Colorizer.color(message));
+                    return true;
+                }
+                if (type.equalsIgnoreCase("guis")) {
+                    plugin.getAutoSellGUIConfig().reloadConfig();
+                    plugin.getAllSellGUIConfig().reloadConfig();
+                    plugin.getMainGUIConfig().reloadConfig();
+
+                    String message = sec.getString("reload.guis", "&aКонфигурация менюшек успешно перезагружена");
+                    commandSender.sendMessage(Colorizer.color(message));
+                    return true;
+                }
+            }
+
             plugin.reloadConfig();
-            plugin.getAutoSellGUI().reloadConfig();
-            plugin.getMainGUI().reloadConfig();
+            plugin.getAutoSellGUIConfig().reloadConfig();
+            plugin.getAllSellGUIConfig().reloadConfig();
+            plugin.getMainGUIConfig().reloadConfig();
             plugin.getItemsConfig().reloadConfig();
             plugin.getLevelManager().reloadLevels();
             plugin.getAutoSellManager().loadConfig();
             plugin.getFormatManager().reload();
             plugin.getBoosterManager().load();
 
-            String message = sec.getString("reload");
+            String message = sec.getString("reload.all", "&aПлагин успешно перезагружен");
             commandSender.sendMessage(Colorizer.color(message));
         }
+
+        if (args[0].equalsIgnoreCase("customItem")) {
+            // rseller customItem <add/remove> <id>
+            if (args.length < 3) {
+                commandSender.sendMessage(Colorizer.color("&cИспользование: /" + label + " <create/remove> <id>"));
+                return true;
+            }
+
+            if (args[1].equalsIgnoreCase("create")) {
+                if (!(commandSender instanceof Player player)) {
+                    String message = sec.getString("only-player");
+                    commandSender.sendMessage(Colorizer.color(message));
+                    return true;
+                }
+
+                String id = args[2];
+                ItemStack itemStack = player.getInventory().getItemInMainHand();
+                if (itemStack == null || itemStack.getType().isAir()) {
+                    player.sendMessage(Colorizer.color("&cВозьмите предмет в руку прежде чем пытаться создать"));
+                    return true;
+                }
+
+                if (!plugin.getItemManager().addCustomItem(id, itemStack)) {
+                    player.sendMessage(Colorizer.color("&cПроизошла ошибка при создании предмета, посмотрите в консоль"));
+                    return true;
+                }
+
+                player.sendMessage(Colorizer.color("&aВы успешно создали предмет с id: " + id + ", следующий этап — настройка"));
+            }
+
+            if (args[1].equalsIgnoreCase("remove")) {
+                String id = args[2];
+
+                if (!plugin.getItemManager().removeCustomItem(id)) {
+                    commandSender.sendMessage(Colorizer.color("&cПроизошла ошибка при удалении предмета, посмотрите в консоль"));
+                }
+
+                commandSender.sendMessage(Colorizer.color("&aВы успешно удалили предмет с id: " + id + ", теперь выполните перезагрузку /rseller reload items"));
+                return true;
+            }
+        }
+
         if (args[0].equalsIgnoreCase("points")) {
             if (args.length < 3) {
                 String message = sec.getString("points-usage");

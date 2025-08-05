@@ -26,6 +26,13 @@ public class TabCompliteAdmin implements TabCompleter {
                     .collect(Collectors.toList());
         }
 
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("reload")) {
+            return Arrays.asList("items", "config", "guis").stream()
+                    .filter(arg -> arg.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
         if (args.length == 2 && args[0].equalsIgnoreCase("points")) {
             return Arrays.asList("add", "remove", "set").stream()
                     .filter(arg -> arg.toLowerCase().startsWith(args[1].toLowerCase()))

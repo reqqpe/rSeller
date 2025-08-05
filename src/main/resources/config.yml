@@ -12,7 +12,6 @@
 # ТГК: https://t.me/reqqpeDev
 
 
-
 #Настройки пула соединений, если не знаете что это рекомендуется не менять
 database:
   max-pool-size: 10
@@ -23,8 +22,13 @@ database:
   max-life-time: 1800000
 
 
+# Какое меню будет открывать команда /<buyer|seller|sell>
+sell-command: "mainGUI" # Такие же названия как у GUI файлов (allSellGUI, mainGUI, autoSellGUI)
+
+
 metrics: true
 update-check: true
+
 
 autosell:
   enable: true # Переключение работает только при перезагрузке сервера
@@ -33,35 +37,22 @@ autosell:
   # вызываться только при подборе предметов
   optimization: true # Переключение работает только при перезагрузке сервера
   check-interval-tick: 40 # Раз в сколько тиков будет проверяться инвентарь. 20 тиков - 1 секунда
-  whitelist:
-    enable: true
-    priority: 1 # Значения не должны повторяться. У одного всегда должно быть или больше, или меньше
-    list:
-#      - STONE
-      - ALL #- все предметы парсит это из конфига
-  blacklist:
-    enable: false
-    priority: 0 # Значения не должны повторяться. У одного всегда должно быть или больше, или меньше
-    list:
-      - ALL
   start_category: resources # Категория, которая будет открываться при первом открытие
   categories:
     all:
       name: "Все предметы"
-      blocks:
+      items:
         - all
     resources:
       name: "Ресурсы"
-      blocks:
-        - coal
-        - lapis_lazuli
-        - iron_ingot
-        - gold_ingot
-        - diamond
-        - emerald
-        - netherite_ingot
-
-
+      items:
+        - COAL
+        - LAPIS_LAZULI
+        - IRON_INGOT
+        - GOLD_INGOT
+        - DIAMOND
+        - EMERALD
+        - NETHERITE_INGOT
 numbers_format:
   # https://github.com/reqqpe/rSeller/wiki/Руководство-по-настройке-формата-чисел
   placeholders:
@@ -87,7 +78,7 @@ boosters:
   # Не забывайте, если вы укажите donate.vip, то конфигурация будет не правильная (так работает yaml)
   # Так же если у вас все права, то значит и все бустеры (что не странно потому что они же работают на правах)
 
-
+  
   donate: # Пермишен rseller.booster.donate
     coin-multiplier: 2.0 # Если не указывать, то изначально 1.0
     point-multiplier: 2.0 # Если не указывать, то изначально 1.0
@@ -119,7 +110,11 @@ levels:
     required-points: 500.0
 
 messages:
-  reload: "&aПлагин успешно перезагружен"
+  reload:
+    all: "&aПлагин успешно перезагружен"
+    guis: "&aКонфигурация менюшек успешно перезагружена"
+    items: "&aКонфигурация предметов успешно перезагружена"
+    config: "&aГлавная конфигурация успешно перезагружена"
   no-permission: "&cУ вас нет прав использовать эту команду"
   no-arguments: "&cНе достаточно аргументов"
   points-usage: "&cИспользование: /sa points <add/remove/set> <кол-во> [игрок]"
