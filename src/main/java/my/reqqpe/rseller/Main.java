@@ -17,17 +17,10 @@ import my.reqqpe.rseller.updateCheker.UpdateChecker;
 import my.reqqpe.rseller.utils.Metrics;
 import my.reqqpe.rseller.utils.PlaceholderAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandMap;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Set;
 
 

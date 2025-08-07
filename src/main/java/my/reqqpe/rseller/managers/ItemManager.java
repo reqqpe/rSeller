@@ -276,9 +276,6 @@ public class ItemManager {
 
 
     public Item searchItem(ItemStack itemStack) {
-        itemStack = itemStack.clone();
-        itemStack.setAmount(1);
-
         Set<Item> items = getItemsByMaterial(itemStack.getType());
         for (Item item : items) {
             if (item.matches(itemStack, searchItemSettings, plugin)) {

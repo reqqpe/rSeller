@@ -32,18 +32,6 @@ public class SellManager {
         this.itemManager = plugin.getItemManager();
     }
 
-
-    public SellResult priceItem(ItemStack itemStack) {
-        if (itemStack == null || itemStack.getType() == Material.AIR)
-            return null;
-
-        Item item = itemManager.searchItem(itemStack);
-
-        if (item == null) return null;
-
-        return new SellResult(item.getPrice(), item.getPoints());
-    }
-
     public SellResult sellResult(Player player, double price, double points) {
         Booster booster = plugin.getBoosterManager().getBoosterByPlayer(player);
         if (booster == null) {
@@ -54,13 +42,6 @@ public class SellManager {
         double finalPrice = price * Math.max(1.0, booster.getCoinMultiplier());
         double finalPoints = points * Math.max(1.0, booster.getPointMultiplier());
 
-        if (finalPrice > 0) economy.depositPlayer(player, finalPrice);
-
-        if (finalPoints > 0) {
-            PlayerData data = database.getPlayerData(player.getUniqueId());
-            data.addPoints(finalPoints);
-        }
-
         return new SellResult(finalPrice, finalPoints);
     }
 
@@ -69,16 +50,19 @@ public class SellManager {
         double totalPoints = 0;
 
         for (int slot : sellSlots) {
-            ItemStack item = inv.getItem(slot);
-
-            SellResult priceItem = priceItem(item);
-            if (priceItem == null) continue;
+            ItemStack itemStack = inv.getItem(slot);
+            if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
 
-            double price = priceItem.coins;
-            double points = priceItem.points;
 
-            int amount = item.getAmount();
+            Item item = itemManager.searchItem(itemStack);
+            if (item == null) continue;
+
+
+            double price = item.getPoints();;
+            double points = item.getPrice();
+
+            int amount = itemStack.getAmount();
 
             if (price > 0) {
                 totalCoins += price * amount;
@@ -94,6 +78,15 @@ public class SellManager {
         }
 
         SellResult sellResult = sellResult(player, totalCoins, totalPoints);
+
+        if (sellResult.coins > 0) {
+            economy.depositPlayer(player, sellResult.coins);
+        }
+        if (sellResult.points > 0) {
+            PlayerData playerData = database.getPlayerData(player.getUniqueId());
+            playerData.addPoints(sellResult.points);
+        }
+
         ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
         if (sellResult.coins > 0 || sellResult.points > 0) {
 
@@ -112,6 +105,7 @@ public class SellManager {
 
 
     public void autoSell(Player player) {
+        plugin.getLogger().warning("Вызвался метод авто-скупки");
         Inventory inv = player.getInventory();
         PlayerData data = database.getPlayerData(player.getUniqueId());
 
@@ -128,12 +122,8 @@ public class SellManager {
 
             if (!data.isAutosell(item.getId())) continue;
 
-            SellResult priceItem = priceItem(itemstack);
-            if (priceItem == null) continue;
-
-
-            double price = priceItem.coins;
-            double points = priceItem.points;
+            double price = item.getPrice();
+            double points = item.getPoints();
 
             int amount = itemstack.getAmount();
 
@@ -178,18 +168,20 @@ public class SellManager {
         double totalPoints = 0;
 
         for (int slot : sellSlots) {
-            ItemStack item = inv.getItem(slot);
+            ItemStack itemStack = inv.getItem(slot);
+            if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
-            SellResult priceItem = priceItem(item);
-            if (priceItem == null) continue;
 
-            double price = priceItem.coins;
-            double points = priceItem.points;
+            Item item = itemManager.searchItem(itemStack);
+            if (item == null) continue;
+
+            double price = item.getPrice();
+            double points = item.getPoints();
 
             if (price <= 0 && points <= 0) {
                 continue;
             }
-            int amount = item.getAmount();
+            int amount = itemStack.getAmount();
 
             if (price > 0) {
                 totalCoins += price * amount;
