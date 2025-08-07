@@ -54,6 +54,9 @@ public final class Main extends JavaPlugin {
     @Getter private LevelManager levelManager;
 
 
+    public static boolean useNBTAPI = false;
+
+
     @Override
     public void onEnable() {
 
@@ -64,6 +67,9 @@ public final class Main extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+
+        if (getServer().getPluginManager().getPlugin("NBTAPI") != null) useNBTAPI = true;
+
 
         loadConfigs();
 
@@ -166,37 +172,5 @@ public final class Main extends JavaPlugin {
 
         database = new Database(this);
         for (Player pl : Bukkit.getOnlinePlayers()) database.loadPlayerData(pl.getUniqueId());
-    }
-
-    public void registerCommandWithAliases(String name, List<String> aliases, CommandExecutor executor) {
-        PluginCommand command = createPluginCommand(name);
-        if (command == null) {
-            getLogger().warning("Не удалось создать команду: " + name);
-            return;
-        }
-
-        command.setExecutor(executor);
-        command.setAliases(aliases);
-
-        try {
-            Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-            commandMapField.setAccessible(true);
-            CommandMap commandMap = (CommandMap) commandMapField.get(Bukkit.getServer());
-            commandMap.register(getDescription().getName(), command);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private PluginCommand createPluginCommand(String name) {
-        try {
-            Constructor<PluginCommand> constructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
-            constructor.setAccessible(true);
-            return constructor.newInstance(name, this);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 }

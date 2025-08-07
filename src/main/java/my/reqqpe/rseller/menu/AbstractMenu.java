@@ -273,6 +273,10 @@ public abstract class AbstractMenu {
             boolean isLeftClick = e.isLeftClick();
             boolean isRightClick = e.isRightClick();
 
+            if (!isLeftClick && !isRightClick) {
+                return;
+            }
+
             ConfigurationSection reqSection = itemSection.getConfigurationSection(
                     isLeftClick ? "left_click_requaments" :
                             isRightClick ? "right_click_requaments" : null

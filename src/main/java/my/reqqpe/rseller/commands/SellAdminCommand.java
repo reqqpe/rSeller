@@ -3,6 +3,7 @@ package my.reqqpe.rseller.commands;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -89,7 +90,6 @@ public class SellAdminCommand implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("customItem")) {
-            // rseller customItem <add/remove> <id>
             if (args.length < 3) {
                 commandSender.sendMessage(Colorizer.color("&cИспользование: /" + label + " <create/remove> <id>"));
                 return true;
@@ -97,24 +97,65 @@ public class SellAdminCommand implements CommandExecutor {
 
             if (args[1].equalsIgnoreCase("create")) {
                 if (!(commandSender instanceof Player player)) {
-                    String message = sec.getString("only-player");
+                    String message = sec.getString("only-player", "&cЭта команда доступна только игрокам!");
                     commandSender.sendMessage(Colorizer.color(message));
                     return true;
                 }
 
+                if (args.length < 5) {
+                    player.sendMessage(Colorizer.color("&cИспользование: /<command> create <id> [price] [points]"));
+                    return true;
+                }
+
                 String id = args[2];
+                if (!id.matches("[a-zA-Z0-9_]+")) {
+                    player.sendMessage(Colorizer.color("&cID предмета может содержать только буквы, цифры и подчеркивания"));
+                    return true;
+                }
+
+                double price = 0.0;
+                double points = 0.0;
+
+                try {
+                    price = Double.parseDouble(args[3]);
+                    if (price < 0) {
+                        player.sendMessage(Colorizer.color("&cЦена не может быть отрицательной!"));
+                        return true;
+                    }
+                    points = Double.parseDouble(args[4]);
+                    if (points < 0) {
+                        player.sendMessage(Colorizer.color("&cОчки не могут быть отрицательными!"));
+                        return true;
+                    }
+                } catch (NumberFormatException e) {
+                    player.sendMessage(Colorizer.color("&cНеверный формат цены или очков! Используйте числа (например, 10.0)"));
+                    return true;
+                }
+
+                if (price <= 0 && points <= 0) {
+                    player.sendMessage(Colorizer.color("&cУкажите хотя бы цену или очки больше 0!"));
+                    return true;
+                }
+
                 ItemStack itemStack = player.getInventory().getItemInMainHand();
                 if (itemStack == null || itemStack.getType().isAir()) {
                     player.sendMessage(Colorizer.color("&cВозьмите предмет в руку прежде чем пытаться создать"));
                     return true;
                 }
 
-                if (!plugin.getItemManager().addCustomItem(id, itemStack)) {
-                    player.sendMessage(Colorizer.color("&cПроизошла ошибка при создании предмета, посмотрите в консоль"));
+                Item item = Item.fromItemStack(id, itemStack, price, points, plugin);
+                if (item == null) {
+                    player.sendMessage(Colorizer.color("&cПроизошла ошибка при создании предмета, проверьте консоль"));
                     return true;
                 }
 
-                player.sendMessage(Colorizer.color("&aВы успешно создали предмет с id: " + id + ", следующий этап — настройка"));
+                if (!plugin.getItemManager().addCustomItem(item)) {
+                    player.sendMessage(Colorizer.color("&cПроизошла ошибка при сохранении предмета, проверьте консоль"));
+                    return true;
+                }
+
+                player.sendMessage(Colorizer.color("&aВы успешно создали предмет с ID: " + id + ", цена: " + price + ", очки: " + points));
+                return true;
             }
 
             if (args[1].equalsIgnoreCase("remove")) {

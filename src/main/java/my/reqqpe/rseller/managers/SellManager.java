@@ -4,10 +4,8 @@ import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
-import my.reqqpe.rseller.model.Booster;
-import my.reqqpe.rseller.model.Item;
-import my.reqqpe.rseller.model.ItemData;
-import my.reqqpe.rseller.utils.Base64.Base64ItemStack;
+import my.reqqpe.rseller.models.Booster;
+import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.configuration.ConfigurationSection;
@@ -35,25 +33,15 @@ public class SellManager {
     }
 
 
-    public SellResult priceItem(ItemStack item) {
-        if (item == null || item.getType() == Material.AIR)
+    public SellResult priceItem(ItemStack itemStack) {
+        if (itemStack == null || itemStack.getType() == Material.AIR)
             return null;
 
-        Item searchedItem = itemManager.searchItem(item);
+        Item item = itemManager.searchItem(itemStack);
 
-        if (searchedItem == null)
-            return null;
+        if (item == null) return null;
 
-        ItemData itemData = searchedItem.getItemData();
-        if (itemData == null)
-            return null;
-
-
-        double price = itemData.getPrice();
-        double points = itemData.getPoints();
-
-        return new SellResult(price, points);
-
+        return new SellResult(item.getPrice(), item.getPoints());
     }
 
     public SellResult sellResult(Player player, double price, double points) {
@@ -158,7 +146,6 @@ public class SellManager {
             }
             if (price > 0 || points > 0) {
                 inv.setItem(i, null);
-
             }
         }
 

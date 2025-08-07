@@ -1,7 +1,7 @@
 package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.model.Booster;
+import my.reqqpe.rseller.models.Booster;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;

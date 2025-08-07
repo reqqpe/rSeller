@@ -3,7 +3,7 @@ package my.reqqpe.rseller.managers;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
-import my.reqqpe.rseller.model.Level;
+import my.reqqpe.rseller.models.Level;
 import org.bukkit.entity.Player;
 import org.bukkit.configuration.ConfigurationSection;
 

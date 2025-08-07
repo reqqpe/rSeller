@@ -7,14 +7,12 @@ import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
 import my.reqqpe.rseller.managers.AutoSellManager;
 import my.reqqpe.rseller.managers.NumberFormatManager;
-import my.reqqpe.rseller.model.Item;
-import my.reqqpe.rseller.model.ItemData;
-import my.reqqpe.rseller.utils.Base64.Base64ItemStack;
+import my.reqqpe.rseller.models.item.Item;
+import my.reqqpe.rseller.models.item.ItemData;
 import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -29,7 +27,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class AutoSellMenu extends AbstractMenu implements Listener {
@@ -102,22 +99,16 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 inv.setItem(slot, null);
                 continue;
             }
-            ItemStack itemStack = item.getItem();
+
+            ItemStack itemStack = item.getItemStack(plugin);
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
+            String itemName = item.getDisplayName(plugin);
 
-            ItemData itemData = item.getItemData();
-
-            double price = itemData.getPrice();
-            double points = itemData.getPoints();
-            String itemName = itemData.getName();
-
-            if (itemName == null || itemName.isEmpty()) {
-                itemName = itemStack.getType().name().replace("_", " ");
-            }
+            double price = item.getPrice();
+            double points = item.getPoints();
 
             String id = item.getId();
-
 
             boolean autosell = playerData.isAutosell(id);
 

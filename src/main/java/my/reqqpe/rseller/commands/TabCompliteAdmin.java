@@ -21,7 +21,7 @@ public class TabCompliteAdmin implements TabCompleter {
         }
 
         if (args.length == 1) {
-            return Arrays.asList("reload", "points").stream()
+            return Arrays.asList("reload", "points", "customitem").stream()
                     .filter(arg -> arg.toLowerCase().startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }
@@ -29,6 +29,12 @@ public class TabCompliteAdmin implements TabCompleter {
 
         if (args.length == 2 && args[0].equalsIgnoreCase("reload")) {
             return Arrays.asList("items", "config", "guis").stream()
+                    .filter(arg -> arg.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("customitem")) {
+            return Arrays.asList("create", "remove").stream()
                     .filter(arg -> arg.toLowerCase().startsWith(args[1].toLowerCase()))
                     .collect(Collectors.toList());
         }

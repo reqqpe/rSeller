@@ -5,24 +5,19 @@
 #  |__|    |   __/|____/____/\___  /|__|___|  /____  >
 #          |__|             /_____/         \/     \/
 #
-
-
-
 #
 # Готовый конфиг: https://spigotmc.ru/resources/konfig-predmetov-dlja-plagina-rseller.3859
 #
-
-
 settings-check:
   display-name: true
   lore: true
-  durability: false
   enchants: true
   model-data: true
   nbt-tags: false # Требует плагин nbt-api
 
 
 custom-items: {}
+
 
 items:
   COAL:

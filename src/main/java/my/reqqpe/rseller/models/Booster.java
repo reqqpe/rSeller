@@ -1,4 +1,4 @@
-package my.reqqpe.rseller.model;
+package my.reqqpe.rseller.models;
 
 
 import lombok.AllArgsConstructor;

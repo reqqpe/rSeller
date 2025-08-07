@@ -1,7 +1,7 @@
 package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.model.Item;
+import my.reqqpe.rseller.models.item.Item;
 import org.bukkit.configuration.ConfigurationSection;
 
 
@@ -95,6 +95,4 @@ public class AutoSellManager {
     public List<Item> getCategoryItems(String category) {
         return categories.getOrDefault(category, Collections.emptyList());
     }
-
-
 }
