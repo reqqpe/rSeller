@@ -49,7 +49,7 @@ public class SellAdminCommand implements CommandExecutor {
                     plugin.getItemManager().load();
                     plugin.getAutoSellManager().loadConfig();
 
-                    String message = sec.getString("reload.items", "&aКонфигурация предметов успешно перезагружена");
+                    String message = reloadSection.getString("items", "&aКонфигурация предметов успешно перезагружена");
                     commandSender.sendMessage(Colorizer.color(message));
                     return true;
                 }
@@ -60,7 +60,7 @@ public class SellAdminCommand implements CommandExecutor {
                     plugin.getBoosterManager().load();
                     plugin.getFormatManager().reload();
 
-                    String message = sec.getString("reload.config", "&aГлавная конфигурация успешно перезагружена");
+                    String message = reloadSection.getString("config", "&aГлавная конфигурация успешно перезагружена");
                     commandSender.sendMessage(Colorizer.color(message));
                     return true;
                 }
@@ -69,7 +69,7 @@ public class SellAdminCommand implements CommandExecutor {
                     plugin.getAllSellGUIConfig().reloadConfig();
                     plugin.getMainGUIConfig().reloadConfig();
 
-                    String message = sec.getString("reload.guis", "&aКонфигурация менюшек успешно перезагружена");
+                    String message = reloadSection.getString("guis", "&aКонфигурация менюшек успешно перезагружена");
                     commandSender.sendMessage(Colorizer.color(message));
                     return true;
                 }
@@ -80,12 +80,13 @@ public class SellAdminCommand implements CommandExecutor {
             plugin.getAllSellGUIConfig().reloadConfig();
             plugin.getMainGUIConfig().reloadConfig();
             plugin.getItemsConfig().reloadConfig();
+            plugin.getItemManager().load();
             plugin.getLevelManager().reloadLevels();
             plugin.getAutoSellManager().loadConfig();
             plugin.getFormatManager().reload();
             plugin.getBoosterManager().load();
 
-            String message = sec.getString("reload.all", "&aПлагин успешно перезагружен");
+            String message = reloadSection.getString("all", "&aПлагин успешно перезагружен");
             commandSender.sendMessage(Colorizer.color(message));
         }
 
@@ -113,8 +114,8 @@ public class SellAdminCommand implements CommandExecutor {
                     return true;
                 }
 
-                double price = 0.0;
-                double points = 0.0;
+                double price;
+                double points;
 
                 try {
                     price = Double.parseDouble(args[3]);
