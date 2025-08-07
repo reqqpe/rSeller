@@ -8,9 +8,7 @@ import my.reqqpe.rseller.database.PlayerData;
 import my.reqqpe.rseller.managers.AutoSellManager;
 import my.reqqpe.rseller.managers.NumberFormatManager;
 import my.reqqpe.rseller.models.item.Item;
-import my.reqqpe.rseller.models.item.ItemData;
 import my.reqqpe.rseller.utils.Colorizer;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -27,7 +25,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
-
 
 public class AutoSellMenu extends AbstractMenu implements Listener {
     private final Database database;
@@ -182,9 +179,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
             text = text.replace("{state_autosell_category}", status);
         }
 
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            text = PlaceholderAPI.setPlaceholders(player, text);
-        }
+        text = PlaceholderAPI.setPlaceholders(player, text);
 
         return text;
     }
@@ -213,7 +208,6 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 replaced.add(Colorizer.color(replacePlaceholders(player, line, inventory)));
             }
         }
-
         return replaced;
     }
 
@@ -259,6 +253,8 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
         if (!holder.getId().equals(getMenuId())) return;
 
+
+        e.setCancelled(true);
         handleClick(player, e);
     }
 
@@ -276,7 +272,6 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     protected boolean handleSpecialSlotClick(Player player, InventoryClickEvent e) {
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return false;
         if (!holder.getId().equals(getMenuId())) return false;
-
 
         int rawSlot = e.getRawSlot();
         Inventory menuInv = e.getInventory();

@@ -28,7 +28,7 @@ public class AutoSellManager {
         categories.clear();
         categoryNames.clear();
 
-        var section = plugin.getConfig().getConfigurationSection("autosell.categories");
+        var section = config.getConfigurationSection("categories");
         if (section == null) return;
 
         for (String category : section.getKeys(false)) {
@@ -74,7 +74,7 @@ public class AutoSellManager {
 
 
     public Map<String, List<Item>> getCategories() {
-        return Collections.unmodifiableMap(categories);
+        return new HashMap<>(categories);
     }
 
 

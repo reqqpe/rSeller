@@ -37,13 +37,13 @@ autosell:
   # вызываться только при подборе предметов
   optimization: true # Переключение работает только при перезагрузке сервера
   check-interval-tick: 40 # Раз в сколько тиков будет проверяться инвентарь. 20 тиков - 1 секунда
-  start_category: resources # Категория, которая будет открываться при первом открытие
+  start_category: example # Категория, которая будет открываться при первом открытие
   categories:
     all:
       name: "Все предметы"
       items:
         - all
-    resources:
+    example:
       name: "Ресурсы"
       items:
         - COAL

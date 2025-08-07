@@ -15,7 +15,7 @@ import my.reqqpe.rseller.menu.SellMenu;
 import my.reqqpe.rseller.tasks.AutoSellTask;
 import my.reqqpe.rseller.updateCheker.UpdateChecker;
 import my.reqqpe.rseller.utils.Metrics;
-import my.reqqpe.rseller.utils.PlaceholderAPI;
+import my.reqqpe.rseller.utils.SellerPlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -78,7 +78,7 @@ public final class Main extends JavaPlugin {
         //papi
 
         if (getServer().getPluginManager().getPlugin("PlaceHolderAPI") != null) {
-            new PlaceholderAPI(this, database).register();
+            new SellerPlaceholderAPI(this, database).register();
             getLogger().info("PlaceHolderAPI найден");
         }
 

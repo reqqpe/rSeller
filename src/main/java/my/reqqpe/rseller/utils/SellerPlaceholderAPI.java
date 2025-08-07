@@ -9,12 +9,12 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class PlaceholderAPI extends PlaceholderExpansion {
+public class SellerPlaceholderAPI extends PlaceholderExpansion {
     private final Main plugin;
     private final Database database;
     private final NumberFormatManager numberFormat;
 
-    public PlaceholderAPI(Main plugin, Database database) {
+    public SellerPlaceholderAPI(Main plugin, Database database) {
         this.plugin = plugin;
         this.database = database;
         this.numberFormat = plugin.getFormatManager();

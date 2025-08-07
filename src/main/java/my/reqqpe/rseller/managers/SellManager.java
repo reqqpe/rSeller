@@ -8,6 +8,7 @@ import my.reqqpe.rseller.models.Booster;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -59,8 +60,8 @@ public class SellManager {
             if (item == null) continue;
 
 
-            double price = item.getPoints();;
-            double points = item.getPrice();
+            double price = item.getPrice();;
+            double points = item.getPoints();
 
             int amount = itemStack.getAmount();
 
@@ -105,7 +106,6 @@ public class SellManager {
 
 
     public void autoSell(Player player) {
-        plugin.getLogger().warning("Вызвался метод авто-скупки");
         Inventory inv = player.getInventory();
         PlayerData data = database.getPlayerData(player.getUniqueId());
 

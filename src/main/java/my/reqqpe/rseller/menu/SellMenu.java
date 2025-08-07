@@ -57,9 +57,7 @@ public class SellMenu extends AbstractMenu implements Listener {
         text = text.replace("{sell_price}", coinsFormatted);
         text = text.replace("{sell_points}", pointsFormatted);
 
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            text = PlaceholderAPI.setPlaceholders(player, text);
-        }
+        text = PlaceholderAPI.setPlaceholders(player, text);
 
         return text;
     }
