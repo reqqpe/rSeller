@@ -4,7 +4,6 @@ package my.reqqpe.rseller.menu;
 import me.clip.placeholderapi.PlaceholderAPI;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.managers.NumberFormatManager;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -15,7 +14,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class SellMenu extends AbstractMenu implements Listener {
     private final NumberFormatManager numberFormatManager;
@@ -28,11 +29,15 @@ public class SellMenu extends AbstractMenu implements Listener {
 
 
     @Override
-    protected FileConfiguration getGuiConfig() { return plugin.getAllSellGUIConfig().getConfig(); }
+    protected FileConfiguration getGuiConfig() {
+        return plugin.getAllSellGUIConfig().getConfig();
+    }
 
 
     @Override
-    protected String getMenuId() { return "SELL_MENU"; }
+    protected String getMenuId() {
+        return "SELL_MENU";
+    }
 
 
     @Override
@@ -47,7 +52,6 @@ public class SellMenu extends AbstractMenu implements Listener {
 
         if (!(inventory.getHolder() instanceof CustomInventoryHolder holder)) return text;
         if (!holder.getId().equals(getMenuId())) return text;
-
 
 
         var result = plugin.getSellManager().calculateSellPreview(player, inventory, new ArrayList<>(special_slots));
@@ -73,7 +77,6 @@ public class SellMenu extends AbstractMenu implements Listener {
 
         return replaced;
     }
-
 
 
     @EventHandler
@@ -120,7 +123,6 @@ public class SellMenu extends AbstractMenu implements Listener {
 
         return false;
     }
-
 
 
     protected void executeAction(Player player, String action) {

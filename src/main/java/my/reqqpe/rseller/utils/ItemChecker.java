@@ -6,8 +6,6 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.List;
-import java.util.Objects;
-
 
 
 public class ItemChecker {
@@ -54,7 +52,7 @@ public class ItemChecker {
             String displayNameA = metaA.hasDisplayName() ? metaA.getDisplayName() : null;
             String displayNameB = metaB.hasDisplayName() ? metaB.getDisplayName() : null;
             if ((displayNameA == null) != (displayNameB == null)) return false;
-            if (displayNameA !=null && !displayNameA.equals(displayNameB)) return false;
+            if (displayNameA != null && !displayNameA.equals(displayNameB)) return false;
         }
 
         if (lore) {
@@ -87,7 +85,8 @@ public class ItemChecker {
                 NBTItem nbtA = new NBTItem(a);
                 NBTItem nbtB = new NBTItem(b);
                 if (!nbtA.toString().equals(nbtB.toString())) return false;
-            } catch (Throwable ignored) {}
+            } catch (Throwable ignored) {
+            }
         }
 
         return true;

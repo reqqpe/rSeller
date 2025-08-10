@@ -7,7 +7,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.Map;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

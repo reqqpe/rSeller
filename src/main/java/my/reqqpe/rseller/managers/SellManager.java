@@ -8,12 +8,11 @@ import my.reqqpe.rseller.models.Booster;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.Material;
 
 import java.util.List;
 
@@ -55,12 +54,12 @@ public class SellManager {
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
 
-
             Item item = itemManager.searchItem(itemStack);
             if (item == null) continue;
 
 
-            double price = item.getPrice();;
+            double price = item.getPrice();
+            ;
             double points = item.getPoints();
 
             int amount = itemStack.getAmount();
@@ -161,6 +160,7 @@ public class SellManager {
             player.sendMessage(msg);
         }
     }
+
     public SellResult calculateSellPreview(Player player, Inventory inv, List<Integer> sellSlots) {
 
 
@@ -195,5 +195,6 @@ public class SellManager {
         return sellResult(player, totalCoins, totalPoints);
     }
 
-    public record SellResult(double coins, double points) {}
+    public record SellResult(double coins, double points) {
+    }
 }

@@ -4,8 +4,8 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
 import my.reqqpe.rseller.models.Level;
-import org.bukkit.entity.Player;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -79,6 +79,7 @@ public class LevelManager {
         }
         return -1;
     }
+
     public double getPointsForNextLevel(Player player) {
         int currentLevel = getLevel(player);
         return getPointsForNextLevel(currentLevel);

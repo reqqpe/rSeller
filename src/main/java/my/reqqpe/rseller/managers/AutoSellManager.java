@@ -4,7 +4,6 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.models.item.Item;
 import org.bukkit.configuration.ConfigurationSection;
 
-
 import java.util.*;
 
 public class AutoSellManager {
@@ -18,6 +17,7 @@ public class AutoSellManager {
         this.plugin = plugin;
         loadConfig();
     }
+
     public void loadConfig() {
         ConfigurationSection config = plugin.getConfig().getConfigurationSection("autosell");
         if (config == null) {

@@ -18,7 +18,6 @@ public class BoosterManager {
     private final Map<String, Booster> boosters = new HashMap<>();
 
 
-
     public BoosterManager(Main plugin) {
         this.plugin = plugin;
         this.levelManager = plugin.getLevelManager();

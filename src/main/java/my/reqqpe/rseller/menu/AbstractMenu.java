@@ -23,7 +23,6 @@ import java.util.*;
 public abstract class AbstractMenu {
 
 
-
     protected final Main plugin;
     protected FileConfiguration guiConfig;
     protected Map<Integer, String> slotToItemId;
@@ -32,17 +31,15 @@ public abstract class AbstractMenu {
     private final Map<UUID, List<BukkitTask>> updateTasks = new HashMap<>();
 
 
-
     public AbstractMenu(Main plugin) {
         this.plugin = plugin;
         this.slotToItemId = new HashMap<>();
     }
 
 
-
     protected abstract FileConfiguration getGuiConfig();
-    protected abstract String getMenuId();
 
+    protected abstract String getMenuId();
 
 
     public void openMenu(Player player) {
@@ -184,31 +181,22 @@ public abstract class AbstractMenu {
         if (cmd.startsWith("[console] ")) {
             String command = cmd.substring(10).replace("%player%", player.getName());
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-        }
-
-        else if (cmd.startsWith("[player] ")) {
+        } else if (cmd.startsWith("[player] ")) {
             String command = cmd.substring(9).replace("%player%", player.getName());
             player.performCommand(command);
-        }
-
-        else if (cmd.startsWith("[text] ")) {
+        } else if (cmd.startsWith("[text] ")) {
             String message = Colorizer.color(cmd.substring(7).replace("%player%", player.getName()));
             player.sendMessage(message);
-        }
-
-        else if (cmd.startsWith("[opengui] ")) {
+        } else if (cmd.startsWith("[opengui] ")) {
             String guiId = cmd.substring(10).trim();
             if (guiId.equalsIgnoreCase("autoSellGUI")) {
                 plugin.getAutoSellMenu().openMenu(player);
-            }
-            else if (guiId.equalsIgnoreCase("allSellGUI")) {
+            } else if (guiId.equalsIgnoreCase("allSellGUI")) {
                 plugin.getAllSellMenu().openMenu(player);
             } else if (guiId.equalsIgnoreCase("mainGUI")) {
                 plugin.getMainMenu().openMenu(player);
             }
-        }
-
-        else if (cmd.startsWith("[sound] ")) {
+        } else if (cmd.startsWith("[sound] ")) {
             String[] parts = cmd.substring(8).split(";");
             if (parts.length >= 1) {
                 try {
@@ -223,9 +211,7 @@ public abstract class AbstractMenu {
                     e.printStackTrace();
                 }
             }
-        }
-
-        else {
+        } else {
             player.sendMessage(Colorizer.color(cmd));
         }
     }
@@ -254,7 +240,6 @@ public abstract class AbstractMenu {
         int rawSlot = e.getRawSlot();
         Inventory clickedInv = e.getClickedInventory();
         Inventory menuInv = e.getInventory();
-
 
 
         if (clickedInv == menuInv && rawSlot < menuInv.getSize()) {
@@ -329,8 +314,6 @@ public abstract class AbstractMenu {
     }
 
 
-
-
     protected void executeAction(Player player, String action) {
 
         Inventory inv = player.getOpenInventory().getTopInventory();
@@ -397,7 +380,6 @@ public abstract class AbstractMenu {
     }
 
 
-
     protected List<Integer> slotORslots(String path) {
         List<Integer> slots = new ArrayList<>();
 
@@ -441,6 +423,6 @@ public abstract class AbstractMenu {
     }
 
 
-
-    public record UpdatableItem(int slot, String name, List<String> lore) {}
+    public record UpdatableItem(int slot, String name, List<String> lore) {
+    }
 }

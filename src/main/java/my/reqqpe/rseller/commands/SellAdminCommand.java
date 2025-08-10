@@ -241,7 +241,8 @@ public class SellAdminCommand implements CommandExecutor {
             double newPoints = data.getPoints();
             String message = sec.getString("update-points-sender")
                     .replace("{player}", target.getName())
-                    .replace("{value}", String.valueOf(newPoints));;
+                    .replace("{value}", String.valueOf(newPoints));
+            ;
             commandSender.sendMessage(Colorizer.color(message));
             if (!target.equals(commandSender)) {
                 String message2 = sec.getString("update-points-target")

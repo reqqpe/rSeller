@@ -64,9 +64,9 @@ public class SyntaxParser {
             case "<=" -> left <= right;
             case "==" -> left == right;
             case "!=" -> left != right;
-            case ">"  -> left > right;
-            case "<"  -> left < right;
-            default   -> false;
+            case ">" -> left > right;
+            case "<" -> left < right;
+            default -> false;
         };
     }
 
@@ -75,11 +75,11 @@ public class SyntaxParser {
         return switch (op) {
             case "==" -> left.equals(right);
             case "!=" -> !left.equals(right);
-            case ">"  -> cmp > 0;
-            case "<"  -> cmp < 0;
+            case ">" -> cmp > 0;
+            case "<" -> cmp < 0;
             case ">=" -> cmp >= 0;
             case "<=" -> cmp <= 0;
-            default   -> false;
+            default -> false;
         };
     }
 

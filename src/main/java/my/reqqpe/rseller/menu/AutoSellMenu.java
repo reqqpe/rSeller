@@ -212,7 +212,6 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     }
 
 
-
     public int getPlayerPage(Player player, String category) {
         return playerCategoryPages
                 .computeIfAbsent(player.getUniqueId(), k -> new HashMap<>())
@@ -244,7 +243,6 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
         if (items.isEmpty()) return 1;
         return (int) Math.ceil((double) items.size() / totalSlots);
     }
-
 
 
     @EventHandler
@@ -289,10 +287,10 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                             .getItemMeta()
                             .getPersistentDataContainer()
                             .get(new NamespacedKey(plugin, "id"),
-                            PersistentDataType.STRING);
+                                    PersistentDataType.STRING);
                 }
 
-                if (id !=null && !id.isEmpty()) {
+                if (id != null && !id.isEmpty()) {
                     boolean currentState = playerData.isAutosell(id);
                     playerData.setAutosell(id, !currentState);
 
@@ -321,9 +319,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 setPlayerPage(player, currentCategory, currentPage + 1);
                 openMenu(player);
             }
-        }
-
-        else if (action.equalsIgnoreCase("[prev_page]")) {
+        } else if (action.equalsIgnoreCase("[prev_page]")) {
 
             String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
             int currentPage = getPlayerPage(player, currentCategory);
@@ -332,9 +328,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 setPlayerPage(player, currentCategory, currentPage - 1);
                 openMenu(player);
             }
-        }
-
-        else if (action.equalsIgnoreCase("[next_category]")) {
+        } else if (action.equalsIgnoreCase("[next_category]")) {
             String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
             List<String> categoryIds = new ArrayList<>(autoSellManager.getCategories().keySet());
 
@@ -347,9 +341,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 setPlayerPage(player, newCategory, 1);
                 openMenu(player);
             }
-        }
-
-        else if (action.equalsIgnoreCase("[prev_category]")) {
+        } else if (action.equalsIgnoreCase("[prev_category]")) {
             String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
             List<String> categoryIds = new ArrayList<>(autoSellManager.getCategories().keySet());
 
@@ -362,9 +354,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 setPlayerPage(player, newCategory, 1);
                 openMenu(player);
             }
-        }
-
-        else if (action.equalsIgnoreCase("[toggle_autosell_category]")) {
+        } else if (action.equalsIgnoreCase("[toggle_autosell_category]")) {
             String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
             List<Item> items = autoSellManager.getCategoryItems(currentCategory);
 
@@ -377,8 +367,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
                 }
                 openMenu(player);
             }
-        }
-        else {
+        } else {
             runMainActions(player, action);
         }
     }

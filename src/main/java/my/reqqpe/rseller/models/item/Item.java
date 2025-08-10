@@ -29,7 +29,6 @@ public class Item {
     private final double points;
 
 
-
     // Знаю кастыльно и лучше сделать это загружаемым в ItemData, но мне лень
     public String getDisplayName(Main plugin) {
         if (itemData != null && itemData.getName() != null && !itemData.getName().isEmpty()) {
@@ -42,7 +41,6 @@ public class Item {
 
         return material.name().toLowerCase().replace("_", " ");
     }
-
 
 
     public ItemStack getItemStack(Main plugin) {
@@ -60,7 +58,7 @@ public class Item {
         if (itemData.getName() != null) {
             itemMeta.setDisplayName(itemData.getName());
         }
-        if (itemData.getLore() != null && !itemData.getLore().isEmpty())  {
+        if (itemData.getLore() != null && !itemData.getLore().isEmpty()) {
             itemMeta.setLore(itemData.getLore());
         }
         if (itemData.getModelData() != 0) {

@@ -1,13 +1,13 @@
 package my.reqqpe.rseller;
 
 import lombok.Getter;
-import my.reqqpe.rseller.listeners.PlayerPickupItem;
-import my.reqqpe.rseller.commands.SellCommand;
 import my.reqqpe.rseller.commands.SellAdminCommand;
+import my.reqqpe.rseller.commands.SellCommand;
 import my.reqqpe.rseller.commands.TabCompliteAdmin;
 import my.reqqpe.rseller.configurations.CustomConfigs;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.DatabaseListener;
+import my.reqqpe.rseller.listeners.PlayerPickupItem;
 import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menu.AutoSellMenu;
 import my.reqqpe.rseller.menu.MainMenu;
@@ -28,23 +28,37 @@ public final class Main extends JavaPlugin {
 
     private Database database;
 
-    @Getter private String openedGUI;
+    @Getter
+    private String openedGUI;
 
-    @Getter private CustomConfigs itemsConfig;
-    @Getter private CustomConfigs allSellGUIConfig;
-    @Getter private CustomConfigs autoSellGUIConfig;
-    @Getter private CustomConfigs mainGUIConfig;
+    @Getter
+    private CustomConfigs itemsConfig;
+    @Getter
+    private CustomConfigs allSellGUIConfig;
+    @Getter
+    private CustomConfigs autoSellGUIConfig;
+    @Getter
+    private CustomConfigs mainGUIConfig;
 
-    @Getter private SellMenu allSellMenu;
-    @Getter private AutoSellMenu autoSellMenu;
-    @Getter private MainMenu mainMenu;
+    @Getter
+    private SellMenu allSellMenu;
+    @Getter
+    private AutoSellMenu autoSellMenu;
+    @Getter
+    private MainMenu mainMenu;
 
-    @Getter private ItemManager itemManager;
-    @Getter private SellManager sellManager;
-    @Getter private AutoSellManager autoSellManager;
-    @Getter private NumberFormatManager formatManager;
-    @Getter private BoosterManager boosterManager;
-    @Getter private LevelManager levelManager;
+    @Getter
+    private ItemManager itemManager;
+    @Getter
+    private SellManager sellManager;
+    @Getter
+    private AutoSellManager autoSellManager;
+    @Getter
+    private NumberFormatManager formatManager;
+    @Getter
+    private BoosterManager boosterManager;
+    @Getter
+    private LevelManager levelManager;
 
 
     public static boolean useNBTAPI = false;
@@ -124,7 +138,7 @@ public final class Main extends JavaPlugin {
             if (autoSellOptimizationEnabled) {
                 pm.registerEvents(new PlayerPickupItem(this), this);
             } else {
-                new AutoSellTask(this,sellManager).autoSellTask();
+                new AutoSellTask(this, sellManager).autoSellTask();
             }
         }
 
@@ -141,6 +155,7 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         database.saveAll();
     }
+
     private void loadConfigs() {
         saveDefaultConfig();
 

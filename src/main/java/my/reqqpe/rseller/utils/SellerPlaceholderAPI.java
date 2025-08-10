@@ -60,7 +60,7 @@ public class SellerPlaceholderAPI extends PlaceholderExpansion {
                 }
             }
             if (params.equalsIgnoreCase("points_needed")) {
-                double points = Math.max(0, plugin.getLevelManager().getPointsForNextLevel(player)) ;
+                double points = Math.max(0, plugin.getLevelManager().getPointsForNextLevel(player));
                 return numberFormat.format("placeholders.points_needed", points);
             }
             if (params.equalsIgnoreCase("points_fornextlevel")) {
