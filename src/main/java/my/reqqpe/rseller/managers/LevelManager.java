@@ -1,6 +1,7 @@
 package my.reqqpe.rseller.managers;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
@@ -47,7 +48,7 @@ public class LevelManager {
         double points = data.getPoints();
 
         Level current = levels.get(levels.firstIntKey());
-        for (Int2ObjectSortedMap.Entry<Level> entry : levels.int2ObjectEntrySet()) {
+        for (Int2ObjectMap.Entry<Level> entry : levels.int2ObjectEntrySet()) {
             if (points >= entry.getValue().requiredPoints()) {
                 current = entry.getValue();
             } else {
@@ -71,7 +72,7 @@ public class LevelManager {
     }
 
     public double getPointsForNextLevel(int currentLevel) {
-        for (Int2ObjectSortedMap.Entry<Level> entry : levels.int2ObjectEntrySet()) {
+        for (Int2ObjectMap.Entry<Level> entry : levels.int2ObjectEntrySet()) {
             if (entry.getIntKey() > currentLevel) {
                 return entry.getValue().requiredPoints();
             }
