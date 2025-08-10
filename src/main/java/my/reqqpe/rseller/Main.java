@@ -12,7 +12,6 @@ import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menu.AutoSellMenu;
 import my.reqqpe.rseller.menu.MainMenu;
 import my.reqqpe.rseller.menu.SellMenu;
-import my.reqqpe.rseller.tasks.AutoSellTask;
 import my.reqqpe.rseller.updateCheker.UpdateChecker;
 import my.reqqpe.rseller.utils.Metrics;
 import my.reqqpe.rseller.utils.SellerPlaceholderAPI;
@@ -132,14 +131,9 @@ public final class Main extends JavaPlugin {
         }
 
         boolean autoSellEnabled = config.getBoolean("autosell.enable", true);
-        boolean autoSellOptimizationEnabled = config.getBoolean("autosell.optimization", true);
 
         if (autoSellEnabled) {
-            if (autoSellOptimizationEnabled) {
-                pm.registerEvents(new PlayerPickupItem(this), this);
-            } else {
-                new AutoSellTask(this, sellManager).autoSellTask();
-            }
+            pm.registerEvents(new PlayerPickupItem(this, database), this);
         }
 
         boolean updateCheck = getConfig().getBoolean("update-check", true);
