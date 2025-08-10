@@ -3,7 +3,7 @@ package my.reqqpe.rseller;
 import lombok.Getter;
 import my.reqqpe.rseller.commands.SellAdminCommand;
 import my.reqqpe.rseller.commands.SellCommand;
-import my.reqqpe.rseller.commands.TabCompliteAdmin;
+import my.reqqpe.rseller.commands.TabCompleteAdmin;
 import my.reqqpe.rseller.configurations.CustomConfigs;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.DatabaseListener;
@@ -17,6 +17,8 @@ import my.reqqpe.rseller.updateCheker.UpdateChecker;
 import my.reqqpe.rseller.utils.Metrics;
 import my.reqqpe.rseller.utils.SellerPlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -75,12 +77,13 @@ public final class Main extends JavaPlugin {
             return;
         }
 
-        if (getServer().getPluginManager().getPlugin("NBTAPI") != null) useNBTAPI = true;
+        if (getServer().getPluginManager().getPlugin("NBTAPI") != null) {
+            useNBTAPI = true;
+        }
 
-
+        saveDefaultConfig();
         loadConfigs();
 
-        // managers
         formatManager = new NumberFormatManager(this);
         levelManager = new LevelManager(this, database);
         boosterManager = new BoosterManager(this);
@@ -88,20 +91,15 @@ public final class Main extends JavaPlugin {
         sellManager = new SellManager(this, database);
         autoSellManager = new AutoSellManager(this);
 
-
-        //papi
-
         if (getServer().getPluginManager().getPlugin("PlaceHolderAPI") != null) {
             new SellerPlaceholderAPI(this, database).register();
             getLogger().info("PlaceHolderAPI найден");
         }
 
-        // menu
         mainMenu = new MainMenu(this);
         allSellMenu = new SellMenu(this);
         autoSellMenu = new AutoSellMenu(this, database);
 
-        // events
         PluginManager pm = getServer().getPluginManager();
 
         pm.registerEvents(allSellMenu, this);
@@ -110,29 +108,31 @@ public final class Main extends JavaPlugin {
 
         pm.registerEvents(new DatabaseListener(database), this);
 
-        //commands
         getCommand("sell").setExecutor(new SellCommand(this));
 
-        String openedGUIValue = getConfig().getString("sell-command", "mainGUI");
+        FileConfiguration config = getConfig();
+
+        String openedGUIValue = config.getString("sell-command", "mainGUI");
         Set<String> allowedValue = Set.of("mainGUI", "allSellGUI", "autoSellGUI");
         if (allowedValue.contains(openedGUIValue)) {
             openedGUI = openedGUIValue;
-        } else openedGUI = "mainGUI";
+        } else {
+            openedGUI = "mainGUI";
+        }
 
-        getCommand("rseller").setExecutor(new SellAdminCommand(this, database));
-
-        // tab complite
-        getCommand("rseller").setTabCompleter(new TabCompliteAdmin());
+        PluginCommand rsellerCommand = getCommand("rseller");
+        rsellerCommand.setExecutor(new SellAdminCommand(this, database));
+        rsellerCommand.setTabCompleter(new TabCompleteAdmin());
 
         // other
-        if (getConfig().getBoolean("metrics", true)) {
+        if (config.getBoolean("metrics", true)) {
             int pluginId = 25999;
-            Metrics metrics = new Metrics(this, pluginId);
+            new Metrics(this, pluginId);
             getLogger().info("bStats успешно инициализирован!");
         }
 
-        boolean autoSellEnabled = getConfig().getBoolean("autosell.enable", true);
-        boolean autoSellOptimizationEnabled = getConfig().getBoolean("autosell.optimization", true);
+        boolean autoSellEnabled = config.getBoolean("autosell.enable", true);
+        boolean autoSellOptimizationEnabled = config.getBoolean("autosell.optimization", true);
 
         if (autoSellEnabled) {
             if (autoSellOptimizationEnabled) {
@@ -157,28 +157,25 @@ public final class Main extends JavaPlugin {
     }
 
     private void loadConfigs() {
-        saveDefaultConfig();
-
         itemsConfig = new CustomConfigs(this, "items.yml");
         itemsConfig.setup();
         getLogger().info("items.yml успешно загружен");
-
 
         allSellGUIConfig = new CustomConfigs(this, "GUI/allSellGUI.yml");
         allSellGUIConfig.setup();
         getLogger().info("allSellGUI.yml успешно загружен");
 
-
         autoSellGUIConfig = new CustomConfigs(this, "GUI/autoSellGUI.yml");
         autoSellGUIConfig.setup();
         getLogger().info("autoSellGUI.yml успешно загружен");
-
 
         mainGUIConfig = new CustomConfigs(this, "GUI/mainGUI.yml");
         mainGUIConfig.setup();
         getLogger().info("mainGUI.yml успешно загружен");
 
         database = new Database(this);
-        for (Player pl : Bukkit.getOnlinePlayers()) database.loadPlayerData(pl.getUniqueId());
+        for (Player pl : Bukkit.getOnlinePlayers()) {
+            database.loadPlayerData(pl.getUniqueId());
+        }
     }
 }

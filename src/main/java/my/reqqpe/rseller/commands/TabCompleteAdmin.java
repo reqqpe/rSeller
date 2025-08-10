@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TabCompliteAdmin implements TabCompleter {
+public class TabCompleteAdmin implements TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
 
         if (!sender.hasPermission("rseller.admin")) {
-            return new ArrayList<>();
+            return List.of();
         }
 
         if (args.length == 1) {
@@ -59,6 +59,6 @@ public class TabCompliteAdmin implements TabCompleter {
                     .collect(Collectors.toList());
         }
 
-        return new ArrayList<>();
+        return List.of();
     }
 }
