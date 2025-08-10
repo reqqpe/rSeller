@@ -1,6 +1,7 @@
 package my.reqqpe.rseller.menu;
 
 
+import it.unimi.dsi.fastutil.ints.IntList;
 import me.clip.placeholderapi.PlaceholderAPI;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
@@ -66,7 +67,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
         Inventory inv = player.getOpenInventory().getTopInventory();
 
-        List<Integer> specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
+        IntList specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
         this.totalSlots = specialSlots.size();
 
 

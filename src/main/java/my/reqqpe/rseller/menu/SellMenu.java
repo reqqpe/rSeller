@@ -1,6 +1,8 @@
 package my.reqqpe.rseller.menu;
 
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import me.clip.placeholderapi.PlaceholderAPI;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.managers.NumberFormatManager;
@@ -54,7 +56,7 @@ public class SellMenu extends AbstractMenu implements Listener {
         if (!holder.id().equals(getMenuId())) return text;
 
 
-        var result = plugin.getSellManager().calculateSellPreview(player, inventory, new ArrayList<>(specialSlots));
+        var result = plugin.getSellManager().calculateSellPreview(player, inventory, new IntArrayList(specialSlots));
         String coinsFormatted = numberFormatManager.format("mainGUI.sell_price", result.coins());
         String pointsFormatted = numberFormatManager.format("mainGUI.sell_points", result.points());
 
@@ -131,7 +133,7 @@ public class SellMenu extends AbstractMenu implements Listener {
             if (!(inv.getHolder() instanceof CustomInventoryHolder holder)) return;
             if (!holder.id().equals(getMenuId())) return;
 
-            List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("special-slots"));
+            IntList sellSlots = parseSlotList(guiConfig.getStringList("special-slots"));
             plugin.getSellManager().sellItems(player, inv, sellSlots);
         } else {
             runMainActions(player, action);

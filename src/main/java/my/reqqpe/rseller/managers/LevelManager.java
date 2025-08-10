@@ -1,5 +1,7 @@
 package my.reqqpe.rseller.managers;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectSortedMap;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
@@ -7,14 +9,11 @@ import my.reqqpe.rseller.models.Level;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 public class LevelManager {
 
     private final Main plugin;
     private final Database database;
-    private final TreeMap<Integer, Level> levels = new TreeMap<>();
+    private final Int2ObjectSortedMap<Level> levels = new Int2ObjectLinkedOpenHashMap<>();
 
     public LevelManager(Main plugin, Database database) {
         this.plugin = plugin;
@@ -47,8 +46,8 @@ public class LevelManager {
         PlayerData data = database.getPlayerData(player.getUniqueId());
         double points = data.getPoints();
 
-        Level current = levels.firstEntry().getValue();
-        for (Map.Entry<Integer, Level> entry : levels.entrySet()) {
+        Level current = levels.get(levels.firstIntKey());
+        for (Int2ObjectSortedMap.Entry<Level> entry : levels.int2ObjectEntrySet()) {
             if (points >= entry.getValue().requiredPoints()) {
                 current = entry.getValue();
             } else {
@@ -72,8 +71,8 @@ public class LevelManager {
     }
 
     public double getPointsForNextLevel(int currentLevel) {
-        for (Map.Entry<Integer, Level> entry : levels.entrySet()) {
-            if (entry.getKey() > currentLevel) {
+        for (Int2ObjectSortedMap.Entry<Level> entry : levels.int2ObjectEntrySet()) {
+            if (entry.getIntKey() > currentLevel) {
                 return entry.getValue().requiredPoints();
             }
         }

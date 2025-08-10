@@ -1,5 +1,9 @@
 package my.reqqpe.rseller.menu;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
@@ -25,15 +29,14 @@ public abstract class AbstractMenu {
 
     protected final Main plugin;
     protected FileConfiguration guiConfig;
-    protected final Map<Integer, String> slotToItemId;
-    protected List<Integer> specialSlots = new ArrayList<>();
-    protected final Map<Integer, UpdatableItem> updatableItems = new HashMap<>();
+    protected final Int2ObjectMap<String> slotToItemId = new Int2ObjectOpenHashMap<>();
+    protected IntList specialSlots = new IntArrayList();
+    protected final Int2ObjectMap<UpdatableItem> updatableItems = new Int2ObjectOpenHashMap<>();
     private final Map<UUID, List<BukkitTask>> updateTasks = new HashMap<>();
 
 
     public AbstractMenu(Main plugin) {
         this.plugin = plugin;
-        this.slotToItemId = new HashMap<>();
     }
 
 
@@ -60,17 +63,17 @@ public abstract class AbstractMenu {
 
 
     protected void loadItems(Inventory inv, Player player) {
-        List<Integer> specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
-        this.specialSlots = new ArrayList<>(specialSlots);
+        IntList specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
+        this.specialSlots = new IntArrayList(specialSlots);
         Set<Integer> usedSlots = new HashSet<>(specialSlots);
         ConfigurationSection itemsSection = guiConfig.getConfigurationSection("items");
 
         if (itemsSection != null) {
             for (String itemId : itemsSection.getKeys(false)) {
                 String path = "items." + itemId;
-                List<Integer> itemSlots = slotORslots(path);
-                List<Integer> slotsToRemove = new ArrayList<>();
-                List<Integer> validSlots = new ArrayList<>();
+                IntList itemSlots = slotORslots(path);
+                IntList slotsToRemove = new IntArrayList();
+                IntList validSlots = new IntArrayList();
 
                 for (int slot : itemSlots) {
                     if (slot < 0 || slot >= inv.getSize()) {
@@ -379,8 +382,8 @@ public abstract class AbstractMenu {
     }
 
 
-    protected List<Integer> slotORslots(String path) {
-        List<Integer> slots = new ArrayList<>();
+    protected IntList slotORslots(String path) {
+        IntList slots = new IntArrayList();
 
 
         int slot = guiConfig.getInt(path + ".slot", -1);
@@ -404,8 +407,8 @@ public abstract class AbstractMenu {
     }
 
 
-    protected static List<Integer> parseSlotList(List<String> list) {
-        List<Integer> result = new ArrayList<>();
+    protected static IntList parseSlotList(List<String> list) {
+        IntList result = new IntArrayList();
         for (String str : list) {
             if (str.contains("-")) {
                 String[] parts = str.split("-");

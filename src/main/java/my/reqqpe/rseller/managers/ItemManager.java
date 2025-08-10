@@ -20,7 +20,7 @@ public class ItemManager {
 
     private SearchItemSettings searchItemSettings;
     private final List<Item> items = new ArrayList<>();
-    private final Map<Material, Set<Item>> materialItems = new HashMap<>();
+    private final Map<Material, Set<Item>> materialItems = new EnumMap<>(Material.class);
 
     private final Main plugin;
 

@@ -1,5 +1,6 @@
 package my.reqqpe.rseller.managers;
 
+import it.unimi.dsi.fastutil.ints.IntList;
 import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
@@ -13,8 +14,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.List;
 
 public class SellManager {
 
@@ -45,7 +44,7 @@ public class SellManager {
         return new SellResult(finalPrice, finalPoints);
     }
 
-    public void sellItems(Player player, Inventory inv, List<Integer> sellSlots) {
+    public void sellItems(Player player, Inventory inv, IntList sellSlots) {
         double totalCoins = 0;
         double totalPoints = 0;
 
@@ -160,7 +159,7 @@ public class SellManager {
         }
     }
 
-    public SellResult calculateSellPreview(Player player, Inventory inv, List<Integer> sellSlots) {
+    public SellResult calculateSellPreview(Player player, Inventory inv, IntList sellSlots) {
 
 
         double totalCoins = 0;
