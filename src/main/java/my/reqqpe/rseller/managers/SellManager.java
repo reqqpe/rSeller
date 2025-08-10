@@ -1,5 +1,6 @@
 package my.reqqpe.rseller.managers;
 
+import it.unimi.dsi.fastutil.ints.IntList;
 import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
@@ -8,14 +9,11 @@ import my.reqqpe.rseller.models.Booster;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.Material;
-
-import java.util.List;
 
 public class SellManager {
 
@@ -40,13 +38,13 @@ public class SellManager {
         }
 
 
-        double finalPrice = price * Math.max(1.0, booster.getCoinMultiplier());
-        double finalPoints = points * Math.max(1.0, booster.getPointMultiplier());
+        double finalPrice = price * Math.max(1.0, booster.coinMultiplier());
+        double finalPoints = points * Math.max(1.0, booster.pointMultiplier());
 
         return new SellResult(finalPrice, finalPoints);
     }
 
-    public void sellItems(Player player, Inventory inv, List<Integer> sellSlots) {
+    public void sellItems(Player player, Inventory inv, IntList sellSlots) {
         double totalCoins = 0;
         double totalPoints = 0;
 
@@ -55,13 +53,12 @@ public class SellManager {
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
 
-
             Item item = itemManager.searchItem(itemStack);
             if (item == null) continue;
 
 
-            double price = item.getPrice();;
-            double points = item.getPoints();
+            double price = item.price();
+            double points = item.points();
 
             int amount = itemStack.getAmount();
 
@@ -120,10 +117,10 @@ public class SellManager {
             Item item = itemManager.searchItem(itemstack);
             if (item == null) continue;
 
-            if (!data.isAutosell(item.getId())) continue;
+            if (!data.isAutosell(item.id())) continue;
 
-            double price = item.getPrice();
-            double points = item.getPoints();
+            double price = item.price();
+            double points = item.points();
 
             int amount = itemstack.getAmount();
 
@@ -144,8 +141,8 @@ public class SellManager {
             booster = new Booster(1.0, 1.0);
         }
 
-        totalCoins *= Math.max(1.0, booster.getCoinMultiplier());
-        totalPoints *= Math.max(1.0, booster.getPointMultiplier());
+        totalCoins *= Math.max(1.0, booster.coinMultiplier());
+        totalPoints *= Math.max(1.0, booster.pointMultiplier());
 
         if (totalCoins > 0) economy.depositPlayer(player, totalCoins);
         if (totalPoints > 0) data.addPoints(totalPoints);
@@ -161,7 +158,8 @@ public class SellManager {
             player.sendMessage(msg);
         }
     }
-    public SellResult calculateSellPreview(Player player, Inventory inv, List<Integer> sellSlots) {
+
+    public SellResult calculateSellPreview(Player player, Inventory inv, IntList sellSlots) {
 
 
         double totalCoins = 0;
@@ -175,8 +173,8 @@ public class SellManager {
             Item item = itemManager.searchItem(itemStack);
             if (item == null) continue;
 
-            double price = item.getPrice();
-            double points = item.getPoints();
+            double price = item.price();
+            double points = item.points();
 
             if (price <= 0 && points <= 0) {
                 continue;
@@ -195,5 +193,6 @@ public class SellManager {
         return sellResult(player, totalCoins, totalPoints);
     }
 
-    public record SellResult(double coins, double points) {}
+    public record SellResult(double coins, double points) {
+    }
 }

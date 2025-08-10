@@ -6,11 +6,14 @@ import my.reqqpe.rseller.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class Database {
     private final Main plugin;
@@ -19,7 +22,7 @@ public class Database {
 
     public PlayerData getPlayerData(UUID uuid) {
         PlayerData playerData = players.get(uuid);
-        return playerData != null ? playerData : new PlayerData(uuid) ;
+        return playerData != null ? playerData : new PlayerData(uuid);
     }
 
     public PlayerData create(UUID uuid) {
@@ -103,8 +106,6 @@ public class Database {
     }
 
     public void savePlayerDataAsync(UUID uuid) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            savePlayerData(uuid);
-        });
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> savePlayerData(uuid));
     }
 }

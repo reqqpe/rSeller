@@ -18,7 +18,6 @@ public class BoosterManager {
     private final Map<String, Booster> boosters = new HashMap<>();
 
 
-
     public BoosterManager(Main plugin) {
         this.plugin = plugin;
         this.levelManager = plugin.getLevelManager();
@@ -66,8 +65,8 @@ public class BoosterManager {
         double perm_booster_coins = 1.0;
         for (Booster booster : active) {
             if (booster == null) continue;
-            perm_booster_coins += booster.getCoinMultiplier() - 1;
-            perm_booster_points += booster.getPointMultiplier() - 1;
+            perm_booster_coins += booster.coinMultiplier() - 1;
+            perm_booster_points += booster.pointMultiplier() - 1;
         }
 
         double level_booster_coins = levelManager.getCoinMultiplier(player);

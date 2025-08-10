@@ -3,8 +3,6 @@ package my.reqqpe.rseller.models.item;
 
 import de.tr7zw.nbtapi.NBTItem;
 import de.tr7zw.nbtapi.NBTType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.models.SearchItemSettings;
 import org.bukkit.Material;
@@ -19,21 +17,11 @@ import java.util.logging.Logger;
 import static de.tr7zw.nbtapi.NBTType.NBTTagDouble;
 
 
-@Getter
-@AllArgsConstructor
-public class Item {
-    private final String id;
-    private final Material material;
-    private final ItemData itemData;
-    private final double price;
-    private final double points;
-
-
-
+public record Item(String id, Material material, ItemData itemData, double price, double points) {
     // Знаю кастыльно и лучше сделать это загружаемым в ItemData, но мне лень
     public String getDisplayName(Main plugin) {
-        if (itemData != null && itemData.getName() != null && !itemData.getName().isEmpty()) {
-            return itemData.getName();
+        if (itemData != null && itemData.name() != null && !itemData.name().isEmpty()) {
+            return itemData.name();
         }
         String configName = plugin.getItemsConfig().getConfig().getString("items." + id + ".name");
         if (configName != null && !configName.isEmpty()) {
@@ -42,7 +30,6 @@ public class Item {
 
         return material.name().toLowerCase().replace("_", " ");
     }
-
 
 
     public ItemStack getItemStack(Main plugin) {
@@ -57,17 +44,17 @@ public class Item {
             return itemStack;
         }
 
-        if (itemData.getName() != null) {
-            itemMeta.setDisplayName(itemData.getName());
+        if (itemData.name() != null) {
+            itemMeta.setDisplayName(itemData.name());
         }
-        if (itemData.getLore() != null && !itemData.getLore().isEmpty())  {
-            itemMeta.setLore(itemData.getLore());
+        if (itemData.lore() != null && !itemData.lore().isEmpty()) {
+            itemMeta.setLore(itemData.lore());
         }
-        if (itemData.getModelData() != 0) {
-            itemMeta.setCustomModelData(itemData.getModelData());
+        if (itemData.modelData() != 0) {
+            itemMeta.setCustomModelData(itemData.modelData());
         }
 
-        Map<Enchantment, Integer> enchantments = itemData.getEnchantments();
+        Map<Enchantment, Integer> enchantments = itemData.enchantments();
         if (enchantments != null && !enchantments.isEmpty()) {
             enchantments.forEach((enchantment, level) -> {
                 if (level > 0) {
@@ -77,10 +64,10 @@ public class Item {
         }
 
         itemStack.setItemMeta(itemMeta);
-        if (Main.useNBTAPI && (itemData.getNbtTags() != null && !itemData.getNbtTags().isEmpty())) {
+        if (Main.useNBTAPI && (itemData.nbtTags() != null && !itemData.nbtTags().isEmpty())) {
             try {
                 NBTItem nbtItem = new NBTItem(itemStack);
-                for (Map.Entry<NamespacedKey, Object> entry : itemData.getNbtTags().entrySet()) {
+                for (Map.Entry<NamespacedKey, Object> entry : itemData.nbtTags().entrySet()) {
                     NamespacedKey key = entry.getKey();
                     Object value = entry.getValue();
                     String keyString = key.toString();
@@ -125,34 +112,34 @@ public class Item {
         }
 
         ItemMeta itemMeta = itemStack.getItemMeta();
-        if ((itemData != null) && (itemMeta == null)) {
+        if (itemMeta == null) {
             return false;
         }
 
-        if (searchItemSettings.name() && !Objects.equals(itemData.getName(), itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : null)) {
+        if (searchItemSettings.name() && !Objects.equals(itemData.name(), itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : null)) {
             return false;
         }
 
         if (searchItemSettings.lore()) {
-            List<String> expectedLore = itemData.getLore() != null ? itemData.getLore() : Collections.emptyList();
-            List<String> actualLore = itemMeta.hasLore() ? itemMeta.getLore() : Collections.emptyList();
+            List<String> expectedLore = itemData.lore() != null ? itemData.lore() : List.of();
+            List<String> actualLore = itemMeta.hasLore() ? itemMeta.getLore() : List.of();
             if (!Objects.equals(expectedLore, actualLore)) {
                 return false;
             }
         }
 
-        if (searchItemSettings.modelData() && itemData.getModelData() != (itemMeta.hasCustomModelData() ? itemMeta.getCustomModelData() : 0)) {
+        if (searchItemSettings.modelData() && itemData.modelData() != (itemMeta.hasCustomModelData() ? itemMeta.getCustomModelData() : 0)) {
             return false;
         }
 
-        if (searchItemSettings.enchants() && !Objects.equals(itemData.getEnchantments(), itemMeta.getEnchants())) {
+        if (searchItemSettings.enchants() && !Objects.equals(itemData.enchantments(), itemMeta.getEnchants())) {
             return false;
         }
 
         if (searchItemSettings.nbtTags() && Main.useNBTAPI) {
             try {
                 NBTItem nbtItem = new NBTItem(itemStack);
-                Map<NamespacedKey, Object> expectedNbtTags = itemData.getNbtTags();
+                Map<NamespacedKey, Object> expectedNbtTags = itemData.nbtTags();
                 Set<String> actualKeys = nbtItem.getKeys();
 
                 if (expectedNbtTags != null && !expectedNbtTags.isEmpty()) {

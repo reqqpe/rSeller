@@ -1,10 +1,11 @@
 package my.reqqpe.rseller.menu;
 
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import me.clip.placeholderapi.PlaceholderAPI;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.managers.NumberFormatManager;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -15,7 +16,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class SellMenu extends AbstractMenu implements Listener {
     private final NumberFormatManager numberFormatManager;
@@ -28,11 +31,15 @@ public class SellMenu extends AbstractMenu implements Listener {
 
 
     @Override
-    protected FileConfiguration getGuiConfig() { return plugin.getAllSellGUIConfig().getConfig(); }
+    protected FileConfiguration getGuiConfig() {
+        return plugin.getAllSellGUIConfig().getConfig();
+    }
 
 
     @Override
-    protected String getMenuId() { return "SELL_MENU"; }
+    protected String getMenuId() {
+        return "SELL_MENU";
+    }
 
 
     @Override
@@ -46,11 +53,10 @@ public class SellMenu extends AbstractMenu implements Listener {
 
 
         if (!(inventory.getHolder() instanceof CustomInventoryHolder holder)) return text;
-        if (!holder.getId().equals(getMenuId())) return text;
+        if (!holder.id().equals(getMenuId())) return text;
 
 
-
-        var result = plugin.getSellManager().calculateSellPreview(player, inventory, new ArrayList<>(special_slots));
+        var result = plugin.getSellManager().calculateSellPreview(player, inventory, new IntArrayList(specialSlots));
         String coinsFormatted = numberFormatManager.format("mainGUI.sell_price", result.coins());
         String pointsFormatted = numberFormatManager.format("mainGUI.sell_points", result.points());
 
@@ -75,16 +81,15 @@ public class SellMenu extends AbstractMenu implements Listener {
     }
 
 
-
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
         if (!(e.getPlayer() instanceof Player player)) return;
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         Inventory inv = e.getInventory();
 
-        for (int slot : special_slots) {
+        for (int slot : specialSlots) {
             ItemStack item = inv.getItem(slot);
             if (item != null && item.getType() != Material.AIR) {
                 HashMap<Integer, ItemStack> leftovers = player.getInventory().addItem(item);
@@ -102,7 +107,7 @@ public class SellMenu extends AbstractMenu implements Listener {
     public void onClickInventory(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         handleClick(player, e);
     }
@@ -113,7 +118,7 @@ public class SellMenu extends AbstractMenu implements Listener {
 
         int rawSlot = e.getRawSlot();
 
-        if (special_slots.contains(rawSlot)) {
+        if (specialSlots.contains(rawSlot)) {
             e.setCancelled(false);
             return true;
         }
@@ -122,14 +127,13 @@ public class SellMenu extends AbstractMenu implements Listener {
     }
 
 
-
     protected void executeAction(Player player, String action) {
         if (action.equalsIgnoreCase("[sell]")) {
             Inventory inv = player.getOpenInventory().getTopInventory();
             if (!(inv.getHolder() instanceof CustomInventoryHolder holder)) return;
-            if (!holder.getId().equals(getMenuId())) return;
+            if (!holder.id().equals(getMenuId())) return;
 
-            List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("special-slots"));
+            IntList sellSlots = parseSlotList(guiConfig.getStringList("special-slots"));
             plugin.getSellManager().sellItems(player, inv, sellSlots);
         } else {
             runMainActions(player, action);

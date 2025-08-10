@@ -1,5 +1,9 @@
 package my.reqqpe.rseller.menu;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
@@ -23,26 +27,22 @@ import java.util.*;
 public abstract class AbstractMenu {
 
 
-
     protected final Main plugin;
     protected FileConfiguration guiConfig;
-    protected Map<Integer, String> slotToItemId;
-    protected List<Integer> special_slots = new ArrayList<>();
-    protected final Map<Integer, UpdatableItem> updatableItems = new HashMap<>();
+    protected final Int2ObjectMap<String> slotToItemId = new Int2ObjectOpenHashMap<>();
+    protected IntList specialSlots = new IntArrayList();
+    protected final Int2ObjectMap<UpdatableItem> updatableItems = new Int2ObjectOpenHashMap<>();
     private final Map<UUID, List<BukkitTask>> updateTasks = new HashMap<>();
-
 
 
     public AbstractMenu(Main plugin) {
         this.plugin = plugin;
-        this.slotToItemId = new HashMap<>();
     }
 
 
-
     protected abstract FileConfiguration getGuiConfig();
-    protected abstract String getMenuId();
 
+    protected abstract String getMenuId();
 
 
     public void openMenu(Player player) {
@@ -63,18 +63,17 @@ public abstract class AbstractMenu {
 
 
     protected void loadItems(Inventory inv, Player player) {
-        Set<Integer> usedSlots = new HashSet<>();
-        List<Integer> specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
-        this.special_slots = new ArrayList<>(specialSlots);
-        usedSlots.addAll(specialSlots);
+        IntList specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
+        this.specialSlots = new IntArrayList(specialSlots);
+        Set<Integer> usedSlots = new HashSet<>(specialSlots);
         ConfigurationSection itemsSection = guiConfig.getConfigurationSection("items");
 
         if (itemsSection != null) {
             for (String itemId : itemsSection.getKeys(false)) {
                 String path = "items." + itemId;
-                List<Integer> itemSlots = slotORslots(path);
-                List<Integer> slotsToRemove = new ArrayList<>();
-                List<Integer> validSlots = new ArrayList<>();
+                IntList itemSlots = slotORslots(path);
+                IntList slotsToRemove = new IntArrayList();
+                IntList validSlots = new IntArrayList();
 
                 for (int slot : itemSlots) {
                     if (slot < 0 || slot >= inv.getSize()) {
@@ -127,7 +126,7 @@ public abstract class AbstractMenu {
                                     (replacePlaceholders(player, name, inv)));
 
                     List<String> lore = guiConfig.getStringList(path + ".lore");
-                    if (lore != null && !lore.isEmpty()) {
+                    if (!lore.isEmpty()) {
                         meta.setLore(Colorizer
                                 .colorizeAll
                                         (replacePlaceholders(player, lore, inv)));
@@ -184,31 +183,22 @@ public abstract class AbstractMenu {
         if (cmd.startsWith("[console] ")) {
             String command = cmd.substring(10).replace("%player%", player.getName());
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-        }
-
-        else if (cmd.startsWith("[player] ")) {
+        } else if (cmd.startsWith("[player] ")) {
             String command = cmd.substring(9).replace("%player%", player.getName());
             player.performCommand(command);
-        }
-
-        else if (cmd.startsWith("[text] ")) {
+        } else if (cmd.startsWith("[text] ")) {
             String message = Colorizer.color(cmd.substring(7).replace("%player%", player.getName()));
             player.sendMessage(message);
-        }
-
-        else if (cmd.startsWith("[opengui] ")) {
+        } else if (cmd.startsWith("[opengui] ")) {
             String guiId = cmd.substring(10).trim();
             if (guiId.equalsIgnoreCase("autoSellGUI")) {
                 plugin.getAutoSellMenu().openMenu(player);
-            }
-            else if (guiId.equalsIgnoreCase("allSellGUI")) {
+            } else if (guiId.equalsIgnoreCase("allSellGUI")) {
                 plugin.getAllSellMenu().openMenu(player);
             } else if (guiId.equalsIgnoreCase("mainGUI")) {
                 plugin.getMainMenu().openMenu(player);
             }
-        }
-
-        else if (cmd.startsWith("[sound] ")) {
+        } else if (cmd.startsWith("[sound] ")) {
             String[] parts = cmd.substring(8).split(";");
             if (parts.length >= 1) {
                 try {
@@ -223,9 +213,7 @@ public abstract class AbstractMenu {
                     e.printStackTrace();
                 }
             }
-        }
-
-        else {
+        } else {
             player.sendMessage(Colorizer.color(cmd));
         }
     }
@@ -243,22 +231,21 @@ public abstract class AbstractMenu {
             result.add(replacePlaceholders(player, text, inventory));
         }
 
-        return list;
+        return result;
     }
 
 
     public void handleClick(Player player, InventoryClickEvent e) {
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         int rawSlot = e.getRawSlot();
         Inventory clickedInv = e.getClickedInventory();
         Inventory menuInv = e.getInventory();
 
 
-
         if (clickedInv == menuInv && rawSlot < menuInv.getSize()) {
-            if (special_slots.contains(rawSlot)) {
+            if (specialSlots.contains(rawSlot)) {
                 if (handleSpecialSlotClick(player, e)) return;
             }
 
@@ -279,7 +266,7 @@ public abstract class AbstractMenu {
 
             ConfigurationSection reqSection = itemSection.getConfigurationSection(
                     isLeftClick ? "left_click_requaments" :
-                            isRightClick ? "right_click_requaments" : null
+                            "right_click_requaments"
             );
 
             boolean allRequirementsPassed = true;
@@ -305,7 +292,7 @@ public abstract class AbstractMenu {
             }
 
             if (!allRequirementsPassed) {
-                List<String> denyCommands = reqSection != null ? reqSection.getStringList("deny_commands") : Collections.emptyList();
+                List<String> denyCommands = reqSection.getStringList("deny_commands");
                 for (String cmd : denyCommands) {
                     runMainActions(player, cmd);
                 }
@@ -314,7 +301,7 @@ public abstract class AbstractMenu {
 
             List<String> actions = itemSection.getStringList(
                     isLeftClick ? "left_click_actions" :
-                            isRightClick ? "right_click_actions" : null
+                            "right_click_actions"
             );
 
             for (String action : actions) {
@@ -329,13 +316,11 @@ public abstract class AbstractMenu {
     }
 
 
-
-
     protected void executeAction(Player player, String action) {
 
         Inventory inv = player.getOpenInventory().getTopInventory();
         if (!(inv.getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         runMainActions(player, action);
     }
@@ -397,9 +382,8 @@ public abstract class AbstractMenu {
     }
 
 
-
-    protected List<Integer> slotORslots(String path) {
-        List<Integer> slots = new ArrayList<>();
+    protected IntList slotORslots(String path) {
+        IntList slots = new IntArrayList();
 
 
         int slot = guiConfig.getInt(path + ".slot", -1);
@@ -423,8 +407,8 @@ public abstract class AbstractMenu {
     }
 
 
-    protected static List<Integer> parseSlotList(List<String> list) {
-        List<Integer> result = new ArrayList<>();
+    protected static IntList parseSlotList(List<String> list) {
+        IntList result = new IntArrayList();
         for (String str : list) {
             if (str.contains("-")) {
                 String[] parts = str.split("-");
@@ -441,6 +425,6 @@ public abstract class AbstractMenu {
     }
 
 
-
-    public record UpdatableItem(int slot, String name, List<String> lore) {}
+    public record UpdatableItem(int slot, String name, List<String> lore) {
+    }
 }

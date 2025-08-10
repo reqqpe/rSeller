@@ -35,7 +35,7 @@ public class MainMenu extends AbstractMenu implements Listener {
     public void onClickInventory(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         handleClick(player, e);
     }
@@ -44,7 +44,7 @@ public class MainMenu extends AbstractMenu implements Listener {
     public void onInventoryClose(InventoryCloseEvent e) {
         if (!(e.getPlayer() instanceof Player player)) return;
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         cancelItemUpdates(player);
     }

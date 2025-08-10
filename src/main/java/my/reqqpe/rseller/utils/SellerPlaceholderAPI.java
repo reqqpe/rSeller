@@ -60,7 +60,7 @@ public class SellerPlaceholderAPI extends PlaceholderExpansion {
                 }
             }
             if (params.equalsIgnoreCase("points_needed")) {
-                double points = Math.max(0, plugin.getLevelManager().getPointsForNextLevel(player)) ;
+                double points = Math.max(0, plugin.getLevelManager().getPointsForNextLevel(player));
                 return numberFormat.format("placeholders.points_needed", points);
             }
             if (params.equalsIgnoreCase("points_fornextlevel")) {
@@ -76,13 +76,13 @@ public class SellerPlaceholderAPI extends PlaceholderExpansion {
             if (params.equalsIgnoreCase("multiplier_points")) {
                 double multiplier = plugin.getBoosterManager()
                         .getBoosterByPlayer(player)
-                        .getPointMultiplier();
+                        .pointMultiplier();
                 return numberFormat.format("placeholders.multiplier_points", multiplier);
             }
             if (params.equalsIgnoreCase("multiplier_coins")) {
                 double multiplier = plugin.getBoosterManager()
                         .getBoosterByPlayer(player)
-                        .getCoinMultiplier();
+                        .coinMultiplier();
                 return numberFormat.format("placeholders.multiplier_coins", multiplier);
             }
         }

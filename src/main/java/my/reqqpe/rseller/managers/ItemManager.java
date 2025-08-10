@@ -4,7 +4,6 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.models.SearchItemSettings;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.models.item.ItemData;
-import my.reqqpe.rseller.utils.Base64.Base64ItemStack;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -21,7 +20,7 @@ public class ItemManager {
 
     private SearchItemSettings searchItemSettings;
     private final List<Item> items = new ArrayList<>();
-    private final Map<Material, Set<Item>> materialItems = new HashMap<>();
+    private final Map<Material, Set<Item>> materialItems = new EnumMap<>(Material.class);
 
     private final Main plugin;
 
@@ -29,11 +28,6 @@ public class ItemManager {
         this.plugin = plugin;
         load();
     }
-
-
-
-
-
 
 
     public void load() {
@@ -117,7 +111,7 @@ public class ItemManager {
 
             Item item = new Item(id, material, itemData, price, points);
             items.add(item);
-            materialItems.computeIfAbsent(item.getMaterial(), k -> new HashSet<>()).add(item);
+            materialItems.computeIfAbsent(item.material(), k -> new HashSet<>()).add(item);
         }
     }
 
@@ -166,7 +160,7 @@ public class ItemManager {
             }
         }
 
-        if (name == null && (lore == null || lore.isEmpty()) && modelData == 0 && enchants.isEmpty() && nbtTags.isEmpty()) {
+        if (name == null && lore.isEmpty() && modelData == 0 && enchants.isEmpty() && nbtTags.isEmpty()) {
             return null;
         }
 
@@ -192,44 +186,44 @@ public class ItemManager {
             customItemSection = config.createSection("custom-items");
         }
 
-        String itemId = item.getId();
+        String itemId = item.id();
         if (itemSection.contains(itemId) || customItemSection.contains(itemId)) {
             logger.warning("[ItemManager] Не удалось создать предмет, предмет с ID " + itemId + " уже существует");
             return false;
         }
 
-        if (item.getMaterial() == null) {
+        if (item.material() == null) {
             logger.warning("[ItemManager] Не удалось создать предмет, материал не указан для ID " + itemId);
             return false;
         }
-        if (item.getPrice() <= 0 && item.getPoints() <= 0) {
+        if (item.price() <= 0 && item.points() <= 0) {
             logger.warning("[ItemManager] Не удалось создать предмет, недопустимая цена или очки для ID " + itemId);
             return false;
         }
 
-        itemSection.set(itemId + ".price", item.getPrice());
-        itemSection.set(itemId + ".points", item.getPoints());
+        itemSection.set(itemId + ".price", item.price());
+        itemSection.set(itemId + ".points", item.points());
 
         ConfigurationSection itemDataSection = customItemSection.createSection(itemId);
-        itemDataSection.set("material", item.getMaterial().name());
+        itemDataSection.set("material", item.material().name());
 
-        ItemData itemData = item.getItemData();
+        ItemData itemData = item.itemData();
         if (itemData != null) {
             ConfigurationSection dataSection = itemDataSection.createSection("item-data");
 
-            if (itemData.getName() != null) {
-                dataSection.set("name", itemData.getName());
+            if (itemData.name() != null) {
+                dataSection.set("name", itemData.name());
             }
 
-            if (itemData.getLore() != null && !itemData.getLore().isEmpty()) {
-                dataSection.set("lore", itemData.getLore());
+            if (itemData.lore() != null && !itemData.lore().isEmpty()) {
+                dataSection.set("lore", itemData.lore());
             }
 
-            if (itemData.getModelData() != 0) {
-                dataSection.set("model-data", itemData.getModelData());
+            if (itemData.modelData() != 0) {
+                dataSection.set("model-data", itemData.modelData());
             }
 
-            Map<Enchantment, Integer> enchantments = itemData.getEnchantments();
+            Map<Enchantment, Integer> enchantments = itemData.enchantments();
             if (enchantments != null && !enchantments.isEmpty()) {
                 ConfigurationSection enchantsSection = dataSection.createSection("enchantments");
                 for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
@@ -243,7 +237,7 @@ public class ItemManager {
                 }
             }
 
-            Map<NamespacedKey, Object> nbtTags = itemData.getNbtTags();
+            Map<NamespacedKey, Object> nbtTags = itemData.nbtTags();
             if (nbtTags != null && !nbtTags.isEmpty()) {
                 ConfigurationSection nbtTagsSection = dataSection.createSection("nbt-tags");
                 for (Map.Entry<NamespacedKey, Object> entry : nbtTags.entrySet()) {
@@ -259,7 +253,7 @@ public class ItemManager {
         }
 
         items.add(item);
-        materialItems.computeIfAbsent(item.getMaterial(), k -> new HashSet<>()).add(item);
+        materialItems.computeIfAbsent(item.material(), k -> new HashSet<>()).add(item);
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
@@ -272,7 +266,6 @@ public class ItemManager {
 
         return true;
     }
-
 
 
     public Item searchItem(ItemStack itemStack) {
@@ -288,7 +281,7 @@ public class ItemManager {
 
     public Item getItemById(String id) {
         for (Item item : items) {
-            if (item.getId().equals(id)) {
+            if (item.id().equals(id)) {
                 return item;
             }
         }
@@ -298,7 +291,7 @@ public class ItemManager {
     public Item getItemByMaterialAndId(Material material, String id) {
         Set<Item> items = materialItems.get(material);
         for (Item item : items) {
-            if (item.getId().equals(id)) {
+            if (item.id().equals(id)) {
                 return item;
             }
         }

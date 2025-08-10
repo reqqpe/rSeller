@@ -4,8 +4,10 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.models.item.Item;
 import org.bukkit.configuration.ConfigurationSection;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class AutoSellManager {
 
@@ -18,6 +20,7 @@ public class AutoSellManager {
         this.plugin = plugin;
         loadConfig();
     }
+
     public void loadConfig() {
         ConfigurationSection config = plugin.getConfig().getConfigurationSection("autosell");
         if (config == null) {
@@ -93,6 +96,6 @@ public class AutoSellManager {
 
 
     public List<Item> getCategoryItems(String category) {
-        return categories.getOrDefault(category, Collections.emptyList());
+        return categories.getOrDefault(category, List.of());
     }
 }

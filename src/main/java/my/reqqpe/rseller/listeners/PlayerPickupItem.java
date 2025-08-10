@@ -19,9 +19,7 @@ public class PlayerPickupItem implements Listener {
         if (!(event.getEntity() instanceof Player player)) return;
         if (!player.hasPermission("rseller.autosell")) return;
 
-        Bukkit.getScheduler().runTask(plugin, () ->
-                plugin.getSellManager().autoSell(player));
-
+        Bukkit.getScheduler().runTask(plugin, () -> plugin.getSellManager().autoSell(player));
 
     }
 }
