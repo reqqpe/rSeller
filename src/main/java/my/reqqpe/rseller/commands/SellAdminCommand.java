@@ -139,7 +139,7 @@ public class SellAdminCommand implements CommandExecutor {
                 }
 
                 ItemStack itemStack = player.getInventory().getItemInMainHand();
-                if (itemStack == null || itemStack.getType().isAir()) {
+                if (itemStack.getType().isAir()) {
                     player.sendMessage(Colorizer.color("&cВозьмите предмет в руку прежде чем пытаться создать"));
                     return true;
                 }
@@ -242,7 +242,6 @@ public class SellAdminCommand implements CommandExecutor {
             String message = sec.getString("update-points-sender")
                     .replace("{player}", target.getName())
                     .replace("{value}", String.valueOf(newPoints));
-            ;
             commandSender.sendMessage(Colorizer.color(message));
             if (!target.equals(commandSender)) {
                 String message2 = sec.getString("update-points-target")

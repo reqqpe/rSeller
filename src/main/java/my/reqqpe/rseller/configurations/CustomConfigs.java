@@ -12,7 +12,7 @@ public class CustomConfigs {
     private final Main plugin;
     private final String relativePath;
     private final String fileName;
-    private File configFile;
+    private final File configFile;
     private FileConfiguration config;
 
     public CustomConfigs(Main plugin, String relativePath) {

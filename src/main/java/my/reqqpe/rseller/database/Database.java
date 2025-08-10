@@ -106,8 +106,6 @@ public class Database {
     }
 
     public void savePlayerDataAsync(UUID uuid) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            savePlayerData(uuid);
-        });
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> savePlayerData(uuid));
     }
 }

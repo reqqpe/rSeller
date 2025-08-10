@@ -83,7 +83,8 @@ public class Metrics {
         boolean logResponseStatusText = config.getBoolean("logResponseStatusText", false);
         boolean isFolia = false;
         try {
-            isFolia = Class.forName("io.papermc.paper.threadedregions.RegionizedServer") != null;
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            isFolia = true;
         } catch (Exception e) {
         }
         metricsBase =

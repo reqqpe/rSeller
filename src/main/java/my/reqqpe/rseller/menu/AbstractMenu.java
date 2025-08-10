@@ -25,8 +25,8 @@ public abstract class AbstractMenu {
 
     protected final Main plugin;
     protected FileConfiguration guiConfig;
-    protected Map<Integer, String> slotToItemId;
-    protected List<Integer> special_slots = new ArrayList<>();
+    protected final Map<Integer, String> slotToItemId;
+    protected List<Integer> specialSlots = new ArrayList<>();
     protected final Map<Integer, UpdatableItem> updatableItems = new HashMap<>();
     private final Map<UUID, List<BukkitTask>> updateTasks = new HashMap<>();
 
@@ -60,10 +60,9 @@ public abstract class AbstractMenu {
 
 
     protected void loadItems(Inventory inv, Player player) {
-        Set<Integer> usedSlots = new HashSet<>();
         List<Integer> specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
-        this.special_slots = new ArrayList<>(specialSlots);
-        usedSlots.addAll(specialSlots);
+        this.specialSlots = new ArrayList<>(specialSlots);
+        Set<Integer> usedSlots = new HashSet<>(specialSlots);
         ConfigurationSection itemsSection = guiConfig.getConfigurationSection("items");
 
         if (itemsSection != null) {
@@ -124,7 +123,7 @@ public abstract class AbstractMenu {
                                     (replacePlaceholders(player, name, inv)));
 
                     List<String> lore = guiConfig.getStringList(path + ".lore");
-                    if (lore != null && !lore.isEmpty()) {
+                    if (!lore.isEmpty()) {
                         meta.setLore(Colorizer
                                 .colorizeAll
                                         (replacePlaceholders(player, lore, inv)));
@@ -229,13 +228,13 @@ public abstract class AbstractMenu {
             result.add(replacePlaceholders(player, text, inventory));
         }
 
-        return list;
+        return result;
     }
 
 
     public void handleClick(Player player, InventoryClickEvent e) {
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         int rawSlot = e.getRawSlot();
         Inventory clickedInv = e.getClickedInventory();
@@ -243,7 +242,7 @@ public abstract class AbstractMenu {
 
 
         if (clickedInv == menuInv && rawSlot < menuInv.getSize()) {
-            if (special_slots.contains(rawSlot)) {
+            if (specialSlots.contains(rawSlot)) {
                 if (handleSpecialSlotClick(player, e)) return;
             }
 
@@ -264,7 +263,7 @@ public abstract class AbstractMenu {
 
             ConfigurationSection reqSection = itemSection.getConfigurationSection(
                     isLeftClick ? "left_click_requaments" :
-                            isRightClick ? "right_click_requaments" : null
+                            "right_click_requaments"
             );
 
             boolean allRequirementsPassed = true;
@@ -290,7 +289,7 @@ public abstract class AbstractMenu {
             }
 
             if (!allRequirementsPassed) {
-                List<String> denyCommands = reqSection != null ? reqSection.getStringList("deny_commands") : Collections.emptyList();
+                List<String> denyCommands = reqSection.getStringList("deny_commands");
                 for (String cmd : denyCommands) {
                     runMainActions(player, cmd);
                 }
@@ -299,7 +298,7 @@ public abstract class AbstractMenu {
 
             List<String> actions = itemSection.getStringList(
                     isLeftClick ? "left_click_actions" :
-                            isRightClick ? "right_click_actions" : null
+                            "right_click_actions"
             );
 
             for (String action : actions) {
@@ -318,7 +317,7 @@ public abstract class AbstractMenu {
 
         Inventory inv = player.getOpenInventory().getTopInventory();
         if (!(inv.getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         runMainActions(player, action);
     }

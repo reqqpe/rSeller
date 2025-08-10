@@ -39,8 +39,8 @@ public class SellManager {
         }
 
 
-        double finalPrice = price * Math.max(1.0, booster.getCoinMultiplier());
-        double finalPoints = points * Math.max(1.0, booster.getPointMultiplier());
+        double finalPrice = price * Math.max(1.0, booster.coinMultiplier());
+        double finalPoints = points * Math.max(1.0, booster.pointMultiplier());
 
         return new SellResult(finalPrice, finalPoints);
     }
@@ -58,9 +58,8 @@ public class SellManager {
             if (item == null) continue;
 
 
-            double price = item.getPrice();
-            ;
-            double points = item.getPoints();
+            double price = item.price();
+            double points = item.points();
 
             int amount = itemStack.getAmount();
 
@@ -119,10 +118,10 @@ public class SellManager {
             Item item = itemManager.searchItem(itemstack);
             if (item == null) continue;
 
-            if (!data.isAutosell(item.getId())) continue;
+            if (!data.isAutosell(item.id())) continue;
 
-            double price = item.getPrice();
-            double points = item.getPoints();
+            double price = item.price();
+            double points = item.points();
 
             int amount = itemstack.getAmount();
 
@@ -143,8 +142,8 @@ public class SellManager {
             booster = new Booster(1.0, 1.0);
         }
 
-        totalCoins *= Math.max(1.0, booster.getCoinMultiplier());
-        totalPoints *= Math.max(1.0, booster.getPointMultiplier());
+        totalCoins *= Math.max(1.0, booster.coinMultiplier());
+        totalPoints *= Math.max(1.0, booster.pointMultiplier());
 
         if (totalCoins > 0) economy.depositPlayer(player, totalCoins);
         if (totalPoints > 0) data.addPoints(totalPoints);
@@ -175,8 +174,8 @@ public class SellManager {
             Item item = itemManager.searchItem(itemStack);
             if (item == null) continue;
 
-            double price = item.getPrice();
-            double points = item.getPoints();
+            double price = item.price();
+            double points = item.points();
 
             if (price <= 0 && points <= 0) {
                 continue;

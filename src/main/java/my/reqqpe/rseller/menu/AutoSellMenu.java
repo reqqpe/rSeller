@@ -83,8 +83,8 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
         PlayerData playerData = database.getPlayerData(player.getUniqueId());
 
-        for (int i = 0; i < special_slots.size(); i++) {
-            int slot = special_slots.get(i);
+        for (int i = 0; i < specialSlots.size(); i++) {
+            int slot = specialSlots.get(i);
 
             if (i >= pageItems.size()) {
                 inv.setItem(slot, null);
@@ -102,10 +102,10 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
             String itemName = item.getDisplayName(plugin);
 
-            double price = item.getPrice();
-            double points = item.getPoints();
+            double price = item.price();
+            double points = item.points();
 
-            String id = item.getId();
+            String id = item.id();
 
             boolean autosell = playerData.isAutosell(id);
 
@@ -249,7 +249,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     public void onClickInventory(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
 
         e.setCancelled(true);
@@ -260,7 +260,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     public void onInventoryClose(InventoryCloseEvent e) {
         if (!(e.getPlayer() instanceof Player player)) return;
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         cancelItemUpdates(player);
     }
@@ -269,12 +269,12 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     @Override
     protected boolean handleSpecialSlotClick(Player player, InventoryClickEvent e) {
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return false;
-        if (!holder.getId().equals(getMenuId())) return false;
+        if (!holder.id().equals(getMenuId())) return false;
 
         int rawSlot = e.getRawSlot();
         Inventory menuInv = e.getInventory();
 
-        if (special_slots.contains(rawSlot)) {
+        if (specialSlots.contains(rawSlot)) {
             e.setCancelled(true);
             ItemStack clickedItem = menuInv.getItem(rawSlot);
             if (clickedItem != null && clickedItem.getType() != Material.AIR) {
@@ -306,7 +306,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     protected void executeAction(Player player, String action) {
         Inventory inv = player.getOpenInventory().getTopInventory();
         if (!(inv.getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
 
         if (action.equalsIgnoreCase("[next_page]")) {
@@ -363,7 +363,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
             if (!items.isEmpty()) {
                 PlayerData playerData = database.getPlayerData(player.getUniqueId());
                 for (Item item : items) {
-                    playerData.setAutosell(item.getId(), !autosellCategory);
+                    playerData.setAutosell(item.id(), !autosellCategory);
                 }
                 openMenu(player);
             }
@@ -383,7 +383,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
             for (Item item : items) {
 
-                String id = item.getId();
+                String id = item.id();
 
                 if (!playerData.isAutosell(id)) disabled.add(id);
             }

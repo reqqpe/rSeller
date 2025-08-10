@@ -18,9 +18,8 @@ public class SellCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) return false;
+        if (!(sender instanceof Player player)) return false;
 
-        Player player = (Player) sender;
         String openedGUI = plugin.getOpenedGUI();
 
         if (openedGUI.equals("allSellGUI")) plugin.getAllSellMenu().openMenu(player);

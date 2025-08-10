@@ -8,7 +8,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class AutoSellTask {
     private final Main plugin;
-    private long updateTime;
+    private final long updateTime;
     private final SellManager sellManager;
 
     public AutoSellTask(Main plugin, SellManager sellManager) {

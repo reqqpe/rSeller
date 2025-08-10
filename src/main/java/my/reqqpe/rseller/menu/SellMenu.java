@@ -51,10 +51,10 @@ public class SellMenu extends AbstractMenu implements Listener {
 
 
         if (!(inventory.getHolder() instanceof CustomInventoryHolder holder)) return text;
-        if (!holder.getId().equals(getMenuId())) return text;
+        if (!holder.id().equals(getMenuId())) return text;
 
 
-        var result = plugin.getSellManager().calculateSellPreview(player, inventory, new ArrayList<>(special_slots));
+        var result = plugin.getSellManager().calculateSellPreview(player, inventory, new ArrayList<>(specialSlots));
         String coinsFormatted = numberFormatManager.format("mainGUI.sell_price", result.coins());
         String pointsFormatted = numberFormatManager.format("mainGUI.sell_points", result.points());
 
@@ -83,11 +83,11 @@ public class SellMenu extends AbstractMenu implements Listener {
     public void onInventoryClose(InventoryCloseEvent e) {
         if (!(e.getPlayer() instanceof Player player)) return;
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         Inventory inv = e.getInventory();
 
-        for (int slot : special_slots) {
+        for (int slot : specialSlots) {
             ItemStack item = inv.getItem(slot);
             if (item != null && item.getType() != Material.AIR) {
                 HashMap<Integer, ItemStack> leftovers = player.getInventory().addItem(item);
@@ -105,7 +105,7 @@ public class SellMenu extends AbstractMenu implements Listener {
     public void onClickInventory(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.getId().equals(getMenuId())) return;
+        if (!holder.id().equals(getMenuId())) return;
 
         handleClick(player, e);
     }
@@ -116,7 +116,7 @@ public class SellMenu extends AbstractMenu implements Listener {
 
         int rawSlot = e.getRawSlot();
 
-        if (special_slots.contains(rawSlot)) {
+        if (specialSlots.contains(rawSlot)) {
             e.setCancelled(false);
             return true;
         }
@@ -129,7 +129,7 @@ public class SellMenu extends AbstractMenu implements Listener {
         if (action.equalsIgnoreCase("[sell]")) {
             Inventory inv = player.getOpenInventory().getTopInventory();
             if (!(inv.getHolder() instanceof CustomInventoryHolder holder)) return;
-            if (!holder.getId().equals(getMenuId())) return;
+            if (!holder.id().equals(getMenuId())) return;
 
             List<Integer> sellSlots = parseSlotList(guiConfig.getStringList("special-slots"));
             plugin.getSellManager().sellItems(player, inv, sellSlots);
