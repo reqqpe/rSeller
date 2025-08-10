@@ -233,7 +233,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
         int startIndex = (page - 1) * totalSlots;
         int endIndex = Math.min(startIndex + totalSlots, allItems.size());
 
-        if (startIndex >= allItems.size()) return Collections.emptyList();
+        if (startIndex >= allItems.size()) return List.of();
 
         return allItems.subList(startIndex, endIndex);
     }

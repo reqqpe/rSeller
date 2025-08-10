@@ -121,8 +121,8 @@ public record Item(String id, Material material, ItemData itemData, double price
         }
 
         if (searchItemSettings.lore()) {
-            List<String> expectedLore = itemData.lore() != null ? itemData.lore() : Collections.emptyList();
-            List<String> actualLore = itemMeta.hasLore() ? itemMeta.getLore() : Collections.emptyList();
+            List<String> expectedLore = itemData.lore() != null ? itemData.lore() : List.of();
+            List<String> actualLore = itemMeta.hasLore() ? itemMeta.getLore() : List.of();
             if (!Objects.equals(expectedLore, actualLore)) {
                 return false;
             }
