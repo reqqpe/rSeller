@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+
 public class SellManager {
 
     private final Main plugin;
@@ -44,9 +45,12 @@ public class SellManager {
         return new SellResult(finalPrice, finalPoints);
     }
 
+
     public void sellItems(Player player, Inventory inv, IntList sellSlots) {
         double totalCoins = 0;
         double totalPoints = 0;
+
+        int finalAmount = 0;
 
         for (int slot : sellSlots) {
             ItemStack itemStack = inv.getItem(slot);
@@ -69,8 +73,9 @@ public class SellManager {
             if (points > 0) {
                 totalPoints += points * amount;
             }
-
+            
             if (price > 0 || points > 0) {
+                finalAmount += amount;
                 inv.setItem(slot, null);
             }
         }
@@ -93,69 +98,12 @@ public class SellManager {
 
             String message = Colorizer.color(sec.getString("sell-items")
                     .replace("{coins}", coinsFormat)
-                    .replace("{points}", pointsFormat));
+                    .replace("{points}", pointsFormat)
+                    .replace("{amount}", String.valueOf(finalAmount)));
             player.sendMessage(message);
         } else {
             String message = Colorizer.color(sec.getString("no-sell-items"));
             player.sendMessage(message);
-        }
-    }
-
-
-    public void autoSell(Player player) {
-        Inventory inv = player.getInventory();
-        PlayerData data = database.getPlayerData(player.getUniqueId());
-
-        double totalCoins = 0;
-        double totalPoints = 0;
-
-
-        for (int i = 0; i < inv.getSize(); i++) {
-            ItemStack itemstack = inv.getItem(i);
-            if (itemstack == null || itemstack.getType() == Material.AIR) continue;
-
-            Item item = itemManager.searchItem(itemstack);
-            if (item == null) continue;
-
-            if (!data.isAutosell(item.id())) continue;
-
-            double price = item.price();
-            double points = item.points();
-
-            int amount = itemstack.getAmount();
-
-            if (price > 0) {
-                totalCoins += price * amount;
-            }
-
-            if (points > 0) {
-                totalPoints += points * amount;
-            }
-            if (price > 0 || points > 0) {
-                inv.setItem(i, null);
-            }
-        }
-
-        Booster booster = plugin.getBoosterManager().getBoosterByPlayer(player);
-        if (booster == null) {
-            booster = new Booster(1.0, 1.0);
-        }
-
-        totalCoins *= Math.max(1.0, booster.coinMultiplier());
-        totalPoints *= Math.max(1.0, booster.pointMultiplier());
-
-        if (totalCoins > 0) economy.depositPlayer(player, totalCoins);
-        if (totalPoints > 0) data.addPoints(totalPoints);
-
-        if (totalCoins > 0 || totalPoints > 0) {
-
-            String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
-            String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
-
-            String msg = Colorizer.color(plugin.getConfig().getString("messages.auto-sell")
-                    .replace("{coins}", coinsFormat)
-                    .replace("{points}", pointsFormat));
-            player.sendMessage(msg);
         }
     }
 

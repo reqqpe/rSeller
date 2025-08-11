@@ -147,7 +147,7 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        database.saveAll();
+        if (database != null) database.saveAll();
     }
 
     private void loadConfigs() {

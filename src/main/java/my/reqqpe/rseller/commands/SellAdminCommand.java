@@ -5,6 +5,7 @@ import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
+import my.reqqpe.rseller.utils.HeadUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -65,6 +66,7 @@ public class SellAdminCommand implements CommandExecutor {
                     return true;
                 }
                 if (type.equalsIgnoreCase("guis")) {
+                    HeadUtil.clearCache();
                     plugin.getAutoSellGUIConfig().reloadConfig();
                     plugin.getAllSellGUIConfig().reloadConfig();
                     plugin.getMainGUIConfig().reloadConfig();
@@ -75,6 +77,9 @@ public class SellAdminCommand implements CommandExecutor {
                 }
             }
 
+
+
+            HeadUtil.clearCache();
             plugin.reloadConfig();
             plugin.getAutoSellGUIConfig().reloadConfig();
             plugin.getAllSellGUIConfig().reloadConfig();

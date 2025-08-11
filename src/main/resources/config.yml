@@ -9,6 +9,7 @@
 
 
 # Нужна помощь или хочешь узнавать и предлагать идеи для обновлений?
+# Вики плагина: https://reqqpe.gitbook.io/rseller
 # ТГК: https://t.me/reqqpeDev
 
 
@@ -24,7 +25,6 @@ database:
 
 # Какое меню будет открывать команда /<buyer|seller|sell>
 sell-command: "mainGUI" # Такие же названия как у GUI файлов (allSellGUI, mainGUI, autoSellGUI)
-
 
 metrics: true
 update-check: true
@@ -50,7 +50,7 @@ autosell:
         - EMERALD
         - NETHERITE_INGOT
 numbers_format:
-  # https://github.com/reqqpe/rSeller/wiki/Руководство-по-настройке-формата-чисел
+  # https://reqqpe.gitbook.io/rseller/rukovodstvo-po-nastroike-formata-chisel
   placeholders:
     points: "%.2f"
     points_needed: "%.2f"
@@ -119,7 +119,7 @@ messages:
   update-points-sender: "&#54F45F[✔] &fУ игрока &e{player} &fтеперь &e{value} &fочков скупщика"
   update-points-target: "&#54F45F[✔] &fВаши очки скупщика были обновлены до &e{value}"
   no-sell-items: "&#FD4747[❌] &fНет предметов, которые можно продать"
-  sell-items: "&#54F45F[✔] Вы успешно &fпродали предметы на сумму &e{coins} &fи получили &e{points} &fочков скупщика"
+  sell-items: "&#54F45F[✔] Вы успешно &fпродали &e{amount} &fпредмет(ов) на сумму &e{coins} &fи получили &e{points} &fочков скупщика"
   auto-sell: "&#54F45F[✔] Вы успешно &fпродали {item_name} &f[&ex{amount}&f] за &e{coins} &fмонет и &e{points} &fочков скупщика."
   autosell-enable: "&#54F45Fвключена"
   autosell-disable: "&#FD4747выключена"
