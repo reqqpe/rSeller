@@ -30,7 +30,7 @@ public class PlayerPickupItem implements Listener {
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerPickupItem(EntityPickupItemEvent event) {
-
+        if (plugin.isBlockedWorld(event.getEntity().getWorld().getName())) return;
         if (!(event.getEntity() instanceof Player player)) return;
         if (!player.hasPermission("rseller.autosell")) return;
 

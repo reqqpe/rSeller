@@ -22,6 +22,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -63,6 +65,7 @@ public final class Main extends JavaPlugin {
 
 
     public static boolean useNBTAPI = false;
+    private Set<String> blockWorlds = new HashSet<>();
 
 
     @Override
@@ -172,4 +175,17 @@ public final class Main extends JavaPlugin {
             database.loadPlayerData(pl.getUniqueId());
         }
     }
+
+
+    public void reloadBlockWorlds() {
+        blockWorlds.clear();
+
+        List<String> list = getConfig().getStringList("autosell.block-worlds");
+        blockWorlds.addAll(list);
+    }
+
+    public boolean isBlockedWorld(String world) {
+        return blockWorlds.contains(world);
+    }
+
 }

@@ -60,6 +60,7 @@ public class SellAdminCommand implements CommandExecutor {
                     plugin.getLevelManager().reloadLevels();
                     plugin.getBoosterManager().load();
                     plugin.getFormatManager().reload();
+                    plugin.reloadBlockWorlds();
 
                     String message = reloadSection.getString("config", "&aГлавная конфигурация успешно перезагружена");
                     commandSender.sendMessage(Colorizer.color(message));
@@ -90,6 +91,7 @@ public class SellAdminCommand implements CommandExecutor {
             plugin.getAutoSellManager().loadConfig();
             plugin.getFormatManager().reload();
             plugin.getBoosterManager().load();
+            plugin.reloadBlockWorlds();
 
             String message = reloadSection.getString("all", "&aПлагин успешно перезагружен");
             commandSender.sendMessage(Colorizer.color(message));
