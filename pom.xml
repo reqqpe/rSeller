@@ -6,7 +6,7 @@
 
     <groupId>my.reqqpe</groupId>
     <artifactId>rSeller</artifactId>
-    <version>1.9.2</version>
+    <version>1.9.3</version>
     <packaging>jar</packaging>
 
     <name>rSeller</name>
