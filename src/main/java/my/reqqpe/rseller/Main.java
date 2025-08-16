@@ -16,6 +16,7 @@ import my.reqqpe.rseller.updateCheker.UpdateChecker;
 import my.reqqpe.rseller.utils.Metrics;
 import my.reqqpe.rseller.utils.SellerPlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -136,6 +137,7 @@ public final class Main extends JavaPlugin {
         boolean autoSellEnabled = config.getBoolean("autosell.enable", true);
 
         if (autoSellEnabled) {
+            setupBlockWorlds();
             pm.registerEvents(new PlayerPickupItem(this, database), this);
         }
 
@@ -177,11 +179,21 @@ public final class Main extends JavaPlugin {
     }
 
 
-    public void reloadBlockWorlds() {
+    public void setupBlockWorlds() {
         blockWorlds.clear();
 
-        List<String> list = getConfig().getStringList("autosell.block-worlds");
-        blockWorlds.addAll(list);
+        List<String> list = getConfig().getStringList("autosell.worlds-list");
+        boolean whitelist = getConfig().getBoolean("autosell.type-list", false);
+        if (whitelist) {
+            for (World world : Bukkit.getWorlds()) {
+                String worldName = world.getName();
+                if (!list.contains(worldName)) {
+                    blockWorlds.add(worldName);
+                }
+            }
+        } else {
+            blockWorlds.addAll(list);
+        }
     }
 
     public boolean isBlockedWorld(String world) {
