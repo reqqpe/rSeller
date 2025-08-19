@@ -1,5 +1,5 @@
 name: rSeller
-version: '${project.version}'
+version: '${version}'
 main: my.reqqpe.rseller.Main
 api-version: '1.16'
 authors: [reqqpe]
