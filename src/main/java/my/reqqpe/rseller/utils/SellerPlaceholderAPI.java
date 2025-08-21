@@ -56,7 +56,7 @@ public class SellerPlaceholderAPI extends PlaceholderExpansion {
                 PlayerData playerData = database.getPlayerData(player.getUniqueId());
                 if (playerData != null) {
                     double points = playerData.getPoints();
-                    return String.format(numberFormat.format("placeholders.points", points));
+                    return numberFormat.format("placeholders.points", points);
                 }
             }
             if (params.equalsIgnoreCase("points_needed")) {

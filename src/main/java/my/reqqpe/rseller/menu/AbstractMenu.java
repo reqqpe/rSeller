@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.clip.placeholderapi.PlaceholderAPI;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
@@ -220,7 +221,7 @@ public abstract class AbstractMenu {
 
 
     protected String replacePlaceholders(Player player, String text, Inventory inventory) {
-        return text;
+        return PlaceholderAPI.setPlaceholders(player, text);
     }
 
 

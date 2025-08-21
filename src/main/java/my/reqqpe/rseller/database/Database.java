@@ -22,7 +22,7 @@ public class Database {
 
     public PlayerData getPlayerData(UUID uuid) {
         PlayerData playerData = players.get(uuid);
-        return playerData != null ? playerData : new PlayerData(uuid);
+        return playerData != null ? playerData : create(uuid);
     }
 
     public PlayerData create(UUID uuid) {

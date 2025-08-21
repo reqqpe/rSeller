@@ -94,10 +94,12 @@ public final class Main extends JavaPlugin {
         sellManager = new SellManager(this, database);
         autoSellManager = new AutoSellManager(this);
 
-        if (getServer().getPluginManager().getPlugin("PlaceHolderAPI") != null) {
-            new SellerPlaceholderAPI(this, database).register();
-            getLogger().info("PlaceHolderAPI найден");
+        if (getServer().getPluginManager().getPlugin("PlaceHolderAPI") == null) {
+            getLogger().severe("PlaceholderAPI не найден");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
         }
+        new SellerPlaceholderAPI(this, database).register();
 
         mainMenu = new MainMenu(this);
         allSellMenu = new SellMenu(this);
@@ -199,7 +201,5 @@ public final class Main extends JavaPlugin {
     public boolean isBlockedWorld(String world) {
         return blockWorlds.contains(world);
     }
-
-
 
 }
