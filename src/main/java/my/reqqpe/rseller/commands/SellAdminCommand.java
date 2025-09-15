@@ -3,6 +3,7 @@ package my.reqqpe.rseller.commands;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.events.PointsUpdateEvent;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
@@ -253,6 +254,7 @@ public class SellAdminCommand implements CommandExecutor {
                         .replace("{value}", String.valueOf(newPoints));
                 target.sendMessage(Colorizer.color(message2));
             }
+            Bukkit.getPluginManager().callEvent(new PointsUpdateEvent(target, amount, true, action, database));
         }
         return true;
     }

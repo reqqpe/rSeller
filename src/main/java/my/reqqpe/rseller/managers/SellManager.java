@@ -5,15 +5,21 @@ import my.reqqpe.rseller.EconomySetup;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.events.PointsUpdateEvent;
+import my.reqqpe.rseller.events.SellEvent;
 import my.reqqpe.rseller.models.Booster;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SellManager {
@@ -51,6 +57,7 @@ public class SellManager {
         double totalPoints = 0;
 
         int finalAmount = 0;
+        List<Item> sellItems = new ArrayList<>();
 
         for (int slot : sellSlots) {
             ItemStack itemStack = inv.getItem(slot);
@@ -76,6 +83,7 @@ public class SellManager {
             
             if (price > 0 || points > 0) {
                 finalAmount += amount;
+                sellItems.add(item);
                 inv.setItem(slot, null);
             }
         }
@@ -88,6 +96,7 @@ public class SellManager {
         if (sellResult.points > 0) {
             PlayerData playerData = database.getPlayerData(player.getUniqueId());
             playerData.addPoints(sellResult.points);
+            Bukkit.getPluginManager().callEvent(new PointsUpdateEvent(player, sellResult.points, false, "add", database));
         }
 
         ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
@@ -101,6 +110,9 @@ public class SellManager {
                     .replace("{points}", pointsFormat)
                     .replace("{amount}", String.valueOf(finalAmount)));
             player.sendMessage(message);
+
+            Bukkit.getPluginManager().callEvent(new SellEvent(player, sellItems, database));
+
         } else {
             String message = Colorizer.color(sec.getString("no-sell-items"));
             player.sendMessage(message);
