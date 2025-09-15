@@ -4,7 +4,6 @@
 
 plugins {
     id 'java-library'
-    id 'maven-publish'
 }
 
 repositories {
@@ -55,14 +54,6 @@ group = 'my.reqqpe'
 version = '1.9.4'
 description = 'rSeller'
 java.sourceCompatibility = JavaVersion.VERSION_16
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
-}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
