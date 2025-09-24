@@ -26,8 +26,6 @@ public class PointsUpdateEvent extends Event {
 
     private final Player player;
     private final double points;
-
-    @Getter(AccessLevel.NONE)
     private final Database database;
 
     // Если обновление очков выполнено с помощью команды - true
@@ -50,6 +48,10 @@ public class PointsUpdateEvent extends Event {
 
     @Override
     public @NotNull HandlerList getHandlers() {
-        return null;
+        return handlers;
+    }
+
+    public static @NotNull HandlerList getHandlerList() {
+        return handlers;
     }
 }

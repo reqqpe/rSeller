@@ -23,11 +23,11 @@ import java.util.List;
 @Getter
 public class SellEvent extends Event {
 
+
     private static final HandlerList handlers = new HandlerList();
+
     private final Player player;
     private final List<Item> sellingItems;
-
-    @Getter(AccessLevel.NONE)
     private final Database database;
 
     public SellEvent(Player player, List<Item> sellingItems, Database database) {
@@ -42,6 +42,10 @@ public class SellEvent extends Event {
 
     @Override
     public @NotNull HandlerList getHandlers() {
+        return handlers;
+    }
+
+    public static @NotNull HandlerList getHandlerList() {
         return handlers;
     }
 }
