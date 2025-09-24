@@ -1,10 +1,11 @@
 package my.reqqpe.rseller.updateCheker;
 
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.Getter;
 import my.reqqpe.rseller.Main;
 import org.bukkit.Bukkit;
-import org.json.JSONObject;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -14,6 +15,7 @@ import java.net.http.HttpResponse;
 public class UpdateChecker {
     private final Main plugin;
     private final String url = "https://api.github.com/repos/reqqpe/rSeller/releases/latest";
+
     @Getter
     private boolean updateAvailable = false;
     @Getter
@@ -40,8 +42,10 @@ public class UpdateChecker {
                 );
 
                 if (response.statusCode() == 200) {
-                    JSONObject jsonObject = new JSONObject(response.body());
-                    latestVersion = jsonObject.optString("tag_name", "Неизвестная версия");
+
+                    JsonParser parser = new JsonParser();
+                    JsonObject jsonObject = parser.parse(response.body()).getAsJsonObject();
+                    latestVersion = jsonObject.has("tag_name") ? jsonObject.get("tag_name").getAsString() : "Неизвестная версия";
 
                     String currentVersion = plugin.getDescription().getVersion();
                     updateAvailable = needsUpdate(currentVersion, latestVersion);

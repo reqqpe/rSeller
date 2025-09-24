@@ -39,7 +39,6 @@ repositories {
 
 dependencies {
     api libs.org.bstats.bstats.bukkit
-    api libs.org.json.json
     compileOnly libs.com.destroystokyo.paper.paper.api
     compileOnly libs.me.clip.placeholderapi
     compileOnly libs.com.zaxxer.hikaricp
