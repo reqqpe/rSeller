@@ -13,14 +13,24 @@
 # ДС: https://dsc.gg/rplugins
 
 
-#Настройки пула соединений, если не знаете что это рекомендуется не менять
+# Настройка базы данных
 database:
-  max-pool-size: 10
-  #В миллисекундах
-  keep-alive: 120000
-  idle-timeout: 60000
-  connection-timeout: 30000
-  max-life-time: 1800000
+  type: sqlite # sqlite, mysql, postgres
+  # Настройки пула соединений, если не знаете что это рекомендуется не менять
+  hikari:
+    max-pool-size: 10
+    keep-alive: 120000
+    idle-timeout: 60000
+    connection-timeout: 30000
+    max-life-time: 1800000
+
+  # Параметры подключения к MySQL/Postgres
+  connection:
+    host: localhost
+    port: 3306
+    database: rseller
+    username: "username"
+    password: "password"
 
 
 # Какое меню будет открывать команда /<buyer|seller|sell>

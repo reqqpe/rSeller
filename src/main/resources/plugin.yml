@@ -15,3 +15,5 @@ commands:
 
 libraries:
   - com.zaxxer:HikariCP:6.3.0
+  - com.mysql:mysql-connector-j:9.4.0
+  - org.postgresql:postgresql:42.7.8
