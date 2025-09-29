@@ -9,13 +9,14 @@ import my.reqqpe.rseller.models.Booster;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class PlayerPickupItem implements Listener {
         this.database = database;
         this.economy = EconomySetup.getEconomy();
         this.numberFormatManager = plugin.getFormatManager();
-        this.enableDropBlockItemEvent = plugin.getConfig().getBoolean("autosell.block-drop-sell");
+        this.enableDropBlockItemEvent = plugin.getConfig().getBoolean("autosell.block-drop-event-sell-inventory");
     }
 
 
@@ -51,7 +52,7 @@ public class PlayerPickupItem implements Listener {
     }
 
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true)
     public void onBlockDropItemEvent(BlockDropItemEvent e) {
         if (!enableDropBlockItemEvent) return;
         if (plugin.isBlockedWorld(e.getBlock().getWorld().getName())) return;
@@ -59,20 +60,18 @@ public class PlayerPickupItem implements Listener {
         Player player = e.getPlayer();
         if (!player.hasPermission("rseller.autosell")) return;
 
-        List<org.bukkit.entity.Item> itemsInEvent = e.getItems();
-        if (itemsInEvent.isEmpty()) return;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            PlayerInventory inv = player.getInventory();
 
-        boolean hasSellingItems = false;
+            for (int slot = 0; slot < inv.getSize(); slot++) {
+                ItemStack itemStack = inv.getItem(slot);
+                if (itemStack == null) continue;
 
-        for (org.bukkit.entity.Item itemInEvent : itemsInEvent) {
-            ItemStack itemStack = itemInEvent.getItemStack();
-            if (sellItem(player, itemStack)) {
-                hasSellingItems = true;
-                itemInEvent.remove();
+                if (sellItem(player, itemStack)) {
+                    inv.setItem(slot, null);
+                }
             }
-        }
-        
-        if (hasSellingItems) e.setCancelled(true);
+        }, 1L);
     }
 
 
