@@ -46,4 +46,8 @@ public class PlayerData {
         autosellMap = GSON.fromJson(json, Map.class);
     }
 
+    public boolean hasEnabledAutosell() {
+        return autosellMap.values().stream().anyMatch(b -> b);
+    }
+
 }

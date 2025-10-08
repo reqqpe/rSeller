@@ -38,7 +38,7 @@ public class SellMenu extends AbstractMenu implements Listener {
 
     @Override
     protected String getMenuId() {
-        return "SELL_MENU";
+        return "allSellGUI";
     }
 
 
@@ -80,13 +80,8 @@ public class SellMenu extends AbstractMenu implements Listener {
         return replaced;
     }
 
-
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent e) {
-        if (!(e.getPlayer() instanceof Player player)) return;
-        if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.id().equals(getMenuId())) return;
-
+    @Override
+    public void closeMenu(Player player, InventoryCloseEvent e) {
         Inventory inv = e.getInventory();
 
         for (int slot : specialSlots) {
@@ -98,10 +93,8 @@ public class SellMenu extends AbstractMenu implements Listener {
                 }
             }
         }
-
-        cancelItemUpdates(player);
+        super.closeMenu(player, e);
     }
-
 
     @EventHandler
     public void onClickInventory(InventoryClickEvent e) {

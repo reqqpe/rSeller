@@ -2,7 +2,6 @@ package my.reqqpe.rseller.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import lombok.SneakyThrows;
 import my.reqqpe.rseller.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -85,7 +84,6 @@ public class Database {
             }
         }
 
-        // Настройки HikariCP
         hc.setMaximumPoolSize(hikari.getInt("max-pool-size", 10));
         hc.setIdleTimeout(hikari.getLong("idle-timeout", 600000));
         hc.setConnectionTimeout(hikari.getLong("connection-timeout", 30000));

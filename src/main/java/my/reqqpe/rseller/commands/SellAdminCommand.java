@@ -4,6 +4,10 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.PlayerData;
 import my.reqqpe.rseller.events.PointsUpdateEvent;
+import my.reqqpe.rseller.managers.MenuManager;
+import my.reqqpe.rseller.menu.AutoSellMenu;
+import my.reqqpe.rseller.menu.MainMenu;
+import my.reqqpe.rseller.menu.SellMenu;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
@@ -47,31 +51,21 @@ public class SellAdminCommand implements CommandExecutor {
             if (args.length > 1) {
                 String type = args[1];
                 if (type.equalsIgnoreCase("items")) {
-                    plugin.getItemsConfig().reloadConfig();
-                    plugin.getItemManager().load();
-                    plugin.getAutoSellManager().loadConfig();
+                    reloadItems();
 
                     String message = reloadSection.getString("items", "&aКонфигурация предметов успешно перезагружена");
                     commandSender.sendMessage(Colorizer.color(message));
                     return true;
                 }
                 if (type.equalsIgnoreCase("config")) {
-                    plugin.reloadConfig();
-                    plugin.getAutoSellManager().loadConfig();
-                    plugin.getLevelManager().reloadLevels();
-                    plugin.getBoosterManager().load();
-                    plugin.getFormatManager().reload();
-                    plugin.setupBlockWorlds();
+                    reloadConfig();
 
                     String message = reloadSection.getString("config", "&aГлавная конфигурация успешно перезагружена");
                     commandSender.sendMessage(Colorizer.color(message));
                     return true;
                 }
                 if (type.equalsIgnoreCase("guis")) {
-                    HeadUtil.clearCache();
-                    plugin.getAutoSellGUIConfig().reloadConfig();
-                    plugin.getAllSellGUIConfig().reloadConfig();
-                    plugin.getMainGUIConfig().reloadConfig();
+                    reloadGUIs();
 
                     String message = reloadSection.getString("guis", "&aКонфигурация менюшек успешно перезагружена");
                     commandSender.sendMessage(Colorizer.color(message));
@@ -79,18 +73,10 @@ public class SellAdminCommand implements CommandExecutor {
                 }
             }
 
-            HeadUtil.clearCache();
-            plugin.reloadConfig();
-            plugin.getAutoSellGUIConfig().reloadConfig();
-            plugin.getAllSellGUIConfig().reloadConfig();
-            plugin.getMainGUIConfig().reloadConfig();
-            plugin.getItemsConfig().reloadConfig();
-            plugin.getItemManager().load();
-            plugin.getLevelManager().reloadLevels();
-            plugin.getAutoSellManager().loadConfig();
-            plugin.getFormatManager().reload();
-            plugin.getBoosterManager().load();
-            plugin.setupBlockWorlds();
+
+            reloadConfig();
+            reloadItems();
+            reloadGUIs();
 
             String message = reloadSection.getString("all", "&aПлагин успешно перезагружен");
             commandSender.sendMessage(Colorizer.color(message));
@@ -259,4 +245,28 @@ public class SellAdminCommand implements CommandExecutor {
         return true;
     }
 
+
+
+    private void reloadGUIs() {
+        HeadUtil.clearCache();
+        plugin.getAutoSellGUIConfig().reloadConfig();
+        MenuManager.reloadMenu("autoSellGUI", new AutoSellMenu(plugin, database));
+        plugin.getAllSellGUIConfig().reloadConfig();
+        MenuManager.reloadMenu("allSellGUI", new SellMenu(plugin));
+        plugin.getMainGUIConfig().reloadConfig();
+        MenuManager.reloadMenu("mainGUI", new MainMenu(plugin));
+    }
+
+    private void reloadConfig() {
+        plugin.reloadConfig();
+        plugin.getAutoSellManager().loadConfig();
+        plugin.getLevelManager().reloadLevels();
+        plugin.getBoosterManager().load();
+        plugin.getFormatManager().reload();
+        plugin.setupBlockWorlds();
+    }
+    private void reloadItems() {
+        plugin.getItemsConfig().reloadConfig();
+        plugin.getItemManager().load();
+    }
 }

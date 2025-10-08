@@ -7,6 +7,7 @@ import my.reqqpe.rseller.commands.TabCompleteAdmin;
 import my.reqqpe.rseller.configurations.CustomConfigs;
 import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.database.DatabaseListener;
+import my.reqqpe.rseller.listeners.MenuListener;
 import my.reqqpe.rseller.listeners.PlayerPickupItem;
 import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menu.AutoSellMenu;
@@ -23,6 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,13 +47,6 @@ public final class Main extends JavaPlugin {
     private CustomConfigs mainGUIConfig;
 
     @Getter
-    private SellMenu allSellMenu;
-    @Getter
-    private AutoSellMenu autoSellMenu;
-    @Getter
-    private MainMenu mainMenu;
-
-    @Getter
     private ItemManager itemManager;
     @Getter
     private SellManager sellManager;
@@ -65,12 +60,18 @@ public final class Main extends JavaPlugin {
     private LevelManager levelManager;
 
 
+    @Getter
+    private Main instance;
+
+
     public static boolean useNBTAPI = false;
     private Set<String> blockWorlds = new HashSet<>();
 
 
     @Override
     public void onEnable() {
+        instance = this;
+
 
         EconomySetup.setupEconomy(this);
 
@@ -101,15 +102,15 @@ public final class Main extends JavaPlugin {
         }
         new SellerPlaceholderAPI(this, database).register();
 
-        mainMenu = new MainMenu(this);
-        allSellMenu = new SellMenu(this);
-        autoSellMenu = new AutoSellMenu(this, database);
+
+        MenuManager.registerMenu("mainGUI", new MainMenu(this));
+        MenuManager.registerMenu("allSellGUI", new SellMenu(this));
+        MenuManager.registerMenu("autoSellGUI", new AutoSellMenu(this, database));
+
 
         PluginManager pm = getServer().getPluginManager();
 
-        pm.registerEvents(allSellMenu, this);
-        pm.registerEvents(autoSellMenu, this);
-        pm.registerEvents(mainMenu, this);
+        pm.registerEvents(new MenuListener(this), this);
 
         pm.registerEvents(new DatabaseListener(database), this);
 
@@ -140,7 +141,7 @@ public final class Main extends JavaPlugin {
 
         if (autoSellEnabled) {
             setupBlockWorlds();
-            pm.registerEvents(new PlayerPickupItem(this, database), this);
+            setupSettingsAutoSell();
         }
 
         boolean updateCheck = getConfig().getBoolean("update-check", true);
@@ -149,7 +150,6 @@ public final class Main extends JavaPlugin {
             UpdateChecker updateChecker = new UpdateChecker(this);
             updateChecker.check();
         }
-
     }
 
     @Override
@@ -202,4 +202,17 @@ public final class Main extends JavaPlugin {
         return blockWorlds.contains(world);
     }
 
+
+
+    private void setupSettingsAutoSell() {
+        String type = getConfig().getString("autosell.settings.type", "pickup");
+
+        if (type.equals("task")) {
+            int delay = getConfig().getInt("autosell.settings.task-delay", 5);
+            new AutoSellTask(delay, this, database, formatManager).startTask();
+        } else {
+            boolean inventorySell = getConfig().getBoolean("autosell.settings.sell-inventory", false);
+            getServer().getPluginManager().registerEvents(new PlayerPickupItem(this, database, inventorySell), this);
+        }
+    }
 }

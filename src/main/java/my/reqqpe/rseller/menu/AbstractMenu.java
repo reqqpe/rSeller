@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.clip.placeholderapi.PlaceholderAPI;
 import my.reqqpe.rseller.Main;
+import my.reqqpe.rseller.managers.MenuManager;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
 import my.reqqpe.rseller.utils.SyntaxParser;
@@ -18,6 +19,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -38,6 +40,9 @@ public abstract class AbstractMenu {
 
     public AbstractMenu(Main plugin) {
         this.plugin = plugin;
+    }
+
+    public record UpdatableItem(int slot, String name, List<String> lore) {
     }
 
 
@@ -192,12 +197,12 @@ public abstract class AbstractMenu {
             player.sendMessage(message);
         } else if (cmd.startsWith("[opengui] ")) {
             String guiId = cmd.substring(10).trim();
-            if (guiId.equalsIgnoreCase("autoSellGUI")) {
-                plugin.getAutoSellMenu().openMenu(player);
-            } else if (guiId.equalsIgnoreCase("allSellGUI")) {
-                plugin.getAllSellMenu().openMenu(player);
-            } else if (guiId.equalsIgnoreCase("mainGUI")) {
-                plugin.getMainMenu().openMenu(player);
+            AbstractMenu menu = MenuManager.getMenu(guiId);
+            if (menu != null) {
+                menu.openMenu(player);
+            }
+            else {
+                plugin.getLogger().warning("Ошибка открытия меню (не найдено), id: " + guiId);
             }
         } else if (cmd.startsWith("[sound] ")) {
             String[] parts = cmd.substring(8).split(";");
@@ -235,6 +240,11 @@ public abstract class AbstractMenu {
         return result;
     }
 
+
+
+    public void closeMenu(Player player, InventoryCloseEvent e) {
+        cancelItemUpdates(player);
+    }
 
     public void handleClick(Player player, InventoryClickEvent e) {
         if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
@@ -423,9 +433,5 @@ public abstract class AbstractMenu {
             }
         }
         return result;
-    }
-
-
-    public record UpdatableItem(int slot, String name, List<String> lore) {
     }
 }

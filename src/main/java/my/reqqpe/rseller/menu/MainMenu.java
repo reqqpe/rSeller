@@ -21,32 +21,13 @@ public class MainMenu extends AbstractMenu implements Listener {
 
     @Override
     protected String getMenuId() {
-        return "MAIN_MENU";
+        return "mainGUI";
     }
 
 
     @Override
     public void openMenu(Player player) {
         super.openMenu(player);
-    }
-
-
-    @EventHandler
-    public void onClickInventory(InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player)) return;
-        if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.id().equals(getMenuId())) return;
-
-        handleClick(player, e);
-    }
-
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent e) {
-        if (!(e.getPlayer() instanceof Player player)) return;
-        if (!(e.getInventory().getHolder() instanceof CustomInventoryHolder holder)) return;
-        if (!holder.id().equals(getMenuId())) return;
-
-        cancelItemUpdates(player);
     }
 
 }
