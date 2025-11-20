@@ -25,6 +25,7 @@ public final class RSeller extends JavaPlugin implements Listener {
             dataBase.loadPlayerData(player.getUniqueId());
         }
 
+
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new InventoryClickListener(), this);
         pm.registerEvents(new InventoryCloseListener(), this);
