@@ -1,0 +1,9 @@
+items:
+  id:
+    material: STONE
+
+items-settings:
+  id:
+    points: 0.1
+    money: 10
+    display-name: "&eКамень" # Отображается в авто-скупке

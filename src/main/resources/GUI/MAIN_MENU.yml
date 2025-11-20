@@ -1,0 +1,16 @@
+title: "dadad"
+size: 54
+special-slots: []
+
+items:
+  def:
+    material: STONE
+    slots:
+      - 0
+      - 1-5
+    left_click_actions:
+      - '[console] say i am gay'
+      - '[player] me i too'
+    right_click_actions:
+      - '[message] фвлфвллфвлфв вфлвлфвл фвлфвоов %player_name%'
+      - '[sound] ENTITY_PLAYER_LEVELUP;1;1.5'

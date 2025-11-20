@@ -1,0 +1,5 @@
+name: rSeller
+version: '${version}'
+main: my.reqqpe.rseller.RSeller
+api-version: '1.16'
+authors: [reqqpe]

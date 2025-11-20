@@ -1,0 +1,305 @@
+package my.reqqpe.rseller.menus;
+
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import my.reqqpe.rseller.managers.MenuManager;
+import my.reqqpe.rseller.models.Menu;
+import my.reqqpe.rseller.models.MenuItem;
+import my.reqqpe.rseller.models.ParsedCommand;
+import my.reqqpe.rseller.utils.Colorizer;
+import my.reqqpe.rseller.utils.Parse;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public abstract class AbstractMenu {
+
+    protected FileConfiguration guiConfig;
+    protected Menu menu;
+
+    public AbstractMenu(FileConfiguration guiConfig) {
+        this.guiConfig = guiConfig;
+        loadMenu();
+    }
+
+
+    public abstract String getMenuId();
+
+
+    protected abstract JavaPlugin getPlugin();
+
+
+    protected void loadMenu() {
+        String title = guiConfig.getString("title", "Меню");
+        int size = guiConfig.getInt("size", 54);
+        if (size % 9 != 0 || size < 9 || size > 54) {
+            size = 54;
+        }
+
+        IntList specialSlots = (Parse.StringListToIntList(guiConfig.getStringList("special-slots")));
+        String openPermission = guiConfig.getString("open-permission", null);
+
+
+        ConfigurationSection itemsSection = guiConfig.getConfigurationSection("items");
+        if (itemsSection == null) {
+            getPlugin().getLogger().warning(String.format("[%s] Не удалось найти предметы в секции items", getMenuId()));
+            return;
+        }
+
+        Map<Integer, MenuItem> items = new HashMap<>();
+
+        for (String itemId : itemsSection.getKeys(false)) {
+            ConfigurationSection itemSection = itemsSection.getConfigurationSection(itemId);
+            Map<Integer, MenuItem> loadedItems = loadMenuItem(itemSection, specialSlots, size, items);
+            items.putAll(loadedItems);
+        }
+        menu = new Menu(
+                getMenuId(),
+                title,
+                size,
+                openPermission,
+                specialSlots,
+                items,
+                null
+        );
+    }
+
+    public void closeMenu(InventoryCloseEvent e) {
+    }
+
+    public void openMenu(Player player) {
+        if (menu == null) {
+            getPlugin().getLogger().warning("Не удалось открыть меню %s, оно равняется null");
+            player.sendMessage("Не удалось открыть меню, сообщите администратору");
+        }
+
+        Inventory inv = Bukkit.createInventory(new CustomInventoryHolder(getMenuId()), menu.size(), Colorizer.color(menu.title()));
+
+        for (Map.Entry<Integer, MenuItem> entry : menu.menuItems().entrySet()) {
+            inv.setItem(entry.getKey(), entry.getValue().toItemStack());
+        }
+        player.openInventory(inv);
+    }
+
+    public void handleClick(InventoryClickEvent e) {
+        int rawSlot = e.getRawSlot();
+
+        Inventory clickedInv = e.getClickedInventory();
+        Inventory menuInv = e.getInventory();
+
+        if (clickedInv == menuInv && rawSlot < menuInv.getSize()) {
+            if (menu.specialSlots().contains(rawSlot)) {
+                handleSpecialSlotsClick(e);
+                return;
+            }
+
+            e.setCancelled(true);
+            MenuItem item = menu.menuItems().get(rawSlot);
+            if (item == null) return;
+
+            boolean isLeftClick = e.isLeftClick();
+            boolean isRightClick = e.isRightClick();
+
+            if (!isLeftClick && !isRightClick) return;
+
+            List<String> actions = isRightClick ? item.leftActions() : item.rightActions();
+
+            Player player = (Player) e.getWhoClicked();
+
+            for (String cmdLine : actions) {
+                runDefaultActions(player, cmdLine);
+            }
+        } else {
+            handlePlayerInventoryClick(e);
+        }
+    }
+
+    protected void handleSpecialSlotsClick(InventoryClickEvent e) {
+        e.setCancelled(true);
+    }
+    protected void handlePlayerInventoryClick(InventoryClickEvent e) {
+        e.setCancelled(true);
+    }
+
+    protected Map<Integer, MenuItem> loadMenuItem(ConfigurationSection itemSection, IntList specialSlots, int size, Map<Integer, MenuItem> existingItems) {
+        Map<Integer, MenuItem> result = new HashMap<>();
+
+        if (itemSection == null) return result;
+
+        String materialStr = itemSection.getString("material", "STONE");
+        Material material;
+        String base64 = null;
+
+        if (materialStr.toLowerCase().startsWith("basehead-")) {
+            material = Material.PLAYER_HEAD;
+            base64 = materialStr.substring("basehead-".length());
+        } else {
+            material = Material.getMaterial(materialStr);
+            if (material == null) {
+                getPlugin().getLogger().warning("Неизвестный материал: " + materialStr);
+                return result;
+            }
+        }
+
+        String name = itemSection.getString("name", null);
+        List<String> lore = itemSection.getStringList("lore");
+        int modelData = itemSection.getInt("model_data", -1);
+
+        Map<Enchantment, Integer> enchants = new HashMap<>();
+        ConfigurationSection enchantsSection = itemSection.getConfigurationSection("enchants");
+        if (enchantsSection != null) {
+            for (String enchantName : enchantsSection.getKeys(false)) {
+                Enchantment enchant = Enchantment.getByName(enchantName.toUpperCase());
+                if (enchant != null) {
+                    enchants.put(enchant, enchantsSection.getInt(enchantName, 1));
+                } else {
+                    getPlugin().getLogger().warning("Неизвестный энчант '" + enchantName + "' для предмета " + name);
+                }
+            }
+        }
+
+        IntList slots = new IntArrayList();
+
+        if (itemSection.contains("slots")) {
+            IntList confSlots = Parse.StringListToIntList(itemSection.getStringList("slots"));
+            for (int confSlot : confSlots) {
+                if (confSlot < 0 || confSlot >= size) continue;
+                if (specialSlots.contains(confSlot)) continue;
+                if (existingItems.containsKey(confSlot)) {
+                    getPlugin().getLogger().warning(String.format("Слот %d уже занят, предмет '%s' пропущен в этом слоте", confSlot, name));
+                    continue;
+                }
+                slots.add(confSlot);
+            }
+        }
+
+        if (itemSection.contains("slot")) {
+            int confSlot = itemSection.getInt("slot");
+            if (confSlot >= 0 && confSlot < size &&
+                    !specialSlots.contains(confSlot) &&
+                    !existingItems.containsKey(confSlot)) {
+                slots.add(confSlot);
+            } else if (existingItems.containsKey(confSlot)) {
+                getPlugin().getLogger().warning(String.format("Слот %d уже занят, предмет '%s' пропущен в этом слоте", confSlot, name));
+            }
+        }
+
+        List<String> rawFlags = itemSection.getStringList("item_flags");
+        List<String> finalFlags = new ArrayList<>();
+
+        for (String flagName : rawFlags) {
+            String normalized = flagName.toUpperCase();
+            try {
+                ItemFlag flag = ItemFlag.valueOf(normalized);
+                if (finalFlags.contains(normalized)) {
+                    getPlugin().getLogger().warning(String.format("Флаг '%s' дублируется для предмета '%s', добавлен только один раз", normalized, name));
+                    continue;
+                }
+                finalFlags.add(normalized);
+            } catch (IllegalArgumentException e) {
+                getPlugin().getLogger().warning(String.format("Флаг '%s' не существует для предмета '%s', пропущен", normalized, name));
+            }
+        }
+
+        List<String> rightActions = itemSection.getStringList("right_click_actions");
+        List<String> leftActions = itemSection.getStringList("left_click_actions");
+
+        MenuItem menuItem = new MenuItem(
+                name,
+                modelData,
+                material,
+                lore,
+                enchants,
+                base64,
+                finalFlags,
+                rightActions,
+                leftActions
+        );
+
+        for (int slot : slots) {
+            result.put(slot, menuItem);
+        }
+
+        return result;
+    }
+
+    private void runDefaultActions(Player player, String cmdLine) {
+        ParsedCommand pc = parse(cmdLine);
+        String action = pc.action();
+        String data = pc.data().replace("%player_name%", player.getName());
+        switch (action) {
+            case "console": {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), data);
+                break;
+            }
+            case "player": {
+                Bukkit.dispatchCommand(player, data);
+                break;
+            }
+            case "openguimenu": {
+                AbstractMenu openGUI = MenuManager.getMenu(data);
+                if (openGUI == null) {
+                    getPlugin().getLogger().warning("Меню не найдено: " + data);
+                    return;
+                }
+                openGUI.openMenu(player);
+                break;
+            }
+            case "message": {
+                player.sendMessage(Colorizer.color(data));
+                break;
+            }
+            case "sound": {
+                String[] parts = data.split(";");
+                try {
+                    Sound sound = Sound.valueOf(parts[0].toUpperCase());
+                    float volume = parts.length >= 2 ? Float.parseFloat(parts[1]) : 1.0f;
+                    float pitch  = parts.length >= 3 ? Float.parseFloat(parts[2]) : 1.0f;
+                    player.playSound(player.getLocation(), sound, volume, pitch);
+                } catch (Exception e) {
+                    getPlugin().getLogger().warning("Ошибка звука: " + data);
+                }
+                break;
+            }
+            default: {
+                runCustomActions(player, pc);
+            }
+        }
+
+    }
+
+    protected void runCustomActions(Player player, ParsedCommand pc) {
+    }
+
+
+
+    private static ParsedCommand parse(String cmdLine) {
+        String cmd = cmdLine.trim();
+
+        int start = cmd.indexOf('[');
+        int end = cmd.indexOf(']');
+
+        if (start != 0 || end == -1) {
+            return new ParsedCommand("text", cmd); // fallback
+        }
+
+        String action = cmd.substring(start + 1, end).trim().toLowerCase();
+        String data = cmd.substring(end + 1).trim();
+
+        return new ParsedCommand(action, data);
+    }
+}
