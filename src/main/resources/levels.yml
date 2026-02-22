@@ -1,0 +1,164 @@
+#                 .__               .__               
+# _______  ______ |  |  __ __  ____ |__| ____   ______
+# \_  __ \ \____ \|  | |  |  \/ ___\|  |/    \ /  ___/
+#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \ 
+#  |__|    |   __/|____/____/\___  /|__|___|  /____  >
+#          |__|             /_____/         \/     \/ 
+#        
+# Discord: https://dsc.gg/rplugins
+# Telegram: https://t.me/reqqpeDev
+
+
+# Отсчёт уровня начинается со 2, т.к 1 это уровень по умолчанию
+levels:
+  2:
+    coin-multiplier: 1.1
+    point-multiplier: 1.1
+    required-points: 100.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  3:
+    coin-multiplier: 1.12
+    point-multiplier: 1.12
+    required-points: 400.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  4:
+    coin-multiplier: 1.14
+    point-multiplier: 1.14
+    required-points: 900.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  5:
+    coin-multiplier: 1.16
+    point-multiplier: 1.16
+    required-points: 1600.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  6:
+    coin-multiplier: 1.18
+    point-multiplier: 1.18
+    required-points: 2500.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  7:
+    coin-multiplier: 1.2
+    point-multiplier: 1.2
+    required-points: 3600.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  8:
+    coin-multiplier: 1.22
+    point-multiplier: 1.22
+    required-points: 4900.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  9:
+    coin-multiplier: 1.24
+    point-multiplier: 1.24
+    required-points: 6400.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  10:
+    coin-multiplier: 1.26
+    point-multiplier: 1.26
+    required-points: 8100.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  11:
+    coin-multiplier: 1.28
+    point-multiplier: 1.28
+    required-points: 10000.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  12:
+    coin-multiplier: 1.3
+    point-multiplier: 1.3
+    required-points: 12100.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  13:
+    coin-multiplier: 1.32
+    point-multiplier: 1.32
+    required-points: 14400.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  14:
+    coin-multiplier: 1.34
+    point-multiplier: 1.34
+    required-points: 16900.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  15:
+    coin-multiplier: 1.36
+    point-multiplier: 1.36
+    required-points: 19600.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  16:
+    coin-multiplier: 1.38
+    point-multiplier: 1.38
+    required-points: 22500.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  17:
+    coin-multiplier: 1.4
+    point-multiplier: 1.4
+    required-points: 25600.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  18:
+    coin-multiplier: 1.42
+    point-multiplier: 1.42
+    required-points: 28900.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  19:
+    coin-multiplier: 1.44
+    point-multiplier: 1.44
+    required-points: 32400.0
+    actions:
+      - '[message] &aВы успешно повысили уровень до: %rseller_level%'
+      - '[console] give %player_name% apple 1'
+
+  20:
+    coin-multiplier: 1.5
+    point-multiplier: 1.5
+    required-points: 36100.0
+    actions:
+      - '[message] &6&lМАКСИМАЛЬНЫЙ УРОВЕНЬ ДОСТИГНУТ! Ваш уровень: %rseller_level%'
+      - '[console] give %player_name% diamond 3'

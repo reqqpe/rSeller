@@ -1,3 +1,11 @@
+settings-check:
+  display-name: true
+  lore: true
+  enchants: true
+  model-data: true
+  strict-mode: false
+  nbt-tags: false # Требует плагин nbt-api
+
 items:
   id:
     material: STONE

@@ -82,6 +82,7 @@ public class DataBase {
         }
 
         hc.setMaximumPoolSize(hikari.getInt("max-pool-size", 10));
+        hc.setMinimumIdle(hikari.getInt("minimum-idle", 2));
         hc.setIdleTimeout(hikari.getLong("idle-timeout", 600000));
         hc.setConnectionTimeout(hikari.getLong("connection-timeout", 30000));
         hc.setKeepaliveTime(hikari.getLong("keep-alive", 0));
@@ -99,19 +100,19 @@ public class DataBase {
             case MYSQL -> sql = "CREATE TABLE IF NOT EXISTS players (" +
                     "uuid VARCHAR(36) PRIMARY KEY, " +
                     "points DOUBLE NOT NULL DEFAULT 0, " +
-                    "level BIGINT NOT NULL DEFAULT 0, " +
+                    "level BIGINT NOT NULL DEFAULT 1, " +
                     "autosell TEXT" +
                     ")";
             case POSTGRESQL -> sql = "CREATE TABLE IF NOT EXISTS players (" +
                     "uuid VARCHAR(36) PRIMARY KEY, " +
                     "points DOUBLE PRECISION NOT NULL DEFAULT 0, " +
-                    "level BIGINT NOT NULL DEFAULT 0, " +
+                    "level BIGINT NOT NULL DEFAULT 1, " +
                     "autosell TEXT DEFAULT '{}'" +
                     ")";
             default -> sql = "CREATE TABLE IF NOT EXISTS players (" +
                     "uuid TEXT PRIMARY KEY, " +
                     "points REAL NOT NULL DEFAULT 0, " +
-                    "level INTEGER NOT NULL DEFAULT 0, " +
+                    "level INTEGER NOT NULL DEFAULT 1, " +
                     "autosell TEXT DEFAULT '{}'" +
                     ")";
         }

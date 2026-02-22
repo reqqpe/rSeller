@@ -8,12 +8,16 @@
 # Discord: https://dsc.gg/rplugins
 # Telegram: https://t.me/reqqpeDev
 
+use-legacy-format: false # Использовать ли старый формат &1 &2... или использовать MiniMessage(при false)
+
+
 database:
   type: sqlite # sqlite, mysql, postgresql
   # Настройки пула соединений, если не знаете что это рекомендуется не менять
   hikari:
     max-pool-size: 10
     keep-alive: 120000
+    minimum-idle: 2
     idle-timeout: 60000
     connection-timeout: 30000
     max-life-time: 1800000
@@ -37,9 +41,28 @@ settings:
   update-check: true # Проверка обновлений плагина
   metrics: true # Отправка анонимной статистики https://bstats.org/plugin/bukkit/rSeller/25999
 
+auto-sell:
+  enable: true
+  type: pickup # pickup (оптимизированей чем task) или task
+  delay: 60 # 3 секунды (в тиках 20 тиков - 1 секунда), работает при типе task
+  inventory_mode: false # продавать инвентарь или подобранный предмет, работает при типе pickup
+  default_category: example
 
-
+  # money_up, money_down, points_up, points_down, none
+  default_sort: none
+  categories:
+    example:
+      display_name: "&aПример 1"
+      items:
+      # id предмета из items.yml
+      - stone
+    all_items:
+      display_name: "&aВсе предметы"
+      items:
+      # all - это все настроенные предметы в items.yml
+      - all
 messages:
+  no-permission: "&cУ вас нет прав использовать это!"
   reload:
     all: ""
     menus: ""

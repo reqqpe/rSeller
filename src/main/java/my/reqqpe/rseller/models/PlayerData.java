@@ -16,9 +16,8 @@ public class PlayerData {
     @Setter
     private double points;
     @Setter
-    private long level;
+    private long level = 1;
     private Map<String, Boolean> autosellMap = new HashMap<>();
-
 
     public void addPoints(double points) {
         this.points += points;

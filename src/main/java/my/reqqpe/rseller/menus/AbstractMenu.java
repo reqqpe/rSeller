@@ -2,11 +2,13 @@ package my.reqqpe.rseller.menus;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.clip.placeholderapi.PlaceholderAPI;
 import my.reqqpe.rseller.managers.MenuManager;
 import my.reqqpe.rseller.models.Menu;
 import my.reqqpe.rseller.models.MenuItem;
-import my.reqqpe.rseller.models.ParsedCommand;
+import my.reqqpe.rseller.models.ParsedAction;
 import my.reqqpe.rseller.utils.Colorizer;
+import my.reqqpe.rseller.utils.MessageUtils;
 import my.reqqpe.rseller.utils.Parse;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -26,22 +28,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+// TODO: Сделать обновляемые предметы, а так же плейсхолдеры(как локальные, так и PlaceholderAPI)
 public abstract class AbstractMenu {
 
     protected FileConfiguration guiConfig;
+    protected final JavaPlugin plugin;
     protected Menu menu;
+    protected final Map<Player, Inventory> viewers = new HashMap<>();
+    private int updateTaskId = -1;
 
-    public AbstractMenu(FileConfiguration guiConfig) {
+    public AbstractMenu(FileConfiguration guiConfig, JavaPlugin plugin) {
         this.guiConfig = guiConfig;
+        this.plugin = plugin;
         loadMenu();
     }
 
 
     public abstract String getMenuId();
-
-
-    protected abstract JavaPlugin getPlugin();
-
 
     protected void loadMenu() {
         String title = guiConfig.getString("title", "Меню");
@@ -56,7 +60,7 @@ public abstract class AbstractMenu {
 
         ConfigurationSection itemsSection = guiConfig.getConfigurationSection("items");
         if (itemsSection == null) {
-            getPlugin().getLogger().warning(String.format("[%s] Не удалось найти предметы в секции items", getMenuId()));
+            plugin.getLogger().warning(String.format("[%s] Не удалось найти предметы в секции items", getMenuId()));
             return;
         }
 
@@ -79,19 +83,34 @@ public abstract class AbstractMenu {
     }
 
     public void closeMenu(InventoryCloseEvent e) {
+        Player player = (Player) e.getPlayer();
+        viewers.remove(player);
+        stopUpdateTaskIfNeeded();
     }
 
     public void openMenu(Player player) {
         if (menu == null) {
-            getPlugin().getLogger().warning("Не удалось открыть меню %s, оно равняется null");
+            plugin.getLogger().warning("Не удалось открыть меню %s, оно равняется null");
             player.sendMessage("Не удалось открыть меню, сообщите администратору");
+            return;
         }
 
-        Inventory inv = Bukkit.createInventory(new CustomInventoryHolder(getMenuId()), menu.size(), Colorizer.color(menu.title()));
+        Inventory inv = Bukkit.createInventory(
+                new CustomInventoryHolder(getMenuId()),
+                menu.size(),
+                Colorizer.colorLegacy(menu.title())
+        );
 
         for (Map.Entry<Integer, MenuItem> entry : menu.menuItems().entrySet()) {
-            inv.setItem(entry.getKey(), entry.getValue().toItemStack());
+            inv.setItem(
+                    entry.getKey(),
+                    entry.getValue().toItemStack(s -> replacePlaceholders(s, player, inv))
+            );
         }
+
+        viewers.put(player, inv);
+        startUpdateTask();
+
         player.openInventory(inv);
     }
 
@@ -140,7 +159,7 @@ public abstract class AbstractMenu {
 
         if (itemSection == null) return result;
 
-        String materialStr = itemSection.getString("material", "STONE");
+        String materialStr = itemSection.getString("material", "STONE").toUpperCase();
         Material material;
         String base64 = null;
 
@@ -150,7 +169,7 @@ public abstract class AbstractMenu {
         } else {
             material = Material.getMaterial(materialStr);
             if (material == null) {
-                getPlugin().getLogger().warning("Неизвестный материал: " + materialStr);
+                plugin.getLogger().warning("Неизвестный материал: " + materialStr);
                 return result;
             }
         }
@@ -167,7 +186,7 @@ public abstract class AbstractMenu {
                 if (enchant != null) {
                     enchants.put(enchant, enchantsSection.getInt(enchantName, 1));
                 } else {
-                    getPlugin().getLogger().warning("Неизвестный энчант '" + enchantName + "' для предмета " + name);
+                    plugin.getLogger().warning("Неизвестный энчант '" + enchantName + "' для предмета " + itemSection.getName());
                 }
             }
         }
@@ -180,7 +199,7 @@ public abstract class AbstractMenu {
                 if (confSlot < 0 || confSlot >= size) continue;
                 if (specialSlots.contains(confSlot)) continue;
                 if (existingItems.containsKey(confSlot)) {
-                    getPlugin().getLogger().warning(String.format("Слот %d уже занят, предмет '%s' пропущен в этом слоте", confSlot, name));
+                    plugin.getLogger().warning(String.format("Слот %d уже занят, предмет '%s' пропущен в этом слоте", confSlot, itemSection.getName()));
                     continue;
                 }
                 slots.add(confSlot);
@@ -194,7 +213,7 @@ public abstract class AbstractMenu {
                     !existingItems.containsKey(confSlot)) {
                 slots.add(confSlot);
             } else if (existingItems.containsKey(confSlot)) {
-                getPlugin().getLogger().warning(String.format("Слот %d уже занят, предмет '%s' пропущен в этом слоте", confSlot, name));
+                plugin.getLogger().warning(String.format("Слот %d уже занят, предмет '%s' пропущен в этом слоте", confSlot, itemSection.getName()));
             }
         }
 
@@ -206,17 +225,20 @@ public abstract class AbstractMenu {
             try {
                 ItemFlag flag = ItemFlag.valueOf(normalized);
                 if (finalFlags.contains(normalized)) {
-                    getPlugin().getLogger().warning(String.format("Флаг '%s' дублируется для предмета '%s', добавлен только один раз", normalized, name));
+                    plugin.getLogger().warning(String.format("Флаг '%s' дублируется для предмета '%s', добавлен только один раз", normalized, itemSection.getName()));
                     continue;
                 }
                 finalFlags.add(normalized);
             } catch (IllegalArgumentException e) {
-                getPlugin().getLogger().warning(String.format("Флаг '%s' не существует для предмета '%s', пропущен", normalized, name));
+                plugin.getLogger().warning(String.format("Флаг '%s' не существует для предмета '%s', пропущен", normalized, itemSection.getName()));
             }
         }
 
         List<String> rightActions = itemSection.getStringList("right_click_actions");
         List<String> leftActions = itemSection.getStringList("left_click_actions");
+
+
+        boolean updatable = itemSection.getBoolean("updatable", false);
 
         MenuItem menuItem = new MenuItem(
                 name,
@@ -227,7 +249,8 @@ public abstract class AbstractMenu {
                 base64,
                 finalFlags,
                 rightActions,
-                leftActions
+                leftActions,
+                updatable
         );
 
         for (int slot : slots) {
@@ -237,8 +260,34 @@ public abstract class AbstractMenu {
         return result;
     }
 
+
+    protected Map<String, String> buildLocalPlaceholders(Player player, Inventory inv) {
+        return new HashMap<>();
+    }
+
+    protected String replacePlaceholders(String string, Player player, Inventory inv) {
+
+        Map<String, String> local = buildLocalPlaceholders(player, inv);
+        for (Map.Entry<String, String> entry : local.entrySet()) {
+            string = string.replace("{" + entry.getKey() + "}", entry.getValue());
+        }
+
+        return PlaceholderAPI.setPlaceholders(player, string);
+    }
+
+
+    protected List<String> replacePlaceholders(List<String> lines, Player player, Inventory inv) {
+        List<String> result = new ArrayList<>();
+        for (String line : lines) {
+            line = replacePlaceholders(line, player, inv);
+            result.add(line);
+        }
+        return result;
+    }
+
+
     private void runDefaultActions(Player player, String cmdLine) {
-        ParsedCommand pc = parse(cmdLine);
+        ParsedAction pc = ParsedAction.parse(cmdLine);
         String action = pc.action();
         String data = pc.data().replace("%player_name%", player.getName());
         switch (action) {
@@ -253,14 +302,15 @@ public abstract class AbstractMenu {
             case "openguimenu": {
                 AbstractMenu openGUI = MenuManager.getMenu(data);
                 if (openGUI == null) {
-                    getPlugin().getLogger().warning("Меню не найдено: " + data);
+                    plugin.getLogger().warning("Меню не найдено: " + data);
                     return;
                 }
                 openGUI.openMenu(player);
                 break;
             }
             case "message": {
-                player.sendMessage(Colorizer.color(data));
+                data = MessageUtils.replacePlaceholders(player, data, new HashMap<>());
+                MessageUtils.sendMessage(player, data);
                 break;
             }
             case "sound": {
@@ -271,35 +321,60 @@ public abstract class AbstractMenu {
                     float pitch  = parts.length >= 3 ? Float.parseFloat(parts[2]) : 1.0f;
                     player.playSound(player.getLocation(), sound, volume, pitch);
                 } catch (Exception e) {
-                    getPlugin().getLogger().warning("Ошибка звука: " + data);
+                    plugin.getLogger().warning("Ошибка звука: " + data);
                 }
+                break;
+            }
+            case "close": {
+                player.closeInventory();
                 break;
             }
             default: {
                 runCustomActions(player, pc);
             }
         }
-
     }
 
-    protected void runCustomActions(Player player, ParsedCommand pc) {
+    protected void startUpdateTask() {
+        if (updateTaskId != -1) return;
+
+        updateTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(
+                plugin,
+                this::updateViewers,
+                20L,
+                20L
+        );
     }
 
+    protected void updateViewers() {
+        if (viewers.isEmpty()) return;
 
+        for (Map.Entry<Player, Inventory> entry : viewers.entrySet()) {
+            Player player = entry.getKey();
+            Inventory inv = entry.getValue();
 
-    private static ParsedCommand parse(String cmdLine) {
-        String cmd = cmdLine.trim();
+            if (!player.isOnline()) continue;
 
-        int start = cmd.indexOf('[');
-        int end = cmd.indexOf(']');
+            for (Map.Entry<Integer, MenuItem> itemEntry : menu.menuItems().entrySet()) {
+                MenuItem menuItem = itemEntry.getValue();
+                if (!menuItem.updatable()) continue;
 
-        if (start != 0 || end == -1) {
-            return new ParsedCommand("text", cmd); // fallback
+                inv.setItem(
+                        itemEntry.getKey(),
+                        menuItem.toItemStack(s -> replacePlaceholders(s, player, inv))
+                );
+            }
         }
+    }
+    protected void stopUpdateTaskIfNeeded() {
+        if (!viewers.isEmpty()) return;
 
-        String action = cmd.substring(start + 1, end).trim().toLowerCase();
-        String data = cmd.substring(end + 1).trim();
+        if (updateTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(updateTaskId);
+            updateTaskId = -1;
+        }
+    }
 
-        return new ParsedCommand(action, data);
+    protected void runCustomActions(Player player, ParsedAction pc) {
     }
 }

@@ -13,15 +13,16 @@ public class MenuManager {
     private static final Map<String, AbstractMenu> menus = new HashMap<>();
 
 
-
-
     public static AbstractMenu getMenu(String id) {
         return menus.get(id);
     }
-    public static void addMenu(String id, AbstractMenu menu) {
+
+
+    public static void registerMenu(String id, AbstractMenu menu) {
         menus.put(id, menu);
     }
-    public static void removeMenu(String id) {
+
+    public static void unRegisterMenu(String id) {
         if (!menus.containsKey(id)) {
             return;
         }
@@ -29,6 +30,10 @@ public class MenuManager {
         menus.remove(id);
     }
 
+    public static void unRegisterAllMenus() {
+        closeAllMenus();
+        menus.clear();
+    }
 
 
     public static void closeMenuAllPlayers(String id) {
@@ -47,6 +52,25 @@ public class MenuManager {
                 }
             }
         }
+    }
+
+    public static void closeAllMenus() {
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            Inventory inventory = player.getOpenInventory().getTopInventory();
+            if (inventory == null) {
+                return;
+            }
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof CustomInventoryHolder holder) {
+                if (menus.containsKey(holder.id())) {
+                    player.closeInventory();
+                }
+            }
+        }
+    }
+
+    public static void reloadMenu(String id, AbstractMenu menu) {
+        unRegisterMenu(id);
+        registerMenu(id, menu);
     }
 
 }

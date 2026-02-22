@@ -1,0 +1,2 @@
+sell-message: "Вы продали {amount} предметов, за {money} монет и {points} очков скупщика"
+auto-sell-message: "{item_name} в кол-ве {amount} продан за {money} монет и {points} очков скупщика"

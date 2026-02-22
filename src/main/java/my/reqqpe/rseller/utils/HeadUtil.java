@@ -2,6 +2,7 @@ package my.reqqpe.rseller.utils;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
+import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@UtilityClass
 public class HeadUtil {
 
     private static final Map<String, PlayerProfile> profileCache = new ConcurrentHashMap<>();

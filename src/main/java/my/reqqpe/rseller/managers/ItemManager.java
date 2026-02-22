@@ -1,6 +1,7 @@
 package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.RSeller;
+import my.reqqpe.rseller.models.SearchItemSettings;
 import my.reqqpe.rseller.models.SellableItem;
 import my.reqqpe.rseller.models.SellableItemData;
 import my.reqqpe.rseller.utils.CustomConfig;
@@ -9,28 +10,36 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
+
+// TODO: Сделать поддержку ntb
 public class ItemManager {
 
     private final RSeller plugin;
-    private CustomConfig itemsConfigFile;
+    private final CustomConfig itemsConfigFile;
     private FileConfiguration itemsConfig;
     private List<SellableItem> items =  new ArrayList<>();
     private Map<Material, Set<SellableItem>> materialItems = new EnumMap<>(Material.class);
-
+    private SearchItemSettings searchItemSettings;
 
     public ItemManager(RSeller plugin) {
         this.plugin = plugin;
         this.itemsConfigFile = new CustomConfig(plugin, "items.yml");
         this.itemsConfig = this.itemsConfigFile.getConfig();
+
+        loadItems();
     }
 
     public void loadItems() {
         items.clear();
         materialItems.clear();
 
+        this.searchItemSettings = loadSearchItemSettings(itemsConfig);
+
+        plugin.getLogger().info("Загрузка предметов...");
 
         ConfigurationSection itemsSection = this.itemsConfig.getConfigurationSection("items");
         if (itemsSection == null) {
@@ -38,7 +47,7 @@ public class ItemManager {
             return;
         }
 
-        ConfigurationSection itemsSettingsSection = itemsSection.getConfigurationSection("items-settings");
+        ConfigurationSection itemsSettingsSection = itemsConfig.getConfigurationSection("items-settings");
         if (itemsSettingsSection == null) {
             plugin.getLogger().warning("Не удалось загрузить ни одного предмета. Не обнаружена настройка на предметы");
             return;
@@ -50,9 +59,12 @@ public class ItemManager {
                 errorLoadItem(id, "отсутствует конфигурация предмета");
                 continue;
             }
-            Material material = Material.getMaterial(itemSection.getString("material"));
+
+            String matString = itemSection.getString("material").toUpperCase();
+            Material material = Material.getMaterial(matString);
             if (material == null) {
                 errorLoadItem(id, "Материал не найден");
+                continue;
             }
 
             String name = itemSection.getString("name");
@@ -99,7 +111,7 @@ public class ItemManager {
             }
 
             SellableItemData sellableItemData = new SellableItemData(
-                    name != null ? name : "",
+                    name,
                     lore,
                     modelData,
                     enchants
@@ -117,9 +129,55 @@ public class ItemManager {
             items.add(sellableItem);
             materialItems.computeIfAbsent(material, k -> new HashSet<>()).add(sellableItem);
         }
+        plugin.getLogger().info(String.format("Загрузка предметов завершена. Загружено: %s", items.size()));
     }
 
+    private SearchItemSettings loadSearchItemSettings(FileConfiguration config) {
+        var settingsSection = config.getConfigurationSection("settings-check");
+        if (settingsSection == null) {
+            return new SearchItemSettings(true, true, true, true, false, false);
+        }
+        boolean name = settingsSection.getBoolean("display-name", true);
+        boolean lore = settingsSection.getBoolean("lore", true);
+        boolean enchants = settingsSection.getBoolean("enchants", true);
+        boolean modelData = settingsSection.getBoolean("model-data", true);
+        boolean strictMode = settingsSection.getBoolean("strict-mode", false);
+        boolean nbtTags = settingsSection.getBoolean("nbt-tags", false);
+        return new SearchItemSettings(name, lore, enchants, modelData, nbtTags, strictMode);
+    }
     private void errorLoadItem(String id, String errorMessage) {
         plugin.getLogger().warning(String.format("Ошибка загрузки предмета: %s. Ошибка: %s", id, errorMessage));
+    }
+
+    public void reload() {
+        this.itemsConfigFile.reloadConfig();
+        this.itemsConfig = this.itemsConfigFile.getConfig();
+
+        loadItems();
+    }
+
+
+    public SellableItem getSellableItem(ItemStack itemStack) {
+        Set<SellableItem> items = getItemsByMaterial(itemStack.getType());
+        for (SellableItem item : items) {
+            if (item.equalsItemStack(itemStack, searchItemSettings)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public SellableItem getSellableItemById(String id) {
+        for (SellableItem item : items) {
+            if (item.id().equals(id)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public Set<SellableItem> getItemsByMaterial(Material material) {
+        Set<SellableItem> items = materialItems.get(material);
+        return items == null ? new HashSet<>() : new HashSet<>(items);
     }
 }
