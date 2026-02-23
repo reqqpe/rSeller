@@ -5,6 +5,8 @@ import my.reqqpe.rseller.models.SearchItemSettings;
 import my.reqqpe.rseller.models.SellableItem;
 import my.reqqpe.rseller.models.SellableItemData;
 import my.reqqpe.rseller.utils.CustomConfig;
+import my.reqqpe.rseller.utils.LoggerUtil;
+import my.reqqpe.rseller.utils.MessageUtil;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -39,17 +41,17 @@ public class ItemManager {
 
         this.searchItemSettings = loadSearchItemSettings(itemsConfig);
 
-        plugin.getLogger().info("Загрузка предметов...");
+        LoggerUtil.info(MessageUtil.getString("log.items-loading"));
 
         ConfigurationSection itemsSection = this.itemsConfig.getConfigurationSection("items");
         if (itemsSection == null) {
-            plugin.getLogger().warning("Не удалось загрузить ни одного предмета. Секция items пуста");
+            LoggerUtil.warn(MessageUtil.getString("log.items-empty"));
             return;
         }
 
         ConfigurationSection itemsSettingsSection = itemsConfig.getConfigurationSection("items-settings");
         if (itemsSettingsSection == null) {
-            plugin.getLogger().warning("Не удалось загрузить ни одного предмета. Не обнаружена настройка на предметы");
+            LoggerUtil.warn(MessageUtil.getString("log.items-no-settings"));
             return;
         }
 
@@ -129,7 +131,9 @@ public class ItemManager {
             items.add(sellableItem);
             materialItems.computeIfAbsent(material, k -> new HashSet<>()).add(sellableItem);
         }
-        plugin.getLogger().info(String.format("Загрузка предметов завершена. Загружено: %s", items.size()));
+        LoggerUtil.info(MessageUtil.getString("log.items-loaded")
+                        .replace("{amount}", String.valueOf(items.size()))
+        );
     }
 
     private SearchItemSettings loadSearchItemSettings(FileConfiguration config) {
@@ -145,8 +149,14 @@ public class ItemManager {
         boolean nbtTags = settingsSection.getBoolean("nbt-tags", false);
         return new SearchItemSettings(name, lore, enchants, modelData, nbtTags, strictMode);
     }
+
+
     private void errorLoadItem(String id, String errorMessage) {
-        plugin.getLogger().warning(String.format("Ошибка загрузки предмета: %s. Ошибка: %s", id, errorMessage));
+        LoggerUtil.warn(
+                MessageUtil.getString("log.items-error")
+                        .replace("{id}", id)
+                        .replace("{error}", errorMessage)
+        );
     }
 
     public void reload() {

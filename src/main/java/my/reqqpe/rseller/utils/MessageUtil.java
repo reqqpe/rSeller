@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @UtilityClass
-public class MessageUtils {
+public class MessageUtil {
 
     @Setter
     private static FileConfiguration config;

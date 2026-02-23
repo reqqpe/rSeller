@@ -18,7 +18,8 @@ import my.reqqpe.rseller.menus.AutoSellMenu;
 import my.reqqpe.rseller.tasks.AutoSellTask;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.CustomConfig;
-import my.reqqpe.rseller.utils.MessageUtils;
+import my.reqqpe.rseller.utils.LoggerUtil;
+import my.reqqpe.rseller.utils.MessageUtil;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -59,17 +60,20 @@ public final class RSeller extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        //
+        LoggerUtil.setLogger(getLogger());
+        saveDefaultConfig();
+
+        setupMessages();
+        //
         if (!enabledHooks()) {
-            getLogger().severe("Обнаружены не все зависимости, плагин отключается");
+            LoggerUtil.fine("Not all dependencies were found, the plugin is disabled");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
         this.adventure = BukkitAudiences.create(this);
 
-        saveDefaultConfig();
-
-        setupMessages();
 
         boolean useLegacyFormat = getConfig().getBoolean("use-legacy-format", false);
         Colorizer.setLEGACY_FORMAT(useLegacyFormat);
@@ -129,13 +133,13 @@ public final class RSeller extends JavaPlugin implements Listener {
     private boolean enabledHooks() {
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PAPIHook().register();
-            getLogger().info("PlaceholderAPI подключён");
+            getLogger().info("PlaceholderAPI connect");
         } else {
-            getLogger().severe("PlaceholderAPI не обнаружен");
+            getLogger().severe("PlaceholderAPI not found");
             return false;
         }
         if (!EconomyHook.setupEconomy(this)) {
-            getLogger().severe("Vault не найден или не настроен!");
+            getLogger().severe("Vault not found or not configured!");
             return false;
         }
         return true;
@@ -175,8 +179,8 @@ public final class RSeller extends JavaPlugin implements Listener {
         String lang = getConfig().getString("message-lang", "ru");
 
         CustomConfig customConfig = new CustomConfig(this, "messages/" + lang + ".yml");
-        MessageUtils.setConfig(customConfig.getConfig());
-        MessageUtils.setPlugin(this);
+        MessageUtil.setConfig(customConfig.getConfig());
+        MessageUtil.setPlugin(this);
     }
 
     public void setupBlockWorlds() {

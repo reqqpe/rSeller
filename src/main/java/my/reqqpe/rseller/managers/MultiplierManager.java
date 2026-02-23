@@ -3,6 +3,8 @@ package my.reqqpe.rseller.managers;
 import my.reqqpe.rseller.RSeller;
 import my.reqqpe.rseller.models.Level;
 import my.reqqpe.rseller.models.Multiplier;
+import my.reqqpe.rseller.utils.LoggerUtil;
+import my.reqqpe.rseller.utils.MessageUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
@@ -31,14 +33,20 @@ public class MultiplierManager {
     public void loadMultipliers() {
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("multipliers");
         if (section == null) {
+            LoggerUtil.warn(MessageUtil.getString("log.multipliers-no-section"));
             return;
         }
         for (String id : section.getKeys(true)) {
             if (id == null) {
-                return;
+                LoggerUtil.warn(MessageUtil.getString("log.multiplier-null-id"));
+                continue;
             }
             if (multiplierMap.containsKey(id)) {
-                return;
+                LoggerUtil.warn(
+                        MessageUtil.getString("log.multiplier-duplicate")
+                                .replace("{id}", id)
+                );
+                continue;
             }
             ConfigurationSection multiplierSection = section.getConfigurationSection(id);
             double multiplierMoney = multiplierSection.getDouble("multiplier_money");
@@ -50,7 +58,10 @@ public class MultiplierManager {
             );
             multiplierMap.put(id, multiplier);
         }
-        plugin.getLogger().info("Загружено " + multiplierMap.size() + " бустеров");
+        LoggerUtil.info(
+                MessageUtil.getString("log.multipliers-loaded")
+                        .replace("{amount}", String.valueOf(multiplierMap.size()))
+        );
     }
 
 

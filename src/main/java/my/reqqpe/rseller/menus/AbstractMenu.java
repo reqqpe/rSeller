@@ -8,7 +8,8 @@ import my.reqqpe.rseller.models.Menu;
 import my.reqqpe.rseller.models.MenuItem;
 import my.reqqpe.rseller.models.ParsedAction;
 import my.reqqpe.rseller.utils.Colorizer;
-import my.reqqpe.rseller.utils.MessageUtils;
+import my.reqqpe.rseller.utils.LoggerUtil;
+import my.reqqpe.rseller.utils.MessageUtil;
 import my.reqqpe.rseller.utils.Parse;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -60,7 +61,8 @@ public abstract class AbstractMenu {
 
         ConfigurationSection itemsSection = guiConfig.getConfigurationSection("items");
         if (itemsSection == null) {
-            plugin.getLogger().warning(String.format("[%s] Не удалось найти предметы в секции items", getMenuId()));
+            LoggerUtil.warn(MessageUtil.getString("log.items-section-not-found")
+                    .replace("{menu}", getMenuId()));
             return;
         }
 
@@ -90,8 +92,9 @@ public abstract class AbstractMenu {
 
     public void openMenu(Player player) {
         if (menu == null) {
-            plugin.getLogger().warning("Не удалось открыть меню %s, оно равняется null");
-            player.sendMessage("Не удалось открыть меню, сообщите администратору");
+            LoggerUtil.warn(MessageUtil.getString("log.menu-null")
+                    .replace("{menu}", getMenuId()));
+            player.sendMessage(MessageUtil.getString("log.menu-open-failed"));
             return;
         }
 
@@ -169,7 +172,8 @@ public abstract class AbstractMenu {
         } else {
             material = Material.getMaterial(materialStr);
             if (material == null) {
-                plugin.getLogger().warning("Неизвестный материал: " + materialStr);
+                LoggerUtil.warn(MessageUtil.getString("log.invalid-material")
+                        .replace("{material}", materialStr));
                 return result;
             }
         }
@@ -186,7 +190,9 @@ public abstract class AbstractMenu {
                 if (enchant != null) {
                     enchants.put(enchant, enchantsSection.getInt(enchantName, 1));
                 } else {
-                    plugin.getLogger().warning("Неизвестный энчант '" + enchantName + "' для предмета " + itemSection.getName());
+                    LoggerUtil.warn(MessageUtil.getString("log.invalid-enchant")
+                            .replace("{enchant}", enchantName)
+                            .replace("{item}", itemSection.getName()));
                 }
             }
         }
@@ -199,7 +205,9 @@ public abstract class AbstractMenu {
                 if (confSlot < 0 || confSlot >= size) continue;
                 if (specialSlots.contains(confSlot)) continue;
                 if (existingItems.containsKey(confSlot)) {
-                    plugin.getLogger().warning(String.format("Слот %d уже занят, предмет '%s' пропущен в этом слоте", confSlot, itemSection.getName()));
+                    LoggerUtil.warn(MessageUtil.getString("log.slot-occupied")
+                            .replace("{slot}", String.valueOf(confSlot))
+                            .replace("{item}", itemSection.getName()));
                     continue;
                 }
                 slots.add(confSlot);
@@ -213,7 +221,9 @@ public abstract class AbstractMenu {
                     !existingItems.containsKey(confSlot)) {
                 slots.add(confSlot);
             } else if (existingItems.containsKey(confSlot)) {
-                plugin.getLogger().warning(String.format("Слот %d уже занят, предмет '%s' пропущен в этом слоте", confSlot, itemSection.getName()));
+                LoggerUtil.warn(MessageUtil.getString("log.slot-occupied")
+                        .replace("{slot}", String.valueOf(confSlot))
+                        .replace("{item}", itemSection.getName()));
             }
         }
 
@@ -225,12 +235,16 @@ public abstract class AbstractMenu {
             try {
                 ItemFlag flag = ItemFlag.valueOf(normalized);
                 if (finalFlags.contains(normalized)) {
-                    plugin.getLogger().warning(String.format("Флаг '%s' дублируется для предмета '%s', добавлен только один раз", normalized, itemSection.getName()));
+                    LoggerUtil.warn(MessageUtil.getString("log.flag-duplicate")
+                            .replace("{flag}", normalized)
+                            .replace("{item}", itemSection.getName()));
                     continue;
                 }
                 finalFlags.add(normalized);
             } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning(String.format("Флаг '%s' не существует для предмета '%s', пропущен", normalized, itemSection.getName()));
+                LoggerUtil.warn(MessageUtil.getString("log.flag-invalid")
+                        .replace("{flag}", normalized)
+                        .replace("{item}", itemSection.getName()));
             }
         }
 
@@ -289,7 +303,10 @@ public abstract class AbstractMenu {
     private void runDefaultActions(Player player, String cmdLine) {
         ParsedAction pc = ParsedAction.parse(cmdLine);
         String action = pc.action();
-        String data = pc.data().replace("%player_name%", player.getName());
+        String data = pc.data();
+        if (data != null && !data.isEmpty()) {
+            data = PlaceholderAPI.setPlaceholders(player, data);
+        }
         switch (action) {
             case "console": {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), data);
@@ -302,15 +319,16 @@ public abstract class AbstractMenu {
             case "openguimenu": {
                 AbstractMenu openGUI = MenuManager.getMenu(data);
                 if (openGUI == null) {
-                    plugin.getLogger().warning("Меню не найдено: " + data);
+                    LoggerUtil.warn(MessageUtil.getString("log.menu-not-found")
+                            .replace("{menu}", data));
                     return;
                 }
                 openGUI.openMenu(player);
                 break;
             }
             case "message": {
-                data = MessageUtils.replacePlaceholders(player, data, new HashMap<>());
-                MessageUtils.sendMessage(player, data);
+                data = MessageUtil.replacePlaceholders(player, data, new HashMap<>());
+                MessageUtil.sendMessage(player, data);
                 break;
             }
             case "sound": {
@@ -321,7 +339,8 @@ public abstract class AbstractMenu {
                     float pitch  = parts.length >= 3 ? Float.parseFloat(parts[2]) : 1.0f;
                     player.playSound(player.getLocation(), sound, volume, pitch);
                 } catch (Exception e) {
-                    plugin.getLogger().warning("Ошибка звука: " + data);
+                    LoggerUtil.warn(MessageUtil.getString("log.sound")
+                            .replace("{data}", data));
                 }
                 break;
             }

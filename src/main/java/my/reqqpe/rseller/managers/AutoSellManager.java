@@ -5,6 +5,8 @@ import my.reqqpe.rseller.RSeller;
 import my.reqqpe.rseller.models.AutoSellCategory;
 import my.reqqpe.rseller.models.AutoSellSort;
 import my.reqqpe.rseller.models.SellableItem;
+import my.reqqpe.rseller.utils.LoggerUtil;
+import my.reqqpe.rseller.utils.MessageUtil;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.*;
@@ -33,46 +35,63 @@ public class AutoSellManager {
         categories.clear();
         idsItemsInCategories.clear();
 
-        plugin.getLogger().info("Загрузка авто-продажи...");
+        LoggerUtil.info(MessageUtil.getString("log.loading"));
 
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("auto-sell");
         if (section == null) {
-            plugin.getLogger().warning("Отсутствует секция авто-продажи. Загрузка прекращена");
+            LoggerUtil.warn(MessageUtil.getString("log.section-missing"));
             return;
         }
 
         this.enabled = section.getBoolean("enable", true);
         if (!this.enabled) {
-            plugin.getLogger().info("Авто-продажа отключена. Загрузка прекращена");
+            LoggerUtil.info(MessageUtil.getString("log.disabled"));
             return;
         }
 
         ConfigurationSection categoriesSection = section.getConfigurationSection("categories");
         if (categoriesSection == null) {
-            plugin.getLogger().warning("Отсутствуют категории авто-продажи. Загрузка прекращена");
+            LoggerUtil.warn(MessageUtil.getString("log.categories-missing"));
             return;
         }
+
         for (String categoryId : categoriesSection.getKeys(false)) {
             ConfigurationSection categorySection = categoriesSection.getConfigurationSection(categoryId);
+
             if (categorySection == null) {
-                plugin.getLogger().warning(String.format("Ошибка загрузки категории: %s. Отсутствует её конфигурация", categoryId));
+                LoggerUtil.warn(
+                        MessageUtil.getString("log.category-invalid")
+                                .replace("{category}", categoryId)
+                );
                 continue;
             }
+
             String confDisplayName = categorySection.getString("display_name");
             String displayName = confDisplayName != null ? confDisplayName : categoryId;
 
             List<String> confListItems = categorySection.getStringList("items");
             List<String> listItems = new ArrayList<>();
+
             for (String itemId : confListItems) {
                 SellableItem item = itemManager.getSellableItemById(itemId);
+
                 if (item == null) {
-                    plugin.getLogger().warning(String.format("Ошибка загрузки предмета: '%s', в категории: '%s'", itemId, categoryId));
+                    LoggerUtil.warn(
+                            MessageUtil.getString("log.item-invalid")
+                                    .replace("{item}", itemId)
+                                    .replace("{category}", categoryId)
+                    );
                     continue;
                 }
+
                 listItems.add(itemId);
             }
+
             if (listItems.isEmpty()) {
-                plugin.getLogger().warning(String.format("В категории '%s', нет ни одного предмета.", categoryId));
+                LoggerUtil.warn(
+                        MessageUtil.getString("log.category-empty")
+                                .replace("{category}", categoryId)
+                );
                 continue;
             }
 
@@ -86,19 +105,24 @@ public class AutoSellManager {
         }
 
         if (categories.isEmpty()) {
-            plugin.getLogger().warning("Отсутствуют категории авто-продажи. Загрузка прекращена");
+            LoggerUtil.warn(MessageUtil.getString("log.no-categories"));
             return;
         }
 
         this.defaultCategory = section.getString("default_category");
+
         String sortName = section.getString("default_sort", "NONE");
         try {
             this.defaultSort = AutoSellSort.valueOf(sortName.toUpperCase());
         } catch (Exception e) {
-            plugin.getLogger().warning("Неверный default_sort, используется NONE");
+            LoggerUtil.warn(
+                    MessageUtil.getString("log.invalid-sort")
+                            .replace("{value}", sortName)
+            );
             this.defaultSort = AutoSellSort.NONE;
         }
     }
+
     public AutoSellCategory getAutoSellCategory(String id) {
         return categories.get(id);
     }

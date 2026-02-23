@@ -8,6 +8,8 @@ import my.reqqpe.rseller.models.Level;
 import my.reqqpe.rseller.models.ParsedAction;
 import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.utils.CustomConfig;
+import my.reqqpe.rseller.utils.LoggerUtil;
+import my.reqqpe.rseller.utils.MessageUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -36,7 +38,7 @@ public class LevelManager {
 
         ConfigurationSection levelsSection = levelConfig.getConfigurationSection("levels");
         if (levelsSection == null) {
-            plugin.getLogger().info("Ошибка загрузки уровней. Отсутствует секция levels");
+            LoggerUtil.warn(MessageUtil.getString("log.levels-no-section"));
             return;
         }
 
@@ -45,7 +47,10 @@ public class LevelManager {
             try {
                 levelNum = Integer.parseInt(key);
             } catch (NumberFormatException e) {
-                plugin.getLogger().warning("Неверный номер уровня: " + key);
+                LoggerUtil.warn(
+                        MessageUtil.getString("log.level-invalid-number")
+                                .replace("{level}", key)
+                );
                 continue;
             }
 
@@ -60,7 +65,10 @@ public class LevelManager {
             levels.put(levelNum, level);
         }
 
-        plugin.getLogger().info("Загружено уровней: " + levels.size());
+        LoggerUtil.info(
+                MessageUtil.getString("log.levels-loaded")
+                        .replace("{amount}", String.valueOf(levels.size()))
+        );
     }
 
     public Level getLevel(long level) {

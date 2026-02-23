@@ -7,7 +7,7 @@ import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.models.Multiplier;
 import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.models.SellableItem;
-import my.reqqpe.rseller.utils.MessageUtils;
+import my.reqqpe.rseller.utils.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +15,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class AutoSellTask {
     private final RSeller plugin;
@@ -93,7 +92,7 @@ public class AutoSellTask {
 
         if (totalMoney > 0 || totalPoints > 0) {
 
-            String msg = MessageUtils.getString("auto-sell-message");
+            String msg = MessageUtil.getString("auto-sell-message");
 
             HashMap<String, String> placeholders = new HashMap<>();
             placeholders.put("money", String.valueOf(totalMoney));
@@ -101,9 +100,9 @@ public class AutoSellTask {
             placeholders.put("item_name", item.displayName());
             placeholders.put("amout", String.valueOf(amount));
 
-            msg = MessageUtils.replacePlaceholders(player, msg, placeholders);
+            msg = MessageUtil.replacePlaceholders(player, msg, placeholders);
 
-            MessageUtils.sendMessage(player, msg);
+            MessageUtil.sendMessage(player, msg);
         }
 
         levelManager.tryLevelUp(player);

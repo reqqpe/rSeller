@@ -5,6 +5,8 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.SneakyThrows;
 import my.reqqpe.rseller.RSeller;
 import my.reqqpe.rseller.models.PlayerData;
+import my.reqqpe.rseller.utils.LoggerUtil;
+import my.reqqpe.rseller.utils.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -91,6 +93,11 @@ public class DataBase {
 
         dataSource = new HikariDataSource(hc);
         createTable();
+
+        LoggerUtil.info(
+                MessageUtil.getString("log.database-connected")
+                        .replace("{type}", dbType.name())
+        );
     }
 
 
@@ -123,7 +130,10 @@ public class DataBase {
                  PreparedStatement ps = c.prepareStatement(sql)) {
                 ps.executeUpdate();
             } catch (SQLException e) {
-                plugin.getLogger().warning("Ошибка при создании таблицы " + e);
+                LoggerUtil.warn(
+                        MessageUtil.getString("log.database-create-table-error")
+                                .replace("{error}", e.getMessage())
+                );
             }
         });
     }
@@ -146,7 +156,10 @@ public class DataBase {
                     }
                 }
             } catch (SQLException e) {
-                plugin.getLogger().warning("Ошибка при загрузке данных игрока " + e);
+                LoggerUtil.warn(
+                        MessageUtil.getString("log.database-load-error")
+                                .replace("{error}", e.getMessage())
+                );
             }
         });
     }
@@ -171,7 +184,10 @@ public class DataBase {
             ps.setString(4, data.serializeAutosell());
             ps.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().warning("Ошибка при сохранении данных игрока " + e);
+            LoggerUtil.warn(
+                    MessageUtil.getString("log.database-save-error")
+                            .replace("{error}", e.getMessage())
+            );
         }
     }
 

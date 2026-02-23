@@ -1,11 +1,8 @@
 package my.reqqpe.rseller.models;
 
-import me.clip.placeholderapi.PlaceholderAPI;
-import my.reqqpe.rseller.utils.Colorizer;
-import my.reqqpe.rseller.utils.MessageUtils;
+import my.reqqpe.rseller.utils.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
-import org.bukkit.Warning;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -34,8 +31,8 @@ public record Level(
                     break;
                 }
                 case "message": {
-                    data = MessageUtils.replacePlaceholders(player, data, new HashMap<>());
-                    MessageUtils.sendMessage(player, data);
+                    data = MessageUtil.replacePlaceholders(player, data, new HashMap<>());
+                    MessageUtil.sendMessage(player, data);
                     break;
                 }
                 case "sound": {

@@ -7,6 +7,8 @@ import my.reqqpe.rseller.managers.ItemManager;
 import my.reqqpe.rseller.managers.MultiplierManager;
 import my.reqqpe.rseller.models.*;
 import my.reqqpe.rseller.utils.Colorizer;
+import my.reqqpe.rseller.utils.LoggerUtil;
+import my.reqqpe.rseller.utils.MessageUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -301,7 +303,10 @@ public class AutoSellMenu extends AbstractMenu{
                     try {
                         page = Integer.parseInt(pc.data());
                     } catch (NumberFormatException e) {
-                        plugin.getLogger().warning("set_page: Неверное значение страницы: " + pc.data());
+                        LoggerUtil.warn(
+                                MessageUtil.getString("log.invalid-page")
+                                        .replace("{value}", pc.data())
+                        );
                         break;
                     }
                 }
@@ -322,7 +327,10 @@ public class AutoSellMenu extends AbstractMenu{
                     try {
                         delta = Integer.parseInt(pc.data());
                     } catch (NumberFormatException e) {
-                        plugin.getLogger().warning("switch_page: Неверное значение сдвига страницы: " + pc.data());
+                        LoggerUtil.warn(
+                                MessageUtil.getString("log.invalid-page-delta")
+                                        .replace("{value}", pc.data())
+                        );
                         break;
                     }
                 }
@@ -352,7 +360,10 @@ public class AutoSellMenu extends AbstractMenu{
                     setPlayerPage(player, currentCategory, 1);
                     openMenu(player);
                 } catch (IllegalArgumentException ex) {
-                    plugin.getLogger().warning("Unknown sort: " + pc.data());
+                    LoggerUtil.warn(
+                            MessageUtil.getString("log.unknown-sort")
+                                    .replace("{sort}", pc.data())
+                    );
                 }
                 break;
             }
@@ -364,7 +375,10 @@ public class AutoSellMenu extends AbstractMenu{
                     try {
                         delta = Integer.parseInt(pc.data());
                     } catch (NumberFormatException e) {
-                        plugin.getLogger().warning("switch_sort: Неверное значение сдвига сортировки: " + pc.data());
+                        LoggerUtil.warn(
+                                MessageUtil.getString("log.invalid-sort-delta")
+                                        .replace("{value}", pc.data())
+                        );
                         break;
                     }
                 }

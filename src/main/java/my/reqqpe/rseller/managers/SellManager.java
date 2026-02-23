@@ -7,7 +7,7 @@ import my.reqqpe.rseller.hooks.EconomyHook;
 import my.reqqpe.rseller.models.Multiplier;
 import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.models.SellableItem;
-import my.reqqpe.rseller.utils.MessageUtils;
+import my.reqqpe.rseller.utils.MessageUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -82,16 +82,16 @@ public class SellManager {
             pd.addPoints(totalPoints);
         }
 
-        String message = MessageUtils.getString("sell-message");
+        String message = MessageUtil.getString("sell-message");
 
         HashMap<String, String> placeholders = new HashMap<>();
         placeholders.put("amount", String.valueOf(finalAmount));
         placeholders.put("money", String.valueOf(totalMoney));
         placeholders.put("points", String.valueOf(totalPoints));
 
-        message = MessageUtils.replacePlaceholders(player, message, placeholders);
+        message = MessageUtil.replacePlaceholders(player, message, placeholders);
 
-        MessageUtils.sendMessage(player, message);
+        MessageUtil.sendMessage(player, message);
 
         levelManager.tryLevelUp(player);
     }
