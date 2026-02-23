@@ -15,6 +15,7 @@ import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menus.AbstractMenu;
 import my.reqqpe.rseller.menus.AllSellMenu;
 import my.reqqpe.rseller.menus.AutoSellMenu;
+import my.reqqpe.rseller.menus.MainMenu;
 import my.reqqpe.rseller.tasks.AutoSellTask;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.CustomConfig;
@@ -146,6 +147,16 @@ public final class RSeller extends JavaPlugin implements Listener {
     }
 
     public void registerMenus() {
+        if (MenuManager.getMenu("MAIN_MENU") != null) {
+            MenuManager.unRegisterMenu("MAIN_MENU");
+        }
+        CustomConfig mainMenuConfig = new CustomConfig(this, "GUI/MAIN_MENU.yml");
+        AbstractMenu mainMenu = new MainMenu(
+            mainMenuConfig.getConfig(),
+            this
+        );
+        MenuManager.registerMenu(mainMenu.getMenuId(), mainMenu);
+
         if (MenuManager.getMenu("ALL_SELL_MENU") != null) {
             MenuManager.unRegisterMenu("ALL_SELL_MENU");
         }
