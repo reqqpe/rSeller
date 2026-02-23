@@ -30,7 +30,6 @@ public class CustomConfig {
         if (!configFile.exists()) {
             plugin.saveResource(relativePath, false);
             LoggerUtil.info(fileName + "created");
-            plugin.getLogger().info(fileName + " был создан!");
         }
 
         config = YamlConfiguration.loadConfiguration(configFile);

@@ -9,7 +9,7 @@
 # Telegram: https://t.me/reqqpeDev
 
 use-legacy-format: false # Использовать ли старый формат &1 &2... или использовать MiniMessage(при false)
-
+message-lang: ru # ru,en (or filename in messages folder)
 
 database:
   type: sqlite # sqlite, mysql, postgresql

@@ -1,7 +1,9 @@
-title: "&8Скупщик -> Универсальный скупщик"
+title: "&8Скупщик -> Авто скупщик"
 size: 54
 special-slots:
-  - '0-44'
+  - '10-16'
+  - '19-25'
+  - '28-34'
 
 menu-settings:
   display_name: "&f{item_name}"
@@ -29,9 +31,9 @@ items: # Можно добавлять свои предметы
       - "&fв главное меню скупщика"
       - ""
     left_click_actions:
-      - '[opengui] mainGUI'
+      - '[openguimenu] ALL_SELL_MENU'
     right_click_actions:
-      - '[opengui] mainGUI'
+      - '[openguimenu] ALL_SELL_MENU'
   sell_item:
     material: EMERALD
     update: true
@@ -45,29 +47,25 @@ items: # Можно добавлять свои предметы
       - '[sell]'
     right_click_actions:
       - '[sell]'
-  level_info:
-    slot: 53
-    update: true
-    material: BOOK
-    name: "&#54A0F4▶ Что такое скупщик?"
+  toggle_category_autosell:
+    material: snowball
+    slot: 4
+    name: "&f"
     lore:
-      - "&#54A0F4Скупщик &f- Это уникальный способ заработка"
-      - "&fНа котором вы можете &#54A0F4быстро&f заработать очень &#54A0F4много монет&f!"
-      - "&fПолучай &#54A0F4очки &fдля прокачки бустера &#54A0F4монет &fи &#54A0F4очков&f."
+      - "&fНажмите, чтобы переключить авто-скупку категории"
       - ""
-      - "&#54A0F4▶ Как что-то продать?"
-      - "&fЧтобы продать сложи предметы которые ты хочешь"
-      - "&fпродать в меню и скупщик сам решит что ему купить"
+      - "&fСтатус: {autosell_category_state}"
       - ""
-      - "&#54A0F4▶ Информация"
-      - "&#54A0F4* &fТекущий Уровень: &#54A0F4%rseller_level%"
-      - "&#54A0F4* &fОчков до следующего: &#54A0F4%rseller_points%/%rseller_points_needed%"
-      - ""
-      - "&#54A0F4* &fБустер монет: &7x&#54A0F4%rseller_multiplier_coins%"
-      - "&#54A0F4* &fБустер очков: &7x&#54A0F4%rseller_multiplier_points%"
+    left_click_actions:
+      - '[toggle_autosell_category]'
+    right_click_actions:
+      - '[toggle_autosell_category]'
   decorate:
     material: GRAY_STAINED_GLASS_PANE
     name: "&f"
     slots:
-      - 46-48
-      - 50-52
+      - 0-3
+      - 5-9
+      - 17-18
+      - 26-27
+      - 35-44

@@ -20,7 +20,11 @@ public class MessageUtil {
 
 
     public static String getString(String path) {
-        return config.getString(path);
+        String result = config.getString(path);
+        if (result == null) {
+            return "";
+        }
+        return result;
     }
     public static List<String> getListString(String path) {
         return config.getStringList(path);

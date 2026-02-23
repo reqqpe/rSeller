@@ -16,17 +16,18 @@ items: # Можно добавлять свои предметы
       - "&fв главное меню скупщика"
       - ""
     left_click_actions:
-      - '[opengui] mainGUI'
+      - '[openguimenu] AUTO_SELL_MENU'
     right_click_actions:
-      - '[opengui] mainGUI'
+      - '[openguimenu] AUTO_SELL_MENU'
   sell_item:
     material: EMERALD
     update: true
     name: "&#54A0F4▶ Продать"
+    updatable: true
     slot: 49
     lore:
       - "&fНажмите, чтобы продать и получить:"
-      - "&#54A0F4* &fМонет: &#54A0F4{sell_price}"
+      - "&#54A0F4* &fМонет: &#54A0F4{sell_money}"
       - "&#54A0F4* &fОчков: &#54A0F4{sell_points}"
     left_click_actions:
       - '[sell]'
