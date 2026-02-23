@@ -29,7 +29,7 @@ public class CustomConfig {
 
         if (!configFile.exists()) {
             plugin.saveResource(relativePath, false);
-            LoggerUtil.info(fileName + "created");
+            LoggerUtil.info(fileName + " created successfully.");
         }
 
         config = YamlConfiguration.loadConfiguration(configFile);
@@ -44,19 +44,19 @@ public class CustomConfig {
 
     public void saveConfig() {
         if (config == null || configFile == null) {
-            plugin.getLogger().warning("Cannot save " + relativePath + ": config is not initialized!");
+            LoggerUtil.warn("Cannot save " + relativePath + ": configuration is not initialized!");
             return;
         }
         try {
             config.save(configFile);
-            plugin.getLogger().info(fileName + " был сохранён!");
+            LoggerUtil.info(fileName + " has been saved successfully.");
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "Could not save " + relativePath, e);
+            LoggerUtil.warn("Could not save " + relativePath + ": " + e.getMessage());
         }
     }
 
     public void reloadConfig() {
         config = YamlConfiguration.loadConfiguration(configFile);
-        plugin.getLogger().info(fileName + " был перезагружен!");
+        LoggerUtil.info(fileName + " has been reloaded successfully.");
     }
 }
