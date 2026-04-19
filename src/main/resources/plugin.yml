@@ -1,0 +1,19 @@
+name: rSeller
+version: '${version}'
+main: my.reqqpe.rseller.Main
+api-version: '1.16'
+authors: [reqqpe]
+depend: [PlaceholderAPI]
+softdepend: [NBTAPI, Vault, CoinsEngine, PlayerPoints]
+commands:
+  sell:
+    description: Открыть меню скупщика
+    aliases: [buyer, seller]
+  rseller:
+    aliases: [sa, ba, buyadmin, selladmin, rs]
+    permission: rseller.admin
+
+libraries:
+  - com.zaxxer:HikariCP:6.3.0
+  - com.mysql:mysql-connector-j:9.4.0
+  - org.postgresql:postgresql:42.7.8

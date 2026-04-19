@@ -1,0 +1,88 @@
+#                 .__               .__
+# _______  ______ |  |  __ __  ____ |__| ____   ______
+# \_  __ \ \____ \|  | |  |  \/ ___\|  |/    \ /  ___/
+#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \
+#  |__|    |   __/|____/____/\___  /|__|___|  /____  >
+#          |__|             /_____/         \/     \/
+#
+
+
+
+# Нужна помощь или хочешь узнавать и предлагать идеи для обновлений?
+# Вики плагина: https://reqqpe.gitbook.io/rseller
+# ДС: https://dsc.gg/rplugins
+
+
+# Какое меню будет открывать команда /<buyer|seller|sell>
+sell-command: "mainGUI" # Такие же названия как у GUI файлов (allSellGUI, mainGUI, autoSellGUI)
+
+metrics: true
+update-check: true
+
+economy:
+  type: VAULT # VAULT OR COINSENGINE OR PLAYERPOINTS
+  coinsengine:
+    currency-name: money
+
+
+# Срабатывает при подборе предмета, продаётся лишь тот предмет который подобрался
+autosell:
+  enable: true # Переключение работает только при перезагрузке сервера
+  settings:
+    type: pickup # pickup(вызывается при подборе) или task(каждый игрок проверяется раз в какое-то время)
+    sell-inventory: false # продавать инвентарь или подобранный предмет(работает если type = pickup)
+    task-delay: 5 # в секундах(работает если type = task)
+  type-list: false # false - чёрный список миров, true - белый список миров
+  worlds-list: # Список, миров настраивается параметром type-list
+    - spawn
+  start_category: example # Категория, которая будет открываться при первом открытие
+  categories:
+    all:
+      name: "Все предметы"
+      items:
+        - all
+    example:
+      name: "Ресурсы"
+      items:
+        - COAL
+        - LAPIS_LAZULI
+        - IRON_INGOT
+        - GOLD_INGOT
+        - DIAMOND
+        - EMERALD
+        - NETHERITE_INGOT
+numbers_format:
+  # https://reqqpe.gitbook.io/rseller/rukovodstvo-po-nastroike-formata-chisel
+  placeholders:
+    points: "%.2f"
+    points_needed: "%.2f"
+    multiplier_points: "%.2f"
+    multiplier_coins: "%.2f"
+    points_fornextlevel: "%.2f"
+  mainGUI:
+    sell_price: "%.2f"
+    sell_points: "%.2f"
+  autoSellGUI:
+    sell_price: "%.2f"
+    sell_points: "%.2f"
+  messages:
+    points: "%.2f"
+    coins: "%.2f"
+
+
+# Бустеры по пермишенам rseller.booster.<key>
+boosters:
+
+  # Не забывайте, если вы укажите donate.vip, то конфигурация будет не правильная (так работает yaml)
+  # Так же если у вас все права, то значит и все бустеры (что не странно потому что они же работают на правах)
+
+  
+  donate: # Пермишен rseller.booster.donate
+    coin-multiplier: 2.0 # Если не указывать, то изначально 1.0
+    point-multiplier: 2.0 # Если не указывать, то изначально 1.0
+
+  booster-coin: # rseller.booster.booster-coin
+    coin-multiplier: 1.5
+
+  booster-point:
+    point-multiplier: 1.5

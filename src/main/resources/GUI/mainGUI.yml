@@ -1,0 +1,57 @@
+#                 .__               .__               
+# _______  ______ |  |  __ __  ____ |__| ____   ______
+# \_  __ \ \____ \|  | |  |  \/ ___\|  |/    \ /  ___/
+#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \ 
+#  |__|    |   __/|____/____/\___  /|__|___|  /____  >
+#          |__|             /_____/         \/     \/ 
+#        
+# Discord: https://dsc.gg/rplugins
+
+
+title: "&8Скупщик -> Выбор скупщика"
+size: 27
+special-slots: [] # Нет смысла что-то указывать( просто отсутствует обработка )
+
+items:
+  autosell:
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTFmYWQ1ZDJiODIyZmNlOGQ1OWJjZTA4NDE0YjlmODdmMjdhYTlkNzdhNzM4MjNhNThkZDUxN2VhODBiMmE1In19fQ==
+    model_data: -1 # Не обязательный параметр можно убрать или же поставить -1
+    name: "&#54A0F4▶ Автоскупщик"
+    slot: 12
+    lore:
+      - ""
+      - "&7Нажмите, чтобы открыть систему"
+      - "&7автоматической продажи ресурсов."
+      - ""
+      - "&fВыбранные &fпредметы будут продаваться"
+      - "&f&#54A0F4автоматически &fсразу после подбора."
+      - ""
+    left_click_actions:
+      - '[opengui] autoSellGUI'
+    right_click_actions:
+      - '[opengui] autoSellGUI'
+  allsell:
+    material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzhhZjhiN2Q0M2ZlNGRlOWY4Y2JjNGJiNDk1MzQzY2Y3MTVlYjhmZWJhNGJlZDRjZGNlODJjMWIwY2UxNzIyIn19fQ==
+    model_data: -1 # Не обязательный параметр можно убрать или же поставить -1
+    name: "&#54A0F4▶ Универсальный скупщик"
+    slot: 14
+    lore:
+      - ""
+      - "&7Нажмите, чтобы открыть торговца"
+      - "&7со скупкой любых предметов."
+      - ""
+      - "&fПросто &#54A0F4положите &fлут — &#54A0F4и получите"
+      - "&fмонеты за &#54A0F4всё&f, что можно продать."
+      - ""
+    left_click_actions:
+      - '[opengui] allSellGUI'
+    right_click_actions:
+      - '[opengui] allSellGUI'
+  decorate:
+    material: GRAY_STAINED_GLASS_PANE
+    slots:
+      - "0-11"
+      - "15-26"
+  decorate1:
+    material: chain
+    slot: 13

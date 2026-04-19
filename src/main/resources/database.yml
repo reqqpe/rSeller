@@ -1,0 +1,18 @@
+type: sqlite # sqlite, mysql, postgres
+table_prefix: "rseller_"
+# Настройки пула соединений, если не знаете что это рекомендуется не менять
+hikari:
+  max-pool-size: 10
+  minimum-idle: 2
+  keep-alive: 120000
+  idle-timeout: 60000
+  connection-timeout: 30000
+  max-life-time: 1800000
+
+# Параметры подключения к MySQL/Postgres
+connection:
+  host: localhost
+  port: 3306
+  database: rseller
+  username: "username"
+  password: "password"
