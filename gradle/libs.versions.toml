@@ -4,7 +4,7 @@
 [versions]
 com-destroystokyo-paper-paper-api = "1.16.5-R0.1-SNAPSHOT"
 com-github-milkbowl-vaultapi = "1.7"
-com-zaxxer-hikaricp = "6.2.1"
+com-zaxxer-hikaricp = "7.0.2"
 de-tr7zw-item-nbt-api-plugin = "2.15.1"
 it-unimi-dsi-fastutil = "8.5.16"
 me-clip-placeholderapi = "2.11.6"
