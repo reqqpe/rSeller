@@ -20,5 +20,3 @@ de-tr7zw-item-nbt-api-plugin = { module = "de.tr7zw:item-nbt-api-plugin", versio
 it-unimi-dsi-fastutil = { module = "it.unimi.dsi:fastutil", version.ref = "it-unimi-dsi-fastutil" }
 me-clip-placeholderapi = { module = "me.clip:placeholderapi", version.ref = "me-clip-placeholderapi" }
 org-bstats-bstats-bukkit = { module = "org.bstats:bstats-bukkit", version.ref = "org-bstats-bstats-bukkit" }
-org-json-json = { module = "org.json:json", version.ref = "org-json-json" }
-org-projectlombok-lombok = { module = "org.projectlombok:lombok", version.ref = "org-projectlombok-lombok" }
