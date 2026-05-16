@@ -22,9 +22,9 @@ public class AutoSellManager {
     }
 
     public void loadConfig() {
-        ConfigurationSection config = plugin.getConfig().getConfigurationSection("autosell");
+        ConfigurationSection config = plugin.getMainConfig().getConfig().getConfigurationSection("autosell");
         if (config == null) {
-            plugin.getLogger().warning("[AutoSellManager] Секция autosell отсутствует в config.yml!");
+            plugin.getLogger().warning(plugin.getMessageConfig().getConsoleAutosellSectionMissing());
             return;
         }
 
@@ -60,12 +60,12 @@ public class AutoSellManager {
         List<Item> items = new ArrayList<>();
         for (String id : list) {
             if (id.equalsIgnoreCase("all")) {
-                items.addAll(plugin.getItemManager().getItems());
+                items.addAll(plugin.getItemManager().getAll());
                 break;
             } else {
-                Item item = plugin.getItemManager().getItemById(id);
+                Item item = plugin.getItemManager().getById(id);
                 if (item == null) {
-                    plugin.getLogger().warning("[AutoSellManager] Неверный ID или Material в списке: " + id);
+                    plugin.getLogger().warning(plugin.getMessageConfig().getConsoleAutosellInvalidItem().replace("{id}", id));
                     continue;
                 }
                 items.add(item);
@@ -87,7 +87,7 @@ public class AutoSellManager {
 
 
     public String getFirstCategory() {
-        String firstCategory = plugin.getConfig().getString("autosell.start_category", "all");
+        String firstCategory = plugin.getMainConfig().getAutosell().getStartCategory();
         if (categories.containsKey(firstCategory)) {
             return firstCategory;
         }

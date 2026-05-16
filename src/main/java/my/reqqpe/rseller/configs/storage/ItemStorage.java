@@ -21,7 +21,7 @@ public class ItemStorage {
 
         plugin.getItemsConfig().saveConfig();
 
-        plugin.getLogger().info("[ItemStorage] Saved item " + item.id());
+        plugin.getLogger().info(plugin.getMessageConfig().getConsoleItemSaved().replace("{id}", item.id()));
         return true;
     }
 
@@ -34,7 +34,7 @@ public class ItemStorage {
 
         plugin.getItemsConfig().saveConfig();
 
-        plugin.getLogger().info("[ItemStorage] Deleted item " + id);
+        plugin.getLogger().info(plugin.getMessageConfig().getConsoleItemDeleted().replace("{id}", id));
         return true;
     }
 }

@@ -1,5 +1,6 @@
 package my.reqqpe.rseller.managers;
 
+import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.configs.impl.ItemsConfig;
 import my.reqqpe.rseller.models.SearchItemSettings;
 import my.reqqpe.rseller.models.item.Item;
@@ -14,9 +15,11 @@ public class ItemManager {
     private final Map<Material, Set<Item>> byMaterial = new EnumMap<>(Material.class);
 
     private final ItemsConfig config;
+    private final Main plugin;
 
-    public ItemManager(ItemsConfig config) {
+    public ItemManager(ItemsConfig config, Main plugin) {
         this.config = config;
+        this.plugin = plugin;
         reload();
     }
 
@@ -53,7 +56,7 @@ public class ItemManager {
         SearchItemSettings settings = config.getSearchSettings();
 
         for (Item item : items) {
-            if (item.matches(stack, settings, null)) {
+            if (item.matches(stack, settings, plugin)) {
                 return item;
             }
         }

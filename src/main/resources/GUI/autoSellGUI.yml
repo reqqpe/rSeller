@@ -39,9 +39,9 @@ items:
       - "&#54A0F4* ЛКМ &f— предыдущая категория"
       - "&#54A0F4* ПКМ &f— следующая категория"
     left_click_actions:
-      - '[next_category]'
+      - '[switch_category] +1'
     right_click_actions:
-      - '[prev_category]'
+      - '[switch_category] -1'
   prev_page:
     material: ARROW
     name: "&#54A0F4▶ Предыдущая страница"
@@ -93,6 +93,18 @@ items:
     slot: 53
     left_click_actions:
       - '[toggle_autosell_category]'
+  toggle_autosell_message:
+    material: snowball
+    name: "&f"
+    lore:
+      - "&fНажмите, чтобы переключить"
+      - "&fотправку сообщения авто-скупки"
+      - ""
+      - "&fСтатус: {state_autosell_message}"
+      - ""
+    slot: 52
+    left_click_actions:
+      - '[toggle_autosell_message]'
 
   decorate:
     material: GRAY_STAINED_GLASS_PANE
@@ -106,4 +118,4 @@ items:
       - 44-44
       - 46-47
       - 49-49
-      - 51-52
+      - 51-51

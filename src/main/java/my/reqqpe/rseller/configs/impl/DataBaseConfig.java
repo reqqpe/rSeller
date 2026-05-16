@@ -39,10 +39,10 @@ public class DataBaseConfig extends CustomConfig {
         String hikariPath = "hikari.";
         this.maxPoolSize = getInt(hikariPath + "max-pool-size", 10);
         this.minimumIdle = getInt(hikariPath + "minimum-idle", 2);
-        this.keepAlive = getInt(hikariPath + "hikari.keep-alive", 120000);
-        this.idleTimeout = getInt(hikariPath + "hikari.idle-timeout", 60000);
-        this.connectionTimeout = getInt(hikariPath + "hikari.connection-timeout", 30000);
-        this.maxLifeTime = getInt(hikariPath + "hikari.max-life-time", 1800000);
+        this.keepAlive = getInt(hikariPath + "keep-alive", 120000);
+        this.idleTimeout = getInt(hikariPath + "idle-timeout", 60000);
+        this.connectionTimeout = getInt(hikariPath + "connection-timeout", 30000);
+        this.maxLifeTime = getInt(hikariPath + "max-life-time", 1800000);
 
         String connectionPath = "connection.";
         this.host = getString(connectionPath + "host", "localhost");

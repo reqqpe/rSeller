@@ -1,11 +1,10 @@
 package my.reqqpe.rseller.menu;
 
-
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.clip.placeholderapi.PlaceholderAPI;
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.database.Database;
-import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.cache.PlayerDataCache;
+import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.managers.AutoSellManager;
 import my.reqqpe.rseller.managers.NumberFormatManager;
 import my.reqqpe.rseller.models.item.Item;
@@ -15,10 +14,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -26,10 +23,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
-import java.util.logging.LogRecord;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AutoSellMenu extends AbstractMenu implements Listener {
-    private final Database database;
     private final AutoSellManager autoSellManager;
     private final Map<UUID, String> playerCategory = new HashMap<>();
     private final Map<UUID, Map<String, Integer>> playerCategoryPages = new HashMap<>();
@@ -38,15 +35,14 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
     private autoSellItem autoSellItem;
 
 
-    public AutoSellMenu(Main plugin, Database database) {
+    public AutoSellMenu(Main plugin) {
         super(plugin);
-        this.database = database;
         this.autoSellManager = plugin.getAutoSellManager();
         this.numberFormatManager = plugin.getFormatManager();
 
 
-        String enabled = Colorizer.color(plugin.getConfig().getString("messages.autosell-enable", "&aВключено"));
-        String disabled = Colorizer.color(plugin.getConfig().getString("messages.autosell-disable", "&cВыключено"));
+        String enabled = Colorizer.color(plugin.getMessageConfig().getAutosellEnable());
+        String disabled = Colorizer.color(plugin.getMessageConfig().getAutosellDisable());
 
         String name = getGuiConfig().getString("autosell_item.name", "&f{item_name}");
         boolean autosellEnchanted = getGuiConfig().getBoolean("autosell_item.autosell-enchanted", true);
@@ -72,7 +68,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
     public void openMenu(Player player) {
         if (!player.hasPermission("rSeller.autosell")) {
-            String message = plugin.getConfig().getString("messages.no-permission", "&cУ вас нет прав для использования автопродажи!");
+            String message = plugin.getMessageConfig().getNoPermission();
             player.sendMessage(Colorizer.color(message));
             player.closeInventory();
             return;
@@ -97,7 +93,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
         if (pageItems == null || pageItems.isEmpty()) return;
 
-        PlayerData playerData = database.getPlayerData(player.getUniqueId());
+        PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
 
         for (int i = 0; i < specialSlots.size(); i++) {
             int slot = specialSlots.get(i);
@@ -183,44 +179,42 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
 
         text = text.replace("{current_category}", currentCategoryName);
 
+        if (text.contains("{category_index:")) {
+            List<String> categoryIds = new ArrayList<>(autoSellManager.getCategories().keySet());
+            int currentIndex = categoryIds.indexOf(currentCategoryId);
+            if (currentIndex == -1) currentIndex = 0;
+
+            Matcher m = Pattern
+                    .compile("\\{category_index:([+-]?\\d+)\\}")
+                    .matcher(text);
+            StringBuffer sb = new StringBuffer();
+            while (m.find()) {
+                int offset = Integer.parseInt(m.group(1));
+                int targetIndex = (currentIndex + offset + categoryIds.size()) % categoryIds.size();
+                String targetName = autoSellManager.getCategoryName(categoryIds.get(targetIndex));
+                m.appendReplacement(sb, java.util.regex.Matcher.quoteReplacement(targetName));
+            }
+            m.appendTail(sb);
+            text = sb.toString();
+        }
+
         if (text.contains("{state_autosell_category}")) {
             boolean state = getCategoryAutosellState(player);
-
             String status = state ? autoSellItem.enabled : autoSellItem.disable;
-
             text = text.replace("{state_autosell_category}", status);
+        }
+
+        if (text.contains("{state_autosell_message}")) {
+            boolean msgEnabled = PlayerDataCache.getOrCreate(player.getUniqueId()).isAutosellMessage();
+            String status = msgEnabled
+                    ? plugin.getMessageConfig().getAutosellMessageEnable()
+                    : plugin.getMessageConfig().getAutosellMessageDisable();
+            text = text.replace("{state_autosell_message}", Colorizer.color(status));
         }
 
         text = PlaceholderAPI.setPlaceholders(player, text);
 
         return text;
-    }
-
-
-    @Override
-    protected List<String> replacePlaceholders(Player player, List<String> list, Inventory inventory) {
-        List<String> replaced = new ArrayList<>();
-
-        String currentCategoryId = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
-
-        for (String line : list) {
-            if (line.contains("{categories}")) {
-                String prefixInLine = line.substring(0, line.indexOf("{categories}"));
-                String suffixInLine = line.substring(line.indexOf("{categories}") + "{categories}".length());
-
-                for (String categoryId : autoSellManager.getCategories().keySet()) {
-                    if (!categoryId.equals(currentCategoryId)) {
-                        String displayName = autoSellManager.getCategoryName(categoryId);
-                        String fullLine = prefixInLine + displayName + suffixInLine;
-                        fullLine = replacePlaceholders(player, fullLine, inventory);
-                        replaced.add(Colorizer.color(fullLine));
-                    }
-                }
-            } else {
-                replaced.add(Colorizer.color(replacePlaceholders(player, line, inventory)));
-            }
-        }
-        return replaced;
     }
 
 
@@ -276,7 +270,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
             e.setCancelled(true);
             ItemStack clickedItem = menuInv.getItem(rawSlot);
             if (clickedItem != null && clickedItem.getType() != Material.AIR) {
-                PlayerData playerData = database.getPlayerData(player.getUniqueId());
+                PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
 
 
                 String id = "";
@@ -307,28 +301,47 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
         if (!holder.id().equals(getMenuId())) return;
 
 
-        switch (action.toLowerCase()) {
-            case "[next_page]" -> switchPage(player, 1);
-            case "[prev_page]" -> switchPage(player, -1);
-            case "[next_category]" -> switchCategory(player, 1);
-            case "[prev_category]" -> switchCategory(player, -1);
+        String actionLower = action.toLowerCase().trim();
 
-            case "[toggle_autosell_category]" -> {
-                String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
-                List<Item> items = autoSellManager.getCategoryItems(currentCategory);
-
-                boolean autosellCategory = getCategoryAutosellState(player);
-
-                if (!items.isEmpty()) {
-                    PlayerData playerData = database.getPlayerData(player.getUniqueId());
-                    for (Item item : items) {
-                        playerData.setAutosell(item.id(), !autosellCategory);
-                    }
-                    openMenu(player);
-                }
+        if (actionLower.equals("[next_page]")) {
+            switchPage(player, 1);
+        } else if (actionLower.equals("[prev_page]")) {
+            switchPage(player, -1);
+        } else if (actionLower.startsWith("[switch_category]")) {
+            String arg = action.substring("[switch_category]".length()).trim();
+            try {
+                int offset = Integer.parseInt(arg);
+                switchCategory(player, offset);
+            } catch (NumberFormatException ex) {
+                plugin.getLogger().warning("AutoSellMenu: invalid [switch_category] argument: " + arg);
             }
+        } else if (actionLower.startsWith("[set_category]")) {
 
-            default -> runMainActions(player, action);
+            String categoryId = action.substring("[set_category]".length()).trim();
+            if (autoSellManager.getCategories().containsKey(categoryId)) {
+                playerCategory.put(player.getUniqueId(), categoryId);
+                setPlayerPage(player, categoryId, 1);
+                openMenu(player);
+            } else {
+                plugin.getLogger().warning("AutoSellMenu: unknown category in [set_category]: " + categoryId);
+            }
+        } else if (actionLower.equals("[toggle_autosell_message]")) {
+            PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
+            playerData.toggleAutosellMessage();
+            openMenu(player);
+        } else if (actionLower.equals("[toggle_autosell_category]")) {
+            String currentCategory = playerCategory.getOrDefault(player.getUniqueId(), autoSellManager.getFirstCategory());
+            List<Item> items = autoSellManager.getCategoryItems(currentCategory);
+            boolean autosellCategory = getCategoryAutosellState(player);
+            if (!items.isEmpty()) {
+                PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
+                for (Item item : items) {
+                    playerData.setAutosell(item.id(), !autosellCategory);
+                }
+                openMenu(player);
+            }
+        } else {
+            runMainActions(player, action);
         }
     }
 
@@ -338,7 +351,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
         if (items.isEmpty()) return false;
 
 
-        PlayerData playerData = database.getPlayerData(player.getUniqueId());
+        PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
 
         for (Item item : items) {
             if (!playerData.isAutosell(item.id())) {

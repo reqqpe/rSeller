@@ -29,8 +29,6 @@ public class ItemsConfig extends CustomConfig {
         searchSettings = loadSettings();
 
         loadItems();
-
-        plugin.getLogger().info("[ItemsConfig] Loaded: " + items.size());
     }
 
     private SearchItemSettings loadSettings() {
@@ -85,7 +83,11 @@ public class ItemsConfig extends CustomConfig {
 
         String name = sec.getString("name");
         List<String> lore = sec.getStringList("lore");
-        int model = sec.getInt("model-data");
+        Integer model = null;
+
+        if (sec.contains("model-data")) {
+            model = sec.getInt("model-data");
+        }
 
         Map<Enchantment, Integer> ench = new HashMap<>();
         var enchSec = sec.getConfigurationSection("enchantments");

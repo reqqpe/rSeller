@@ -20,7 +20,7 @@ metrics: true
 update-check: true
 
 economy:
-  type: VAULT # VAULT OR COINSENGINE OR PLAYERPOINTS
+  type: VAULT # VAULT, COINSENGINE или PLAYERPOINTS
   coinsengine:
     currency-name: money
 
@@ -52,22 +52,24 @@ autosell:
         - EMERALD
         - NETHERITE_INGOT
 numbers_format:
-  # https://reqqpe.gitbook.io/rseller/rukovodstvo-po-nastroike-formata-chisel
+  # Формат чисел: %.Nf где N — количество знаков после запятой
+  # Добавь ~ в конец чтобы убрать лишние нули: 20.00 -> 20, 20.10 -> 20.1
+  # Примеры: "%.2f" -> 20.00 | "%.2f~" -> 20 | "%.1f~" -> 20.5
   placeholders:
-    points: "%.2f"
-    points_needed: "%.2f"
-    multiplier_points: "%.2f"
-    multiplier_coins: "%.2f"
-    points_fornextlevel: "%.2f"
+    points: "%.2f~"
+    points_needed: "%.2f~"
+    multiplier_points: "%.2f~"
+    multiplier_coins: "%.2f~"
+    points_fornextlevel: "%.2f~"
   mainGUI:
-    sell_price: "%.2f"
-    sell_points: "%.2f"
+    sell_price: "%.2f~"
+    sell_points: "%.2f~"
   autoSellGUI:
-    sell_price: "%.2f"
-    sell_points: "%.2f"
+    sell_price: "%.2f~"
+    sell_points: "%.2f~"
   messages:
-    points: "%.2f"
-    coins: "%.2f"
+    points: "%.2f~"
+    coins: "%.2f~"
 
 
 # Бустеры по пермишенам rseller.booster.<key>
@@ -86,3 +88,22 @@ boosters:
 
   booster-point:
     point-multiplier: 1.5
+
+# Звуки при событиях продажи
+# Оставь название звука пустым ("") чтобы отключить его
+# Полный список звуков: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
+sounds:
+  # Звук при успешной продаже через меню
+  sell: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  sell-volume: 1.0
+  sell-pitch: 1.0
+
+  # Звук при автопродаже
+  autosell: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  autosell-volume: 1.0
+  autosell-pitch: 1.2
+
+  # Звук когда нечего продавать
+  no-sell: "BLOCK_NOTE_BLOCK_BASS"
+  no-sell-volume: 1.0
+  no-sell-pitch: 1.0

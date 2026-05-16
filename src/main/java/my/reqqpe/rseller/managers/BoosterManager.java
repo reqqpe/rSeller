@@ -3,7 +3,6 @@ package my.reqqpe.rseller.managers;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.models.Booster;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -26,8 +25,7 @@ public class BoosterManager {
 
 
     public void load() {
-        FileConfiguration config = plugin.getConfig();
-        ConfigurationSection section = config.getConfigurationSection("boosters");
+        ConfigurationSection section = plugin.getMainConfig().getConfig().getConfigurationSection("boosters");
 
         if (section == null) return;
 

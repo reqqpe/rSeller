@@ -1,4 +1,4 @@
-package my.reqqpe.rseller.database;
+package my.reqqpe.rseller.models;
 
 import com.google.gson.Gson;
 import lombok.Data;
@@ -16,6 +16,7 @@ public class PlayerData {
     private final UUID uuid;
     private double points = 0;
     private Map<String, Boolean> autosellMap = new HashMap<>();
+    private boolean autosellMessage = true;
 
     public Player toPlayer() {
         return Bukkit.getPlayer(uuid);
@@ -41,6 +42,7 @@ public class PlayerData {
         return GSON.toJson(autosellMap);
     }
 
+    @SuppressWarnings("unchecked")
     public void deserializeAutosell(String json) {
         if (json == null || json.isEmpty()) return;
         autosellMap = GSON.fromJson(json, Map.class);
@@ -50,4 +52,7 @@ public class PlayerData {
         return autosellMap.values().stream().anyMatch(b -> b);
     }
 
+    public void toggleAutosellMessage() {
+        autosellMessage = !autosellMessage;
+    }
 }

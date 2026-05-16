@@ -1,8 +1,9 @@
 package my.reqqpe.rseller.listeners;
 
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.database.Database;
-import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.cache.PlayerDataCache;
+import my.reqqpe.rseller.configs.impl.MainConfig;
+import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.economy.EconomyProvider;
 import my.reqqpe.rseller.managers.NumberFormatManager;
 import my.reqqpe.rseller.models.Booster;
@@ -19,14 +20,12 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class PlayerPickupItem implements Listener {
     private final Main plugin;
-    private final Database database;
     private final EconomyProvider economy;
     private final NumberFormatManager numberFormatManager;
     private final boolean inventorySell;
 
-    public PlayerPickupItem(Main plugin, Database database, boolean inventorySell) {
+    public PlayerPickupItem(Main plugin, boolean inventorySell) {
         this.plugin = plugin;
-        this.database = database;
         this.economy = plugin.getEconomy();
         this.numberFormatManager = plugin.getFormatManager();
         this.inventorySell = inventorySell;
@@ -69,7 +68,7 @@ public class PlayerPickupItem implements Listener {
         Item item = plugin.getItemManager().search(itemStack);
         if (item == null) return false;
 
-        PlayerData playerData = database.getPlayerData(player.getUniqueId());
+        PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
         if (!playerData.isAutosell(item.id())) return false;
 
         double price = item.price();
@@ -94,17 +93,22 @@ public class PlayerPickupItem implements Listener {
         if (totalPoints > 0) playerData.addPoints(totalPoints);
 
         if (totalCoins > 0 || totalPoints > 0) {
-            String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
-            String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
+            MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
+            plugin.playSound(player, sounds.getAutosell(), sounds.getAutosellVolume(), sounds.getAutosellPitch());
 
-            String msg = Colorizer.color(plugin.getConfig().getString("messages.auto-sell")
-                    .replace("{coins}", coinsFormat)
-                    .replace("{points}", pointsFormat)
-                    .replace("{item_name}", item.getDisplayName(plugin))
-                    .replace("{amount}", String.valueOf(amount)));
+            if (playerData.isAutosellMessage()) {
+                String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
+                String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
 
-            if (msg != null && !msg.isEmpty()) {
-                player.sendMessage(msg);
+                String msg = Colorizer.color(plugin.getMessageConfig().getAutoSell()
+                        .replace("{coins}", coinsFormat)
+                        .replace("{points}", pointsFormat)
+                        .replace("{item_name}", item.getDisplayName(plugin))
+                        .replace("{amount}", String.valueOf(amount)));
+
+                if (msg != null && !msg.isEmpty()) {
+                    player.sendMessage(msg);
+                }
             }
         }
 

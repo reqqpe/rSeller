@@ -1,8 +1,11 @@
 package my.reqqpe.rseller.commands;
 
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.database.Database;
-import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.cache.PlayerDataCache;
+import my.reqqpe.rseller.configs.MigrateConfig;
+import my.reqqpe.rseller.configs.impl.MessageConfig;
+import my.reqqpe.rseller.models.PlayerData;
+import my.reqqpe.rseller.database.repositories.PlayerRepository;
 import my.reqqpe.rseller.events.PointsUpdateEvent;
 import my.reqqpe.rseller.managers.MenuManager;
 import my.reqqpe.rseller.menu.AutoSellMenu;
@@ -10,12 +13,10 @@ import my.reqqpe.rseller.menu.MainMenu;
 import my.reqqpe.rseller.menu.SellMenu;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
-import my.reqqpe.rseller.utils.HeadUtil;
-import org.bukkit.Bukkit;
+import my.reqqpe.rseller.utils.HeadUtil;import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -23,73 +24,69 @@ import org.jetbrains.annotations.NotNull;
 public class SellAdminCommand implements CommandExecutor {
 
     private final Main plugin;
-    private final Database database;
 
-    public SellAdminCommand(Main plugin, Database database) {
+    public SellAdminCommand(Main plugin) {
         this.plugin = plugin;
-        this.database = database;
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
-        ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
+        MessageConfig msg = plugin.getMessageConfig();
 
         if (!commandSender.hasPermission("rseller.admin")) {
-            String message = sec.getString("no-permission");
-            commandSender.sendMessage(Colorizer.color(message));
+            commandSender.sendMessage(Colorizer.color(msg.getNoPermission()));
             return true;
         }
 
         if (args.length == 0) {
-            String message = sec.getString("no-arguments");
-            commandSender.sendMessage(Colorizer.color(message));
+            commandSender.sendMessage(Colorizer.color(msg.getNoArguments()));
             return true;
         }
+        if (args[0].equalsIgnoreCase("migrate")) {
+
+            if (commandSender instanceof Player) {
+                commandSender.sendMessage(Colorizer.color(msg.getOnlyConsole()));
+                return true;
+            }
+
+            MigrateConfig migrateConfig = new MigrateConfig();
+            migrateConfig.migrate(plugin);
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("reload")) {
-            ConfigurationSection reloadSection = sec.getConfigurationSection("reload");
             if (args.length > 1) {
                 String type = args[1];
                 if (type.equalsIgnoreCase("items")) {
                     reloadItems();
-
-                    String message = reloadSection.getString("items", "&aКонфигурация предметов успешно перезагружена");
-                    commandSender.sendMessage(Colorizer.color(message));
+                    commandSender.sendMessage(Colorizer.color(msg.getReloadItems()));
                     return true;
                 }
                 if (type.equalsIgnoreCase("config")) {
                     reloadConfig();
-
-                    String message = reloadSection.getString("config", "&aГлавная конфигурация успешно перезагружена");
-                    commandSender.sendMessage(Colorizer.color(message));
+                    commandSender.sendMessage(Colorizer.color(msg.getReloadConfig()));
                     return true;
                 }
                 if (type.equalsIgnoreCase("guis")) {
                     reloadGUIs();
-
-                    String message = reloadSection.getString("guis", "&aКонфигурация менюшек успешно перезагружена");
-                    commandSender.sendMessage(Colorizer.color(message));
+                    commandSender.sendMessage(Colorizer.color(msg.getReloadGuis()));
                     return true;
                 }
             }
-
 
             reloadConfig();
             reloadItems();
             reloadGUIs();
 
-
             if (plugin.setupEconomy()) {
-                String message = reloadSection.getString("all", "&aПлагин успешно перезагружен");
-                commandSender.sendMessage(Colorizer.color(message));
+                commandSender.sendMessage(Colorizer.color(msg.getReloadAll()));
             } else {
                 commandSender.sendMessage(Colorizer.color("&cError check console"));
             }
-
-
         }
 
-        if (args[0].equalsIgnoreCase("customItem")) {
+        if (args[0].equalsIgnoreCase("customitem")) {
             if (args.length < 3) {
                 commandSender.sendMessage(Colorizer.color("&cИспользование: /" + label + " <create/remove> <id>"));
                 return true;
@@ -97,8 +94,7 @@ public class SellAdminCommand implements CommandExecutor {
 
             if (args[1].equalsIgnoreCase("create")) {
                 if (!(commandSender instanceof Player player)) {
-                    String message = sec.getString("only-player", "&cЭта команда доступна только игрокам!");
-                    commandSender.sendMessage(Colorizer.color(message));
+                    commandSender.sendMessage(Colorizer.color(msg.getOnlyPlayer()));
                     return true;
                 }
 
@@ -139,7 +135,7 @@ public class SellAdminCommand implements CommandExecutor {
 
                 ItemStack itemStack = player.getInventory().getItemInMainHand();
                 if (itemStack.getType().isAir()) {
-                    player.sendMessage(Colorizer.color("&cВозьмите предмет в руку прежде чем пытаться создать"));
+                    player.sendMessage(Colorizer.color(msg.getNoItem()));
                     return true;
                 }
 
@@ -154,7 +150,10 @@ public class SellAdminCommand implements CommandExecutor {
                     return true;
                 }
 
-                player.sendMessage(Colorizer.color("&aВы успешно создали предмет с ID: " + id + ", цена: " + price + ", очки: " + points));
+                player.sendMessage(Colorizer.color(msg.getCreateSuccess()
+                        .replace("{id}", id)
+                        .replace("{price}", String.valueOf(price))
+                        .replace("{points}", String.valueOf(points))));
                 return true;
             }
 
@@ -172,8 +171,7 @@ public class SellAdminCommand implements CommandExecutor {
 
         if (args[0].equalsIgnoreCase("points")) {
             if (args.length < 3) {
-                String message = sec.getString("points-usage");
-                commandSender.sendMessage(Colorizer.color(message));
+                commandSender.sendMessage(Colorizer.color(msg.getPointsUsage()));
                 return true;
             }
 
@@ -183,8 +181,7 @@ public class SellAdminCommand implements CommandExecutor {
             try {
                 amount = Double.parseDouble(args[2]);
             } catch (NumberFormatException e) {
-                String message = sec.getString("un-int").replace("{value}", args[2]);
-                commandSender.sendMessage(Colorizer.color(message));
+                commandSender.sendMessage(Colorizer.color(msg.getUnInt().replace("{value}", args[2])));
                 return true;
             }
 
@@ -192,18 +189,16 @@ public class SellAdminCommand implements CommandExecutor {
                     (commandSender instanceof Player ? (Player) commandSender : null);
 
             if (target == null) {
-                String message = sec.getString("not-found-player");
-                commandSender.sendMessage(Colorizer.color(message));
+                commandSender.sendMessage(Colorizer.color(msg.getNotFoundPlayer()));
                 return true;
             }
-            PlayerData data = database.getPlayerData(target.getUniqueId());
-            data.getPoints();
+
+            PlayerData data = PlayerDataCache.getOrCreate(target.getUniqueId());
 
             switch (action) {
                 case "add" -> {
                     if (amount < 0) {
-                        String message = sec.getString("negative-value");
-                        commandSender.sendMessage(Colorizer.color(message));
+                        commandSender.sendMessage(Colorizer.color(msg.getNegativeValue()));
                         return true;
                     }
                     data.addPoints(amount);
@@ -211,22 +206,19 @@ public class SellAdminCommand implements CommandExecutor {
                 case "remove" -> {
                     double current = data.getPoints();
                     if (amount < 0) {
-                        String message = sec.getString("negative-value");
-                        commandSender.sendMessage(Colorizer.color(message));
+                        commandSender.sendMessage(Colorizer.color(msg.getNegativeValue()));
                         return true;
                     }
                     if (current - amount < 0) {
-                        String message = sec.getString("not-enough-points")
-                                .replace("{current}", String.valueOf(current));
-                        commandSender.sendMessage(Colorizer.color(message));
+                        commandSender.sendMessage(Colorizer.color(msg.getNotEnoughPoints()
+                                .replace("{current}", String.valueOf(current))));
                         return true;
                     }
                     data.removePoints(amount);
                 }
                 case "set" -> {
                     if (amount < 0) {
-                        String message = sec.getString("negative-set");
-                        commandSender.sendMessage(Colorizer.color(message));
+                        commandSender.sendMessage(Colorizer.color(msg.getNegativeSet()));
                         return true;
                     }
                     data.setPoints(amount);
@@ -238,16 +230,14 @@ public class SellAdminCommand implements CommandExecutor {
             }
 
             double newPoints = data.getPoints();
-            String message = sec.getString("update-points-sender")
+            commandSender.sendMessage(Colorizer.color(msg.getUpdatePointsSender()
                     .replace("{player}", target.getName())
-                    .replace("{value}", String.valueOf(newPoints));
-            commandSender.sendMessage(Colorizer.color(message));
+                    .replace("{value}", String.valueOf(newPoints))));
             if (!target.equals(commandSender)) {
-                String message2 = sec.getString("update-points-target")
-                        .replace("{value}", String.valueOf(newPoints));
-                target.sendMessage(Colorizer.color(message2));
+                target.sendMessage(Colorizer.color(msg.getUpdatePointsTarget()
+                        .replace("{value}", String.valueOf(newPoints))));
             }
-            Bukkit.getPluginManager().callEvent(new PointsUpdateEvent(target, amount, true, action, database));
+            Bukkit.getPluginManager().callEvent(new PointsUpdateEvent(target, amount, true, action));
         }
         return true;
     }
@@ -256,16 +246,17 @@ public class SellAdminCommand implements CommandExecutor {
 
     private void reloadGUIs() {
         HeadUtil.clearCache();
-        plugin.getAutoSellGUIConfig().reloadConfig();
-        MenuManager.reloadMenu("autoSellGUI", new AutoSellMenu(plugin, database));
-        plugin.getAllSellGUIConfig().reloadConfig();
+        plugin.getAutoSellGUIConfig().reload();
+        MenuManager.reloadMenu("autoSellGUI", new AutoSellMenu(plugin));
+        plugin.getAllSellGUIConfig().reload();
         MenuManager.reloadMenu("allSellGUI", new SellMenu(plugin));
-        plugin.getMainGUIConfig().reloadConfig();
+        plugin.getMainGUIConfig().reload();
         MenuManager.reloadMenu("mainGUI", new MainMenu(plugin));
     }
 
     private void reloadConfig() {
         plugin.reloadConfig();
+        plugin.getMainConfig().reload();
         plugin.getAutoSellManager().loadConfig();
         plugin.getLevelManager().reloadLevels();
         plugin.getBoosterManager().load();

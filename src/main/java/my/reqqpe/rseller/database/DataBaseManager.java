@@ -18,10 +18,13 @@ public class DataBaseManager {
     private HikariDataSource dataSource;
     private DataBaseType dbType;
 
+    private final String PREFIX_TABLES;
+
     public DataBaseManager(Main plugin, DataBaseConfig config) {
         this.plugin = plugin;
         this.config = config;
 
+        this.PREFIX_TABLES = config.getTablePrefix();
         initPool();
     }
 
@@ -73,7 +76,7 @@ public class DataBaseManager {
 
         this.dataSource = new HikariDataSource(hc);
 
-        plugin.getLogger().info("Database initialized: " + dbType);
+        plugin.getLogger().info(plugin.getMessageConfig().getConsoleDatabaseInitialized().replace("{type}", dbType.name()));
     }
 
     private void loadDriver(String driver) {

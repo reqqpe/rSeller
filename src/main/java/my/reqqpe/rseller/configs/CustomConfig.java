@@ -34,7 +34,7 @@ public abstract class CustomConfig {
 
         if (!configFile.exists()) {
             plugin.saveResource(relativePath, false);
-            plugin.getLogger().info(fileName + " был создан!");
+            plugin.getLogger().info(fileName + " created!");
         }
 
         reload();
@@ -43,7 +43,6 @@ public abstract class CustomConfig {
     public void reload() {
         config = YamlConfiguration.loadConfiguration(configFile);
         load();
-        plugin.getLogger().info(fileName + " был перезагружен!");
     }
 
 
@@ -55,7 +54,7 @@ public abstract class CustomConfig {
 
         try {
             config.save(configFile);
-            plugin.getLogger().info(fileName + " был сохранён!");
+            plugin.getLogger().info(fileName + " saved!");
         } catch (IOException e) {
             plugin.getLogger().log(Level.SEVERE, "Could not save " + relativePath, e);
         }
@@ -138,7 +137,7 @@ public abstract class CustomConfig {
 
 
     private void warn(String path, Object def) {
-        plugin.getLogger().warning("Missing config path: " + path + ", using default: " + def);
+        plugin.getLogger().warning("Missing config path: '" + path + "', using default: " + def);
     }
 
     protected abstract void load();

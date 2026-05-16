@@ -7,6 +7,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Set;
+
 
 public class SellCommand implements CommandExecutor {
 
@@ -21,11 +23,13 @@ public class SellCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) return false;
 
-        String openedGUI = plugin.getOpenedGUI();
+        String openedGUI = plugin.getMainConfig().getSellCommand();
+        Set<String> allowed = Set.of("mainGUI", "allSellGUI", "autoSellGUI");
+        String guiToOpen = allowed.contains(openedGUI) ? openedGUI : "mainGUI";
 
-        switch (openedGUI) {
+        switch (guiToOpen) {
             case "allSellGUI" -> MenuManager.openMenu("allSellGUI", player);
-            case "sellSellGUI" -> MenuManager.openMenu("sellSellGUI", player);
+            case "autoSellGUI" -> MenuManager.openMenu("autoSellGUI", player);
             case "mainGUI" -> MenuManager.openMenu("mainGUI", player);
         }
 

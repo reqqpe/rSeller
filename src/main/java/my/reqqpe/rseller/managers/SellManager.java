@@ -2,8 +2,9 @@ package my.reqqpe.rseller.managers;
 
 import it.unimi.dsi.fastutil.ints.IntList;
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.database.Database;
-import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.cache.PlayerDataCache;
+import my.reqqpe.rseller.configs.impl.MainConfig;
+import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.economy.EconomyProvider;
 import my.reqqpe.rseller.events.PointsUpdateEvent;
 import my.reqqpe.rseller.events.SellEvent;
@@ -12,7 +13,6 @@ import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -25,14 +25,12 @@ public class SellManager {
 
     private final Main plugin;
     private final EconomyProvider economy;
-    private final Database database;
     private final NumberFormatManager numberFormatManager;
     private final ItemManager itemManager;
 
-    public SellManager(Main plugin, Database database) {
+    public SellManager(Main plugin) {
         this.plugin = plugin;
         this.economy = plugin.getEconomy();
-        this.database = database;
         this.numberFormatManager = plugin.getFormatManager();
         this.itemManager = plugin.getItemManager();
     }
@@ -62,10 +60,8 @@ public class SellManager {
             ItemStack itemStack = inv.getItem(slot);
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
-
-            Item item = itemManager.searchItem(itemStack);
+            Item item = itemManager.search(itemStack);
             if (item == null) continue;
-
 
             double price = item.price();
             double points = item.points();
@@ -93,28 +89,34 @@ public class SellManager {
             economy.deposit(player, sellResult.coins);
         }
         if (sellResult.points > 0) {
-            PlayerData playerData = database.getPlayerData(player.getUniqueId());
+            PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
             playerData.addPoints(sellResult.points);
-            Bukkit.getPluginManager().callEvent(new PointsUpdateEvent(player, sellResult.points, false, "add", database));
+            Bukkit.getPluginManager().callEvent(new PointsUpdateEvent(player, sellResult.points, false, "add"));
         }
 
-        ConfigurationSection sec = plugin.getConfig().getConfigurationSection("messages");
+        String msgSellItems = plugin.getMessageConfig().getSellItems();
+        String msgNoSellItems = plugin.getMessageConfig().getNoSellItems();
         if (sellResult.coins > 0 || sellResult.points > 0) {
 
             String coinsFormat = numberFormatManager.format("messages.coins", sellResult.coins);
             String pointsFormat = numberFormatManager.format("messages.points", sellResult.points);
 
-            String message = Colorizer.color(sec.getString("sell-items")
+            String message = Colorizer.color(msgSellItems
                     .replace("{coins}", coinsFormat)
                     .replace("{points}", pointsFormat)
                     .replace("{amount}", String.valueOf(finalAmount)));
             player.sendMessage(message);
 
-            Bukkit.getPluginManager().callEvent(new SellEvent(player, sellItems, database));
+            MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
+            plugin.playSound(player, sounds.getSell(), sounds.getSellVolume(), sounds.getSellPitch());
+
+            Bukkit.getPluginManager().callEvent(new SellEvent(player, sellItems));
 
         } else {
-            String message = Colorizer.color(sec.getString("no-sell-items"));
-            player.sendMessage(message);
+            player.sendMessage(Colorizer.color(msgNoSellItems));
+
+            MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
+            plugin.playSound(player, sounds.getNoSell(), sounds.getNoSellVolume(), sounds.getNoSellPitch());
         }
     }
 
@@ -128,16 +130,13 @@ public class SellManager {
             ItemStack itemStack = inv.getItem(slot);
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
-
-            Item item = itemManager.searchItem(itemStack);
+            Item item = itemManager.search(itemStack);
             if (item == null) continue;
 
             double price = item.price();
             double points = item.points();
 
-            if (price <= 0 && points <= 0) {
-                continue;
-            }
+            if (price <= 0 && points <= 0) continue;
             int amount = itemStack.getAmount();
 
             if (price > 0) {

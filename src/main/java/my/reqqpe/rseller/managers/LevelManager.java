@@ -1,25 +1,21 @@
 package my.reqqpe.rseller.managers;
 
+import my.reqqpe.rseller.cache.PlayerDataCache;
 import my.reqqpe.rseller.configs.impl.LevelConfig;
-import my.reqqpe.rseller.database.Database;
 import my.reqqpe.rseller.models.Level;
 import org.bukkit.entity.Player;
 
 public class LevelManager {
 
-    private final Database database;
     private final LevelConfig levelConfig;
 
-    public LevelManager(Database database, LevelConfig levelConfig) {
-        this.database = database;
+    public LevelManager(LevelConfig levelConfig) {
         this.levelConfig = levelConfig;
     }
 
     public Level getLevelInfo(Player player) {
 
-        double points = database
-                .getPlayerData(player.getUniqueId())
-                .getPoints();
+        double points = PlayerDataCache.getOrCreate(player.getUniqueId()).getPoints();
 
         Level current = null;
 
@@ -65,5 +61,9 @@ public class LevelManager {
 
     public double getPointsForNextLevel(Player player) {
         return getPointsForNextLevel(getLevel(player));
+    }
+
+    public void reloadLevels() {
+        levelConfig.reload();
     }
 }

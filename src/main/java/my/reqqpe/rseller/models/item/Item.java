@@ -5,6 +5,7 @@ import de.tr7zw.nbtapi.NBTItem;
 import de.tr7zw.nbtapi.NBTType;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.models.SearchItemSettings;
+import my.reqqpe.rseller.utils.ModelDataUtil;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -50,8 +51,8 @@ public record Item(String id, Material material, ItemData itemData, double price
         if (itemData.lore() != null && !itemData.lore().isEmpty()) {
             itemMeta.setLore(itemData.lore());
         }
-        if (itemData.modelData() != 0) {
-            itemMeta.setCustomModelData(itemData.modelData());
+        if (itemData.hasModelData()) {
+            ModelDataUtil.setModelData(itemMeta, itemData.modelData());
         }
 
         Map<Enchantment, Integer> enchantments = itemData.enchantments();
@@ -128,8 +129,14 @@ public record Item(String id, Material material, ItemData itemData, double price
             }
         }
 
-        if (searchItemSettings.modelData() && itemData.modelData() != (itemMeta.hasCustomModelData() ? itemMeta.getCustomModelData() : 0)) {
-            return false;
+        if (searchItemSettings.modelData()) {
+            Integer actualModelData = ModelDataUtil.hasModelData(itemMeta)
+                    ? ModelDataUtil.getModelData(itemMeta)
+                    : null;
+
+            if (!Objects.equals(itemData.modelData(), actualModelData)) {
+                return false;
+            }
         }
 
         if (searchItemSettings.enchants() && !Objects.equals(itemData.enchantments(), itemMeta.getEnchants())) {
@@ -200,7 +207,9 @@ public record Item(String id, Material material, ItemData itemData, double price
         if (itemMeta != null) {
             String name = itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : null;
             List<String> lore = itemMeta.hasLore() ? itemMeta.getLore() : null;
-            int modelData = itemMeta.hasCustomModelData() ? itemMeta.getCustomModelData() : 0;
+            Integer modelData = ModelDataUtil.hasModelData(itemMeta)
+                    ? ModelDataUtil.getModelData(itemMeta)
+                    : null;
             Map<Enchantment, Integer> enchantments = itemMeta.getEnchants();
 
             Map<NamespacedKey, Object> nbtTags = new HashMap<>();
@@ -231,7 +240,7 @@ public record Item(String id, Material material, ItemData itemData, double price
                     logger.warning("Ошибка при получении NBT-тегов для предмета " + id + ": " + e.getMessage());
                 }
             }
-            if (name != null || lore != null || modelData != 0 || !enchantments.isEmpty() || !nbtTags.isEmpty()) {
+            if (name != null || lore != null || modelData != null || !enchantments.isEmpty() || !nbtTags.isEmpty()) {
                 itemData = new ItemData(name, lore, modelData, enchantments, nbtTags);
             }
         }

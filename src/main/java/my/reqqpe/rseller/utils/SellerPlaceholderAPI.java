@@ -2,8 +2,8 @@ package my.reqqpe.rseller.utils;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import my.reqqpe.rseller.Main;
-import my.reqqpe.rseller.database.Database;
-import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.cache.PlayerDataCache;
+import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.managers.NumberFormatManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -11,12 +11,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class SellerPlaceholderAPI extends PlaceholderExpansion {
     private final Main plugin;
-    private final Database database;
     private final NumberFormatManager numberFormat;
 
-    public SellerPlaceholderAPI(Main plugin, Database database) {
+    public SellerPlaceholderAPI(Main plugin) {
         this.plugin = plugin;
-        this.database = database;
         this.numberFormat = plugin.getFormatManager();
     }
 
@@ -53,25 +51,20 @@ public class SellerPlaceholderAPI extends PlaceholderExpansion {
                 return String.valueOf(level);
             }
             if (params.equalsIgnoreCase("points")) {
-                PlayerData playerData = database.getPlayerData(player.getUniqueId());
-                if (playerData != null) {
-                    double points = playerData.getPoints();
-                    return numberFormat.format("placeholders.points", points);
-                }
+                PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
+                double points = playerData.getPoints();
+                return numberFormat.format("placeholders.points", points);
             }
             if (params.equalsIgnoreCase("points_needed")) {
                 double points = Math.max(0, plugin.getLevelManager().getPointsForNextLevel(player));
                 return numberFormat.format("placeholders.points_needed", points);
             }
             if (params.equalsIgnoreCase("points_fornextlevel")) {
-                PlayerData playerData = database.getPlayerData(player.getUniqueId());
-                if (playerData != null) {
-                    double points = playerData.getPoints();
-                    double pointsForNextLevel = plugin.getLevelManager().getPointsForNextLevel(player);
-                    double pointsToNext = Math.max(0, pointsForNextLevel - points);
-                    return numberFormat.format("placeholders.points_fornextlevel", pointsToNext);
-                }
-
+                PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
+                double points = playerData.getPoints();
+                double pointsForNextLevel = plugin.getLevelManager().getPointsForNextLevel(player);
+                double pointsToNext = Math.max(0, pointsForNextLevel - points);
+                return numberFormat.format("placeholders.points_fornextlevel", pointsToNext);
             }
             if (params.equalsIgnoreCase("multiplier_points")) {
                 double multiplier = plugin.getBoosterManager()

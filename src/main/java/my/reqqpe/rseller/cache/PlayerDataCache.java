@@ -1,6 +1,6 @@
 package my.reqqpe.rseller.cache;
 
-import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.models.PlayerData;
 
 import java.util.Map;
 import java.util.UUID;

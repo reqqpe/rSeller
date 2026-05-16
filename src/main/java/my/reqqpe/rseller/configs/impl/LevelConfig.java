@@ -25,7 +25,7 @@ public class LevelConfig extends CustomConfig {
             try {
                 id = Integer.parseInt(key);
             } catch (NumberFormatException e) {
-                plugin.getLogger().warning("Invalid level id: " + key);
+                plugin.getLogger().warning(plugin.getMessageConfig().getConsoleInvalidLevelId().replace("{id}", key));
                 continue;
             }
 
@@ -35,8 +35,6 @@ public class LevelConfig extends CustomConfig {
 
             levels.put(id, new Level(id, coin, point, req));
         }
-
-        plugin.getLogger().info("Loaded " + levels.size() + " levels");
     }
 
     public Level get(int level) {

@@ -5,10 +5,15 @@ import my.reqqpe.rseller.commands.SellAdminCommand;
 import my.reqqpe.rseller.commands.SellCommand;
 import my.reqqpe.rseller.commands.TabCompleteAdmin;
 import my.reqqpe.rseller.configs.CustomConfig;
+import my.reqqpe.rseller.configs.impl.DataBaseConfig;
 import my.reqqpe.rseller.configs.impl.ItemsConfig;
+import my.reqqpe.rseller.configs.impl.LevelConfig;
+import my.reqqpe.rseller.configs.impl.MainConfig;
+import my.reqqpe.rseller.configs.impl.MessageConfig;
 import my.reqqpe.rseller.configs.storage.ItemStorage;
-import my.reqqpe.rseller.database.Database;
-import my.reqqpe.rseller.database.DatabaseListener;
+import my.reqqpe.rseller.database.DataBaseManager;
+import my.reqqpe.rseller.listeners.DatabaseListener;
+import my.reqqpe.rseller.database.repositories.PlayerRepository;
 import my.reqqpe.rseller.economy.CoinsEngineEconomyProvider;
 import my.reqqpe.rseller.economy.EconomyProvider;
 import my.reqqpe.rseller.economy.PlayerPointsEconomyProvider;
@@ -25,10 +30,9 @@ import my.reqqpe.rseller.utils.SellerPlaceholderAPI;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -40,16 +44,21 @@ import java.util.Set;
 
 public final class Main extends JavaPlugin {
 
-    private Database database;
-
     @Getter
-    private String openedGUI;
+    private PlayerRepository playerRepository;
 
     @Getter
     private ItemsConfig itemsConfig;
     @Getter
     private ItemStorage itemStorage;
-
+    @Getter
+    private LevelConfig levelConfig;
+    @Getter
+    private MessageConfig messageConfig;
+    @Getter
+    private MainConfig mainConfig;
+    @Getter
+    private DataBaseConfig dataBaseConfig;
 
     @Getter
     private CustomConfig allSellGUIConfig;
@@ -77,6 +86,7 @@ public final class Main extends JavaPlugin {
     @Getter
     private Main instance;
 
+    private DataBaseManager dataBaseManager;
 
     public static boolean useNBTAPI = false;
     private Set<String> blockWorlds = new HashSet<>();
@@ -85,8 +95,6 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-
-
 
         saveDefaultConfig();
         loadConfigs();
@@ -98,103 +106,101 @@ public final class Main extends JavaPlugin {
         }
 
         formatManager = new NumberFormatManager(this);
-        levelManager = new LevelManager(this, database);
+        levelManager = new LevelManager(levelConfig);
         boosterManager = new BoosterManager(this);
-        itemManager = new ItemManager(this);
-        sellManager = new SellManager(this, database);
+        itemManager = new ItemManager(itemsConfig, this);
+        sellManager = new SellManager(this);
         autoSellManager = new AutoSellManager(this);
 
         if (getServer().getPluginManager().getPlugin("PlaceHolderAPI") == null) {
-            getLogger().severe("PlaceholderAPI не найден");
+            getLogger().severe(messageConfig.getConsolePlaceholderApiNotFound());
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        new SellerPlaceholderAPI(this, database).register();
-
+        new SellerPlaceholderAPI(this).register();
 
         MenuManager.registerMenu("mainGUI", new MainMenu(this));
         MenuManager.registerMenu("allSellGUI", new SellMenu(this));
-        MenuManager.registerMenu("autoSellGUI", new AutoSellMenu(this, database));
-
+        MenuManager.registerMenu("autoSellGUI", new AutoSellMenu(this));
 
         PluginManager pm = getServer().getPluginManager();
-
         pm.registerEvents(new MenuListener(this), this);
-
-        pm.registerEvents(new DatabaseListener(database), this);
+        pm.registerEvents(new DatabaseListener(playerRepository), this);
 
         getCommand("sell").setExecutor(new SellCommand(this));
 
-        FileConfiguration config = getConfig();
-
-        String openedGUIValue = config.getString("sell-command", "mainGUI");
-        Set<String> allowedValue = Set.of("mainGUI", "allSellGUI", "autoSellGUI");
-        if (allowedValue.contains(openedGUIValue)) {
-            openedGUI = openedGUIValue;
-        } else {
-            openedGUI = "mainGUI";
-        }
-
         PluginCommand rsellerCommand = getCommand("rseller");
-        rsellerCommand.setExecutor(new SellAdminCommand(this, database));
+        rsellerCommand.setExecutor(new SellAdminCommand(this));
         rsellerCommand.setTabCompleter(new TabCompleteAdmin());
 
-        // other
-        if (config.getBoolean("metrics", true)) {
-            int pluginId = 25999;
-            new Metrics(this, pluginId);
-            getLogger().info("bStats успешно инициализирован!");
+        if (mainConfig.isMetrics()) {
+            new Metrics(this, 25999);
+            getLogger().info(getMessageConfig().getConsoleBstatsInitialized());
         }
 
-        boolean autoSellEnabled = config.getBoolean("autosell.enable", true);
-
-        if (autoSellEnabled) {
+        if (mainConfig.getAutosell().isEnabled()) {
             setupBlockWorlds();
             setupSettingsAutoSell();
         }
 
-        boolean updateCheck = getConfig().getBoolean("update-check", true);
-
-        if (updateCheck) {
-            UpdateChecker updateChecker = new UpdateChecker(this);
-            updateChecker.check();
+        if (mainConfig.isUpdateCheck()) {
+            new UpdateChecker(this).check();
         }
     }
 
     @Override
     public void onDisable() {
-        if (database != null) database.saveAll();
+        if (playerRepository != null) playerRepository.saveAll();
+        if (dataBaseManager != null) dataBaseManager.close();
     }
 
     private void loadConfigs() {
-        itemsConfig = new CustomConfig(this, "items.yml");
+        messageConfig = new MessageConfig(this);
+        messageConfig.setup();
+
+        mainConfig = new MainConfig(this);
+        mainConfig.setup();
+
+        dataBaseConfig = new DataBaseConfig(this);
+        dataBaseConfig.setup();
+
+        itemsConfig = new ItemsConfig(this);
         itemsConfig.setup();
-        getLogger().info("items.yml успешно загружен");
 
-        allSellGUIConfig = new CustomConfig(this, "GUI/allSellGUI.yml");
+        levelConfig = new LevelConfig(this);
+        levelConfig.setup();
+
+        allSellGUIConfig = new CustomConfig(this, "GUI/allSellGUI.yml") {
+            @Override protected void load() {}
+        };
         allSellGUIConfig.setup();
-        getLogger().info("allSellGUI.yml успешно загружен");
 
-        autoSellGUIConfig = new CustomConfig(this, "GUI/autoSellGUI.yml");
+        autoSellGUIConfig = new CustomConfig(this, "GUI/autoSellGUI.yml") {
+            @Override protected void load() {}
+        };
         autoSellGUIConfig.setup();
-        getLogger().info("autoSellGUI.yml успешно загружен");
 
-        mainGUIConfig = new CustomConfig(this, "GUI/mainGUI.yml");
+        mainGUIConfig = new CustomConfig(this, "GUI/mainGUI.yml") {
+            @Override protected void load() {}
+        };
         mainGUIConfig.setup();
-        getLogger().info("mainGUI.yml успешно загружен");
 
-        database = new Database(this);
+        itemStorage = new ItemStorage(this);
+
+        dataBaseManager = new DataBaseManager(this, dataBaseConfig);
+        playerRepository = new PlayerRepository(dataBaseManager);
+        playerRepository.createTable();
+
         for (Player pl : Bukkit.getOnlinePlayers()) {
-            database.loadPlayerData(pl.getUniqueId());
+            playerRepository.loadPlayerData(pl.getUniqueId());
         }
     }
-
 
     public void setupBlockWorlds() {
         blockWorlds.clear();
 
-        List<String> list = getConfig().getStringList("autosell.worlds-list");
-        boolean whitelist = getConfig().getBoolean("autosell.type-list", false);
+        List<String> list = mainConfig.getAutosell().getWorlds();
+        boolean whitelist = mainConfig.getAutosell().isWhitelist();
         if (whitelist) {
             for (World world : Bukkit.getWorlds()) {
                 String worldName = world.getName();
@@ -211,18 +217,23 @@ public final class Main extends JavaPlugin {
         return blockWorlds.contains(world);
     }
 
+    public void playSound(Player player, String soundName, float volume, float pitch) {
+        if (soundName == null || soundName.isBlank()) return;
+        try {
+            Sound sound = Sound.valueOf(soundName.toUpperCase());
+            player.playSound(player.getLocation(), sound, volume, pitch);
+        } catch (IllegalArgumentException e) {
+            getLogger().warning("Unknown sound: " + soundName);
+        }
+    }
 
     public boolean setupEconomy() {
-        ConfigurationSection economySection = getConfig().getConfigurationSection("economy");
-        String type = "VAULT";
-        if (economySection != null) {
-            type = economySection.getString("type", "VAULT");
-        }
+        String type = mainConfig.getEconomy().getType();
 
         switch (type.toUpperCase()) {
             case "VAULT": {
                 if (getServer().getPluginManager().getPlugin("Vault") == null) {
-                    getLogger().severe("Not found Vault, plugin disable");
+                    getLogger().severe(getMessageConfig().getConsoleEconomyNotFound().replace("{type}", "Vault"));
                     getServer().getPluginManager().disablePlugin(this);
                     return false;
                 }
@@ -231,44 +242,42 @@ public final class Main extends JavaPlugin {
             }
             case "COINSENGINE": {
                 if (getServer().getPluginManager().getPlugin("CoinsEngine") == null) {
-                    getLogger().severe("Not found CoinsEngine, plugin disable");
+                    getLogger().severe(getMessageConfig().getConsoleEconomyNotFound().replace("{type}", "CoinsEngine"));
                     getServer().getPluginManager().disablePlugin(this);
                     return false;
                 }
-
-                String currency = economySection.getString("coinsengine.currency", "money");
+                String currency = mainConfig.getEconomy().getCoinsengineCurrency();
                 this.economy = new CoinsEngineEconomyProvider(currency);
                 return true;
             }
             case "PLAYERPOINTS": {
                 if (getServer().getPluginManager().getPlugin("PlayerPoints") == null) {
-                    getLogger().severe("Not found PlayerPoints, plugin disable");
+                    getLogger().severe(getMessageConfig().getConsoleEconomyNotFound().replace("{type}", "PlayerPoints"));
                     getServer().getPluginManager().disablePlugin(this);
                     return false;
                 }
-
                 PlayerPointsAPI playerPointsAPI = PlayerPoints.getInstance().getAPI();
                 this.economy = new PlayerPointsEconomyProvider(playerPointsAPI);
+                return true;
             }
             default: {
-                getLogger().severe("Unknow economy type: " + type);
-                getLogger().severe("Plugin disable");
+                getLogger().severe(getMessageConfig().getConsoleEconomyUnknown().replace("{type}", type));
                 getServer().getPluginManager().disablePlugin(this);
                 return false;
             }
         }
     }
 
-
     private void setupSettingsAutoSell() {
-        String type = getConfig().getString("autosell.settings.type", "pickup");
+        String type = mainConfig.getAutosell().getType();
 
         if (type.equals("task")) {
-            int delay = getConfig().getInt("autosell.settings.task-delay", 5);
-            new AutoSellTask(delay, this, database, formatManager).startTask();
+            int delay = mainConfig.getAutosell().getTaskDelay();
+            new AutoSellTask(delay, this, formatManager).startTask();
         } else {
-            boolean inventorySell = getConfig().getBoolean("autosell.settings.sell-inventory", false);
-            getServer().getPluginManager().registerEvents(new PlayerPickupItem(this, database, inventorySell), this);
+            boolean inventorySell = mainConfig.getAutosell().isSellInventory();
+            getServer().getPluginManager().registerEvents(new PlayerPickupItem(this, inventorySell), this);
         }
     }
+
 }

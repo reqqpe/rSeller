@@ -1,7 +1,8 @@
 package my.reqqpe.rseller;
 
-import my.reqqpe.rseller.database.Database;
-import my.reqqpe.rseller.database.PlayerData;
+import my.reqqpe.rseller.cache.PlayerDataCache;
+import my.reqqpe.rseller.configs.impl.MainConfig;
+import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.economy.EconomyProvider;
 import my.reqqpe.rseller.managers.NumberFormatManager;
 import my.reqqpe.rseller.models.Booster;
@@ -17,14 +18,12 @@ public class AutoSellTask {
 
     private final long delay;
     private final Main plugin;
-    private final Database db;
     private final EconomyProvider economy;
     private final NumberFormatManager numberFormatManager;
 
-    public AutoSellTask(long delay, Main plugin, Database db, NumberFormatManager numberFormatManager) {
+    public AutoSellTask(long delay, Main plugin, NumberFormatManager numberFormatManager) {
         this.delay = delay;
         this.plugin = plugin;
-        this.db = db;
         this.economy = plugin.getEconomy();
         this.numberFormatManager = numberFormatManager;
     }
@@ -38,7 +37,7 @@ public class AutoSellTask {
                     if (plugin.isBlockedWorld(player.getWorld().getName())) continue;
                     if (!player.hasPermission("rseller.autosell")) continue;
 
-                    PlayerData playerData = db.getPlayerData(player.getUniqueId());
+                    PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
                     if (playerData == null) continue;
                     if (!playerData.hasEnabledAutosell()) continue;
 
@@ -62,7 +61,7 @@ public class AutoSellTask {
         Item item = plugin.getItemManager().search(itemStack);
         if (item == null) return false;
 
-        PlayerData playerData = db.getPlayerData(player.getUniqueId());
+        PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
         if (!playerData.isAutosell(item.id())) return false;
 
         double price = item.price();
@@ -87,18 +86,22 @@ public class AutoSellTask {
         if (totalPoints > 0) playerData.addPoints(totalPoints);
 
         if (totalCoins > 0 || totalPoints > 0) {
-            String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
-            String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
+            MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
+            plugin.playSound(player, sounds.getAutosell(), sounds.getAutosellVolume(), sounds.getAutosellPitch());
 
-            String msg = Colorizer.color(plugin.getConfig().getString("messages.auto-sell")
-                    .replace("{coins}", coinsFormat)
-                    .replace("{points}", pointsFormat)
-                    .replace("{item_name}", item.getDisplayName(plugin))
-                    .replace("{amount}", String.valueOf(amount)));
-            if (msg != null && !msg.isEmpty()) {
-                player.sendMessage(msg);
+            if (playerData.isAutosellMessage()) {
+                String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
+                String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
+
+                String msg = Colorizer.color(plugin.getMessageConfig().getAutoSell()
+                        .replace("{coins}", coinsFormat)
+                        .replace("{points}", pointsFormat)
+                        .replace("{item_name}", item.getDisplayName(plugin))
+                        .replace("{amount}", String.valueOf(amount)));
+                if (msg != null && !msg.isEmpty()) {
+                    player.sendMessage(msg);
+                }
             }
-
         }
 
         return true;

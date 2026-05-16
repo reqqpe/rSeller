@@ -9,6 +9,7 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.managers.MenuManager;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
+import my.reqqpe.rseller.utils.ModelDataUtil;
 import my.reqqpe.rseller.utils.SyntaxParser;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -84,14 +85,19 @@ public abstract class AbstractMenu {
                 for (int slot : itemSlots) {
                     if (slot < 0 || slot >= inv.getSize()) {
                         slotsToRemove.add(slot);
-                        plugin.getLogger().warning(String.format("[%s] Пропущен слот %d для предмета %s: слот выходит за пределы инвентаря (0-%d).",
-                                getMenuId(), slot, itemId, inv.getSize() - 1));
+                        plugin.getLogger().warning(plugin.getMessageConfig().getConsoleMenuSlotOutOfBounds()
+                                .replace("{menu}", getMenuId())
+                                .replace("{slot}", String.valueOf(slot))
+                                .replace("{item}", itemId)
+                                .replace("{max}", String.valueOf(inv.getSize() - 1)));
                         continue;
                     }
                     if (specialSlots.contains(slot) || usedSlots.contains(slot)) {
                         slotsToRemove.add(slot);
-                        plugin.getLogger().warning(String.format("[%s] Пропущен слот %d для предмета %s: слот уже занят специальным слотом или другим предметом.",
-                                getMenuId(), slot, itemId));
+                        plugin.getLogger().warning(plugin.getMessageConfig().getConsoleMenuSlotOccupied()
+                                .replace("{menu}", getMenuId())
+                                .replace("{slot}", String.valueOf(slot))
+                                .replace("{item}", itemId));
                         continue;
                     }
                     validSlots.add(slot);
@@ -100,7 +106,9 @@ public abstract class AbstractMenu {
                 itemSlots.removeAll(slotsToRemove);
 
                 if (validSlots.isEmpty()) {
-                    plugin.getLogger().warning(String.format("[%s] Нет доступных слотов для предмета %s.", getMenuId(), itemId));
+                    plugin.getLogger().warning(plugin.getMessageConfig().getConsoleMenuNoSlots()
+                            .replace("{menu}", getMenuId())
+                            .replace("{item}", itemId));
                     continue;
                 }
 
@@ -113,18 +121,22 @@ public abstract class AbstractMenu {
                 } else {
                     Material material = Material.matchMaterial(matString);
                     if (material == null) {
-                        plugin.getLogger().warning(String.format("[%s] Неизвестный материал для предмета %s: %s", getMenuId(), itemId, matString));
+                        plugin.getLogger().warning(plugin.getMessageConfig().getConsoleMenuUnknownMaterial()
+                                .replace("{menu}", getMenuId())
+                                .replace("{item}", itemId)
+                                .replace("{material}", matString));
                         continue;
                     }
                     item = new ItemStack(material);
                 }
 
-                int customModelData = -1;
+                Integer customModelData = null;
                 if (guiConfig.contains(path + ".model-data")) {
                     customModelData = guiConfig.getInt(path + ".model-data");
                 }
 
                 ItemMeta meta = item.getItemMeta();
+
                 if (meta != null) {
                     String name = guiConfig.getString(path + ".name", "");
                     meta.setDisplayName(Colorizer
@@ -137,8 +149,8 @@ public abstract class AbstractMenu {
                                 .colorizeAll
                                         (replacePlaceholders(player, lore, inv)));
                     }
-                    if (customModelData != -1) {
-                        meta.setCustomModelData(customModelData);
+                    if (customModelData != null) {
+                        ModelDataUtil.setModelData(meta, customModelData);
                     }
 
                     item.setItemMeta(meta);
@@ -151,19 +163,27 @@ public abstract class AbstractMenu {
                             int level = enchantsSection.getInt(enchantName);
                             Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(enchantName.toLowerCase()));
                             if (enchantment == null) {
-                                plugin.getLogger().warning(String.format("[%s] Неизвестное зачарование для предмета %s: %s",
-                                        getMenuId(), itemId, enchantName));
+                                plugin.getLogger().warning(plugin.getMessageConfig().getConsoleMenuUnknownEnchant()
+                                        .replace("{menu}", getMenuId())
+                                        .replace("{item}", itemId)
+                                        .replace("{enchant}", enchantName));
                                 continue;
                             }
                             if (level <= 0) {
-                                plugin.getLogger().warning(String.format("[%s] Некорректный уровень зачарования для предмета %s: %d (должен быть больше 0)",
-                                        getMenuId(), itemId, level));
+                                plugin.getLogger().warning(plugin.getMessageConfig().getConsoleMenuInvalidEnchantLevel()
+                                        .replace("{menu}", getMenuId())
+                                        .replace("{item}", itemId)
+                                        .replace("{level}", String.valueOf(level)));
                                 continue;
                             }
                             item.addUnsafeEnchantment(enchantment, level);
                         } catch (Exception e) {
-                            plugin.getLogger().warning(String.format("[%s] Ошибка при добавлении зачарования %s:%d для предмета %s: %s",
-                                    getMenuId(), enchantName, enchantsSection.getInt(enchantName, -1), itemId, e.getMessage()));
+                            plugin.getLogger().warning(plugin.getMessageConfig().getConsoleMenuEnchantError()
+                                    .replace("{menu}", getMenuId())
+                                    .replace("{enchant}", enchantName)
+                                    .replace("{level}", String.valueOf(enchantsSection.getInt(enchantName, -1)))
+                                    .replace("{item}", itemId)
+                                    .replace("{error}", e.getMessage()));
                         }
                     }
                 }
@@ -205,7 +225,7 @@ public abstract class AbstractMenu {
                 menu.openMenu(player);
             }
             else {
-                plugin.getLogger().warning("Ошибка открытия меню (не найдено), id: " + guiId);
+                plugin.getLogger().warning(plugin.getMessageConfig().getConsoleMenuNotFound().replace("{id}", guiId));
             }
         } else if (cmd.startsWith("[sound] ")) {
             String[] parts = cmd.substring(8).split(";");
@@ -216,9 +236,9 @@ public abstract class AbstractMenu {
                     float pitch = parts.length >= 3 ? Float.parseFloat(parts[2]) : 1.0f;
                     player.playSound(player.getLocation(), sound, volume, pitch);
                 } catch (IllegalArgumentException e) {
-                    plugin.getLogger().warning("Неизвестный звук: " + parts[0]);
+                    plugin.getLogger().warning(plugin.getMessageConfig().getConsoleSoundUnknown().replace("{sound}", parts[0]));
                 } catch (Exception e) {
-                    plugin.getLogger().warning("Ошибка при воспроизведении звука.");
+                    plugin.getLogger().warning(plugin.getMessageConfig().getConsoleSoundError());
                     e.printStackTrace();
                 }
             }

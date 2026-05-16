@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import my.reqqpe.rseller.Main;
+import my.reqqpe.rseller.configs.impl.MessageConfig;
 import org.bukkit.Bukkit;
 
 import java.net.URI;
@@ -50,20 +51,27 @@ public class UpdateChecker {
                     String currentVersion = plugin.getDescription().getVersion();
                     updateAvailable = needsUpdate(currentVersion, latestVersion);
 
+                    MessageConfig msg = plugin.getMessageConfig();
                     if (updateAvailable) {
                         plugin.getLogger().warning("======");
                         plugin.getLogger().warning("|");
-                        plugin.getLogger().warning("| Доступно обновление: текущая версия " + currentVersion + ", последняя версия " + latestVersion);
+                        plugin.getLogger().warning("| " + msg.getConsoleUpdateAvailable()
+                                .replace("{current}", currentVersion)
+                                .replace("{latest}", latestVersion));
                         plugin.getLogger().warning("|");
                         plugin.getLogger().warning("======");
                     } else {
-                        plugin.getLogger().info("Обновление не требуется: текущая версия " + currentVersion + ", последняя версия " + latestVersion);
+                        plugin.getLogger().info(msg.getConsoleUpdateNotRequired()
+                                .replace("{current}", currentVersion)
+                                .replace("{latest}", latestVersion));
                     }
                 } else {
-                    plugin.getLogger().warning("Ошибка HTTP при проверке обновлений: " + response.statusCode());
+                    plugin.getLogger().warning(plugin.getMessageConfig().getConsoleUpdateHttpError()
+                            .replace("{code}", String.valueOf(response.statusCode())));
                 }
             } catch (Exception e) {
-                plugin.getLogger().severe("Ошибка при проверке обновлений: " + e.getMessage());
+                plugin.getLogger().severe(plugin.getMessageConfig().getConsoleUpdateError()
+                        .replace("{error}", e.getMessage()));
                 e.printStackTrace();
             }
         });
@@ -88,7 +96,9 @@ public class UpdateChecker {
             }
             return false;
         } catch (NumberFormatException e) {
-            plugin.getLogger().warning("Некорректный формат версии: текущая=" + currentVersion + ", последняя=" + latestVersion);
+            plugin.getLogger().warning(plugin.getMessageConfig().getConsoleUpdateVersionFormat()
+                    .replace("{current}", currentVersion)
+                    .replace("{latest}", latestVersion));
             return false;
         }
     }

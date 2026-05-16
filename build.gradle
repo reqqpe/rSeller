@@ -51,18 +51,17 @@ dependencies {
     compileOnly libs.com.zaxxer.hikaricp
     compileOnly("com.mysql:mysql-connector-j:9.4.0")
     compileOnly("org.postgresql:postgresql:42.7.8")
-    compileOnly("org.projectlombok:lombok:1.18.38")
-    annotationProcessor("org.projectlombok:lombok:1.18.38")
+    compileOnly("org.projectlombok:lombok:1.18.46")
+    annotationProcessor("org.projectlombok:lombok:1.18.46")
     compileOnly libs.com.github.milkbowl.vaultapi
     compileOnly libs.de.tr7zw.item.nbt.api.plugin
     compileOnly libs.it.unimi.dsi.fastutil
     compileOnly "su.nightexpress.coinsengine:CoinsEngine:2.7.0"
-    compileOnly 'org.black_ixx:playerpoints:3.3.3'
-    implementation "dev.dejvokep:boosted-yaml:1.3.6"
+    compileOnly 'org.black_ixx:playerpoints:3.3.4'
 }
 
 group = 'my.reqqpe'
-version = '1.11.0'
+version = '1.12.0'
 description = 'rSeller'
 java.sourceCompatibility = JavaVersion.VERSION_16
 
