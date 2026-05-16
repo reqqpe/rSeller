@@ -9,8 +9,6 @@ de-tr7zw-item-nbt-api-plugin = "2.15.1"
 it-unimi-dsi-fastutil = "8.5.16"
 me-clip-placeholderapi = "2.11.6"
 org-bstats-bstats-bukkit = "3.0.2"
-org-json-json = "20231013"
-org-projectlombok-lombok = "1.18.36"
 
 [libraries]
 com-destroystokyo-paper-paper-api = { module = "com.destroystokyo.paper:paper-api", version.ref = "com-destroystokyo-paper-paper-api" }
