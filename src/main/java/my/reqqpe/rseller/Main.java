@@ -24,6 +24,8 @@ import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menu.AutoSellMenu;
 import my.reqqpe.rseller.menu.MainMenu;
 import my.reqqpe.rseller.menu.SellMenu;
+import my.reqqpe.rseller.tasks.AutoSellTask;
+import my.reqqpe.rseller.tasks.SavePlayerDataCacheTask;
 import my.reqqpe.rseller.updateCheker.UpdateChecker;
 import my.reqqpe.rseller.utils.Metrics;
 import my.reqqpe.rseller.utils.SellerPlaceholderAPI;
@@ -132,6 +134,8 @@ public final class Main extends JavaPlugin {
         PluginCommand rsellerCommand = getCommand("rseller");
         rsellerCommand.setExecutor(new SellAdminCommand(this));
         rsellerCommand.setTabCompleter(new TabCompleteAdmin());
+
+        new SavePlayerDataCacheTask(this, playerRepository, dataBaseConfig);
 
         if (mainConfig.isMetrics()) {
             new Metrics(this, 25999);

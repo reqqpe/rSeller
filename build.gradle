@@ -61,7 +61,7 @@ dependencies {
 }
 
 group = 'my.reqqpe'
-version = '1.12.0'
+version = '1.12.2'
 description = 'rSeller'
 java.sourceCompatibility = JavaVersion.VERSION_16
 

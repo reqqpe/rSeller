@@ -1,5 +1,6 @@
-package my.reqqpe.rseller;
+package my.reqqpe.rseller.tasks;
 
+import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.cache.PlayerDataCache;
 import my.reqqpe.rseller.configs.impl.MainConfig;
 import my.reqqpe.rseller.models.PlayerData;

@@ -12,6 +12,8 @@ public class DataBaseConfig extends CustomConfig {
     private DataBaseType dbType;
     private String tablePrefix;
 
+    private long saveCacheTimer;
+
     private int maxPoolSize;
     private int minimumIdle;
     private int keepAlive;
@@ -35,6 +37,7 @@ public class DataBaseConfig extends CustomConfig {
         this.dbType = DataBaseType.from(config.getString("type"));
         this.tablePrefix = getString("table_prefix", "rseller_");
 
+        this.saveCacheTimer = getLong("save-cache-timer", 300);
 
         String hikariPath = "hikari.";
         this.maxPoolSize = getInt(hikariPath + "max-pool-size", 10);

@@ -1,5 +1,10 @@
 type: sqlite # sqlite, mysql, postgres
 table_prefix: "rseller_"
+
+
+# Раз в какое время будут сохраняться данные игроков (в секундах)
+save-cache-timer: 1800 # 30 мин
+
 # Настройки пула соединений, если не знаете что это рекомендуется не менять
 hikari:
   max-pool-size: 10
