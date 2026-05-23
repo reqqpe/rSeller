@@ -15,7 +15,7 @@ special-slots: [] # Нет смысла что-то указывать( прос
 items:
   autosell:
     material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTFmYWQ1ZDJiODIyZmNlOGQ1OWJjZTA4NDE0YjlmODdmMjdhYTlkNzdhNzM4MjNhNThkZDUxN2VhODBiMmE1In19fQ==
-    model_data: -1 # Не обязательный параметр можно убрать или же поставить -1
+    model-data: -1 # Не обязательный параметр можно убрать или же поставить -1
     name: "&#54A0F4▶ Автоскупщик"
     slot: 12
     lore:
@@ -32,7 +32,7 @@ items:
       - '[opengui] autoSellGUI'
   allsell:
     material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzhhZjhiN2Q0M2ZlNGRlOWY4Y2JjNGJiNDk1MzQzY2Y3MTVlYjhmZWJhNGJlZDRjZGNlODJjMWIwY2UxNzIyIn19fQ==
-    model_data: -1 # Не обязательный параметр можно убрать или же поставить -1
+    model-data: -1 # Не обязательный параметр можно убрать или же поставить -1
     name: "&#54A0F4▶ Универсальный скупщик"
     slot: 14
     lore:
