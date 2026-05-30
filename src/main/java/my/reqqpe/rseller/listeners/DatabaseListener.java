@@ -9,6 +9,8 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 public class DatabaseListener implements Listener {
     private final PlayerRepository playerRepository;
@@ -20,13 +22,15 @@ public class DatabaseListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-        playerRepository.savePlayerDataAsync(e.getPlayer().getUniqueId());
-        PlayerDataCache.remove(e.getPlayer().getUniqueId());
+        UUID uuid = e.getPlayer().getUniqueId();
+        playerRepository.savePlayerDataAsync(uuid)
+                .thenRun(() -> PlayerDataCache.remove(uuid));
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onKick(PlayerKickEvent e) {
-        playerRepository.savePlayerDataAsync(e.getPlayer().getUniqueId());
-        PlayerDataCache.remove(e.getPlayer().getUniqueId());
+        UUID uuid = e.getPlayer().getUniqueId();
+        playerRepository.savePlayerDataAsync(uuid)
+                .thenRun(() -> PlayerDataCache.remove(uuid));
     }
 }

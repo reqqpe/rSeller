@@ -154,8 +154,8 @@ public class PlayerRepository {
         }
     }
 
-    public void savePlayerDataAsync(UUID uuid) {
-        CompletableFuture.runAsync(() -> savePlayerData(uuid));
+    public CompletableFuture<Void> savePlayerDataAsync(UUID uuid) {
+        return CompletableFuture.runAsync(() -> savePlayerData(uuid));
     }
 
     private void execute(String sql, String action) {

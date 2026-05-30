@@ -35,7 +35,7 @@ public class DataBaseConfig extends CustomConfig {
     protected void load() {
 
         this.dbType = DataBaseType.from(config.getString("type"));
-        this.tablePrefix = getString("table_prefix", "rseller_");
+        this.tablePrefix = getString("table_prefix", "");
 
         this.saveCacheTimer = getLong("save-cache-timer", 300);
 
