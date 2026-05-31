@@ -207,17 +207,20 @@ public abstract class AbstractMenu {
     protected void runMainActions(Player player, String cmdLine) {
         String cmd = cmdLine.trim();
         if (cmd.startsWith("[console] ")) {
-            String command = cmd.substring(10).replace("%player%", player.getName());
+            String command = cmd.substring(10);
+            command = PlaceholderAPI.setPlaceholders(player, command);
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
         } else if (cmd.startsWith("[close]")) {
             player.closeInventory();
         }
         else if (cmd.startsWith("[player] ")) {
-            String command = cmd.substring(9).replace("%player%", player.getName());
+            String command = cmd.substring(9);
+            command = PlaceholderAPI.setPlaceholders(player, command);
             player.performCommand(command);
         } else if (cmd.startsWith("[text] ")) {
-            String message = Colorizer.color(cmd.substring(7).replace("%player%", player.getName()));
-            player.sendMessage(message);
+            String command = Colorizer.color(cmd.substring(7));
+            command = PlaceholderAPI.setPlaceholders(player, command);
+            player.sendMessage(command);
         } else if (cmd.startsWith("[opengui] ")) {
             String guiId = cmd.substring(10).trim();
             AbstractMenu menu = MenuManager.getMenu(guiId);
