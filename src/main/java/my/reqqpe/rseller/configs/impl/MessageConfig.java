@@ -26,6 +26,7 @@ public class MessageConfig extends CustomConfig {
     private String noSellItems;
     private String sellItems;
     private String autoSell;
+    private String autoSellTask;
 
     private String autosellEnable;
     private String autosellDisable;
@@ -93,6 +94,7 @@ public class MessageConfig extends CustomConfig {
         noSellItems = getString("no-sell-items", "");
         sellItems = getString("sell-items", "");
         autoSell = getString("auto-sell", "");
+        autoSellTask = getString("auto-sell-task", "");
 
         autosellEnable = getString("autosell-enable", "");
         autosellDisable = getString("autosell-disable", "");

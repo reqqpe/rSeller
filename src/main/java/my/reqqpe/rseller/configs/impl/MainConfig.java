@@ -41,7 +41,9 @@ public class MainConfig extends CustomConfig {
     @Getter
     public class AutoSellSection {
         private final boolean enabled = getBoolean("autosell.enable", true);
-        private final String type = getString("autosell.settings.type", "pickup");
+        private final String typeMessage = getString("autosell.message-settings.type", "sell");
+        private final int delayMessage = getInt("autosell.message-settings.task-delay", 5);
+        private final String typeSell = getString("autosell.settings.type", "pickup");
         private final boolean sellInventory = getBoolean("autosell.settings.sell-inventory", false);
         private final int taskDelay = getInt("autosell.settings.task-delay", 5);
         private final boolean whitelist = getBoolean("autosell.type-list", false);

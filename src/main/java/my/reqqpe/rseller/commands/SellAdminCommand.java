@@ -257,6 +257,8 @@ public class SellAdminCommand implements CommandExecutor {
     private void reloadConfig() {
         plugin.reloadConfig();
         plugin.getMainConfig().reload();
+        plugin.getMessageConfig().reload();
+        plugin.getLevelConfig().reload();
         plugin.getAutoSellManager().loadConfig();
         plugin.getLevelManager().reloadLevels();
         plugin.getBoosterManager().load();

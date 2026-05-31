@@ -2,11 +2,13 @@ package my.reqqpe.rseller.tasks;
 
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.cache.PlayerDataCache;
+import my.reqqpe.rseller.cache.SellDataCache;
 import my.reqqpe.rseller.configs.impl.MainConfig;
 import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.economy.EconomyProvider;
 import my.reqqpe.rseller.managers.NumberFormatManager;
 import my.reqqpe.rseller.models.Booster;
+import my.reqqpe.rseller.models.SellData;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Bukkit;
@@ -15,15 +17,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.UUID;
+
 public class AutoSellTask {
 
-    private final long delay;
     private final Main plugin;
     private final EconomyProvider economy;
     private final NumberFormatManager numberFormatManager;
 
-    public AutoSellTask(long delay, Main plugin, NumberFormatManager numberFormatManager) {
-        this.delay = delay;
+    public AutoSellTask(Main plugin, NumberFormatManager numberFormatManager) {
         this.plugin = plugin;
         this.economy = plugin.getEconomy();
         this.numberFormatManager = numberFormatManager;
@@ -54,7 +56,7 @@ public class AutoSellTask {
                     }
                 }
             }
-        }.runTaskTimer(plugin, 0L, delay * 20L);
+        }.runTaskTimer(plugin, 0L, plugin.getMainConfig().getAutosell().getTaskDelay() * 20L);
     }
 
 
@@ -87,20 +89,31 @@ public class AutoSellTask {
         if (totalPoints > 0) playerData.addPoints(totalPoints);
 
         if (totalCoins > 0 || totalPoints > 0) {
-            MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
-            plugin.playSound(player, sounds.getAutosell(), sounds.getAutosellVolume(), sounds.getAutosellPitch());
 
             if (playerData.isAutosellMessage()) {
-                String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
-                String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
 
-                String msg = Colorizer.color(plugin.getMessageConfig().getAutoSell()
-                        .replace("{coins}", coinsFormat)
-                        .replace("{points}", pointsFormat)
-                        .replace("{item_name}", item.getDisplayName(plugin))
-                        .replace("{amount}", String.valueOf(amount)));
-                if (msg != null && !msg.isEmpty()) {
-                    player.sendMessage(msg);
+                String typeMessage = plugin.getMainConfig().getAutosell().getTypeMessage();
+                if (typeMessage.equalsIgnoreCase("task")) {
+                    SellData sellData = SellDataCache.getOrCreate(player.getUniqueId());
+                    sellData.addMoney(totalCoins);
+                    sellData.addPoints(totalPoints);
+                    sellData.addCount(amount);
+                } else {
+
+                    MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
+                    plugin.playSound(player, sounds.getAutosell(), sounds.getAutosellVolume(), sounds.getAutosellPitch());
+
+                    String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
+                    String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
+
+                    String msg = Colorizer.color(plugin.getMessageConfig().getAutoSell()
+                            .replace("{coins}", coinsFormat)
+                            .replace("{points}", pointsFormat)
+                            .replace("{item_name}", item.getDisplayName(plugin))
+                            .replace("{amount}", String.valueOf(amount)));
+                    if (msg != null && !msg.isEmpty()) {
+                        player.sendMessage(msg);
+                    }
                 }
             }
         }

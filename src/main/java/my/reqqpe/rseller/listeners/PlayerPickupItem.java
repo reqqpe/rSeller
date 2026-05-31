@@ -2,11 +2,13 @@ package my.reqqpe.rseller.listeners;
 
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.cache.PlayerDataCache;
+import my.reqqpe.rseller.cache.SellDataCache;
 import my.reqqpe.rseller.configs.impl.MainConfig;
 import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.economy.EconomyProvider;
 import my.reqqpe.rseller.managers.NumberFormatManager;
 import my.reqqpe.rseller.models.Booster;
+import my.reqqpe.rseller.models.SellData;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Bukkit;
@@ -93,21 +95,30 @@ public class PlayerPickupItem implements Listener {
         if (totalPoints > 0) playerData.addPoints(totalPoints);
 
         if (totalCoins > 0 || totalPoints > 0) {
-            MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
-            plugin.playSound(player, sounds.getAutosell(), sounds.getAutosellVolume(), sounds.getAutosellPitch());
 
             if (playerData.isAutosellMessage()) {
-                String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
-                String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
+                String typeMessage = plugin.getMainConfig().getAutosell().getTypeMessage();
+                if (typeMessage.equalsIgnoreCase("task")) {
+                    SellData sellData = SellDataCache.getOrCreate(player.getUniqueId());
+                    sellData.addMoney(totalCoins);
+                    sellData.addPoints(totalPoints);
+                    sellData.addCount(amount);
+                } else {
 
-                String msg = Colorizer.color(plugin.getMessageConfig().getAutoSell()
-                        .replace("{coins}", coinsFormat)
-                        .replace("{points}", pointsFormat)
-                        .replace("{item_name}", item.getDisplayName(plugin))
-                        .replace("{amount}", String.valueOf(amount)));
+                    MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
+                    plugin.playSound(player, sounds.getAutosell(), sounds.getAutosellVolume(), sounds.getAutosellPitch());
 
-                if (msg != null && !msg.isEmpty()) {
-                    player.sendMessage(msg);
+                    String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
+                    String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
+
+                    String msg = Colorizer.color(plugin.getMessageConfig().getAutoSell()
+                            .replace("{coins}", coinsFormat)
+                            .replace("{points}", pointsFormat)
+                            .replace("{item_name}", item.getDisplayName(plugin))
+                            .replace("{amount}", String.valueOf(amount)));
+                    if (msg != null && !msg.isEmpty()) {
+                        player.sendMessage(msg);
+                    }
                 }
             }
         }

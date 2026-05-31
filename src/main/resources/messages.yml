@@ -12,7 +12,8 @@ update-points-sender: "&#54F45F[✔] &fУ игрока &e{player} &fтеперь
 update-points-target: "&#54F45F[✔] &fВаши очки скупщика были обновлены до &e{value}"
 no-sell-items: "&#FD4747[❌] &fНет предметов, которые можно продать"
 sell-items: "&#54F45F[✔] Вы успешно &fпродали &e{amount} &fпредмет(ов) на сумму &e{coins} &fи получили &e{points} &fочков скупщика"
-auto-sell: "&#54F45F[✔] Вы успешно &fпродали {item_name} &f[&ex{amount}&f] за &e{coins} &fмонет и &e{points} &fочков скупщика."
+auto-sell: "&#54F45F[✔] Вы успешно &fпродали {item_name} &f[&ex{amount}&f] за &e{coins} &fмонет и &e{points} &fочков скупщика." # Если тип сообщения sell
+auto-sell-task: "&#54F45F[✔] Вы успешно &fпродали &e{amount} &fпредмет(ов) на сумму &e{coins} &fи получили &e{points} &fочков скупщика &8(За последние 5 секунд)" # Если тип сообщения task
 autosell-enable: "&#54F45Fвключена"
 autosell-disable: "&#FD4747выключена"
 autosell-message-enable: "&#54F45Fвключены"

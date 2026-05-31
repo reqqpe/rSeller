@@ -24,6 +24,7 @@ import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menu.AutoSellMenu;
 import my.reqqpe.rseller.menu.MainMenu;
 import my.reqqpe.rseller.menu.SellMenu;
+import my.reqqpe.rseller.tasks.AutoSellMessageTask;
 import my.reqqpe.rseller.tasks.AutoSellTask;
 import my.reqqpe.rseller.tasks.SavePlayerDataCacheTask;
 import my.reqqpe.rseller.updateCheker.UpdateChecker;
@@ -273,14 +274,19 @@ public final class Main extends JavaPlugin {
     }
 
     private void setupSettingsAutoSell() {
-        String type = mainConfig.getAutosell().getType();
+        String type = mainConfig.getAutosell().getTypeSell();
 
-        if (type.equals("task")) {
-            int delay = mainConfig.getAutosell().getTaskDelay();
-            new AutoSellTask(delay, this, formatManager).startTask();
+        if (type.equalsIgnoreCase("task")) {
+            new AutoSellTask(this, formatManager).startTask();
         } else {
             boolean inventorySell = mainConfig.getAutosell().isSellInventory();
             getServer().getPluginManager().registerEvents(new PlayerPickupItem(this, inventorySell), this);
+        }
+
+        String messageType = mainConfig.getAutosell().getTypeMessage();
+
+        if (messageType.equalsIgnoreCase("task")) {
+            new AutoSellMessageTask(this, formatManager).startTask();
         }
     }
 

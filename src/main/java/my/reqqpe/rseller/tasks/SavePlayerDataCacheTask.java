@@ -39,6 +39,6 @@ public class SavePlayerDataCacheTask {
                     playerRepository.savePlayerData(uuid);
                 }
             });
-        }, 20L, dataBaseConfig.getSaveCacheTimer() * 20L);
+        }, 0L, dataBaseConfig.getSaveCacheTimer() * 20L);
     }
 }
