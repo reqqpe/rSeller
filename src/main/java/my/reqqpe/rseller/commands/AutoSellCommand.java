@@ -32,7 +32,6 @@ public class AutoSellCommand implements CommandExecutor {
         this.msg = plugin.getMessageConfig();
     }
 
-    // /autosell <category/item> <id> [player]
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
