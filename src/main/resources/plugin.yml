@@ -12,10 +12,17 @@ commands:
   rseller:
     aliases: [sa, ba, buyadmin, selladmin, rs]
     permission: rseller.admin
+  autosell:
+    description: Позволяет переключать автоскупку через команду
+    aliases: [autos]
 
 permissions:
   rseller.autosell:
     default: true
+  rseller.autosell.command:
+    default: true
+  rseller.autosell.command.other:
+    default: op
   rseller.admin:
     default: op
 

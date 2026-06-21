@@ -27,6 +27,13 @@ only-console: "&#FD4747[❌] &fЭту команду может использо
 no-item: "&#FD4747[❌] &f Похоже в вашей руке нет предмета, возьмите предмет в руку чтобы создать"
 create-success: "&#54F45F[✔] Предмет успешно создан и записан в конфигурацию"
 
+autosell-not-found-category: "&#FD4747[❌] Не удалось найти категорию &e{id}"
+autosell-not-found-item: "&#FD4747[❌] Не удалось найти предмет &e{id}"
+autosell-toggle-category: "&#54F45F[✔] Вы успешно &fпереключили категорию &e{id} &fна состояние {state}"
+autosell-toggle-item: "&#54F45F[✔] Вы успешно &fпереключили предмет &e{id} &fна состояние {state}"
+autosell-usage-admin: "&#FD4747[❌] &fИспользование: /autosell <category/item> <id> [игрок]"
+autosell-usage-def: "&#FD4747[❌] &fИспользование: /autosell <category/item> <id>"
+
 console:
   database-initialized: "Database initialized: {type}"
   bstats-initialized: "bStats initialized!"

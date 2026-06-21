@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitTask;
@@ -135,6 +136,15 @@ public abstract class AbstractMenu {
                     customModelData = guiConfig.getInt(path + ".model-data");
                 }
 
+
+                int amount = guiConfig.getInt(path + ".amount", 1);
+                if (amount <= 0 || amount >= 64) {
+                    amount = 1;
+                }
+                item.setAmount(amount);
+
+
+
                 ItemMeta meta = item.getItemMeta();
 
                 if (meta != null) {
@@ -152,6 +162,21 @@ public abstract class AbstractMenu {
                     if (customModelData != null) {
                         ModelDataUtil.setModelData(meta, customModelData);
                     }
+
+                    List<ItemFlag> itemFlags = new ArrayList<>();
+
+                    for (String s : guiConfig.getStringList(path + ".item-flags")) {
+                        try {
+                            itemFlags.add(ItemFlag.valueOf(s.toUpperCase()));
+                        } catch (IllegalArgumentException ex) {
+                            plugin.getLogger().warning("Неизвестный ItemFlag: " + s);
+                        }
+                    }
+
+                    meta.addItemFlags(
+                            itemFlags.toArray(new ItemFlag[0])
+                    );
+
 
                     item.setItemMeta(meta);
                 }

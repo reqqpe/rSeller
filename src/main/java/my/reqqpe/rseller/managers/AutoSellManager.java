@@ -94,6 +94,9 @@ public class AutoSellManager {
         return null;
     }
 
+    public boolean hasCategory(String category) {
+        return categories.containsKey(category);
+    }
 
     public List<Item> getCategoryItems(String category) {
         return categories.getOrDefault(category, List.of());

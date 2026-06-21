@@ -127,7 +127,7 @@ public class SellMenu extends AbstractMenu implements Listener {
             if (!holder.id().equals(getMenuId())) return;
 
             IntList sellSlots = parseSlotList(guiConfig.getStringList("special-slots"));
-            plugin.getSellManager().sellItems(player, inv, sellSlots);
+            plugin.getSellManager().menuSellItems(player, inv, sellSlots);
         } else {
             runMainActions(player, action);
         }

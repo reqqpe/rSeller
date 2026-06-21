@@ -1,6 +1,7 @@
 package my.reqqpe.rseller;
 
 import lombok.Getter;
+import my.reqqpe.rseller.commands.AutoSellCommand;
 import my.reqqpe.rseller.commands.SellAdminCommand;
 import my.reqqpe.rseller.commands.SellCommand;
 import my.reqqpe.rseller.commands.TabCompleteAdmin;
@@ -135,6 +136,9 @@ public final class Main extends JavaPlugin {
         PluginCommand rsellerCommand = getCommand("rseller");
         rsellerCommand.setExecutor(new SellAdminCommand(this));
         rsellerCommand.setTabCompleter(new TabCompleteAdmin());
+
+        PluginCommand autosellCommand = getCommand("autosell");
+        autosellCommand.setExecutor(new AutoSellCommand(this, autoSellManager, itemManager));
 
         new SavePlayerDataCacheTask(this, playerRepository, dataBaseConfig);
 
@@ -277,10 +281,10 @@ public final class Main extends JavaPlugin {
         String type = mainConfig.getAutosell().getTypeSell();
 
         if (type.equalsIgnoreCase("task")) {
-            new AutoSellTask(this, formatManager).startTask();
+            new AutoSellTask(this, sellManager).startTask();
         } else {
             boolean inventorySell = mainConfig.getAutosell().isSellInventory();
-            getServer().getPluginManager().registerEvents(new PlayerPickupItem(this, inventorySell), this);
+            getServer().getPluginManager().registerEvents(new PlayerPickupItem(this, sellManager, inventorySell), this);
         }
 
         String messageType = mainConfig.getAutosell().getTypeMessage();

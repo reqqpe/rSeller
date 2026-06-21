@@ -33,6 +33,13 @@ public class MessageConfig extends CustomConfig {
     private String autosellMessageEnable;
     private String autosellMessageDisable;
 
+    private String autosellNotFoundCategory;
+    private String autosellNotFoundItem;
+    private String autosellCategoryToggle;
+    private String autosellItemToggle;
+    private String autosellUsageAdmin;
+    private String autosellUsageDef;
+
     private String negativeValue;
     private String negativeSet;
     private String notEnoughPoints;
@@ -100,6 +107,13 @@ public class MessageConfig extends CustomConfig {
         autosellDisable = getString("autosell-disable", "");
         autosellMessageEnable = getString("autosell-message-enable", "");
         autosellMessageDisable = getString("autosell-message-disable", "");
+
+        autosellNotFoundCategory = getString("autosell-not-found-category", "");
+        autosellNotFoundItem = getString("autosell-not-found-item", "");
+        autosellCategoryToggle = getString("autosell-toggle-category", "");
+        autosellItemToggle = getString("autosell-toggle-item", "");
+        autosellUsageAdmin = getString("autosell-usage-admin", "");
+        autosellUsageDef = getString("autosell-usage-def", "");
 
         negativeValue = getString("negative-value", "");
         negativeSet = getString("negative-set", "");

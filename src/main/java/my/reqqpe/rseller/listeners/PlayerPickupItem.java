@@ -4,6 +4,7 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.cache.PlayerDataCache;
 import my.reqqpe.rseller.cache.SellDataCache;
 import my.reqqpe.rseller.configs.impl.MainConfig;
+import my.reqqpe.rseller.managers.SellManager;
 import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.economy.EconomyProvider;
 import my.reqqpe.rseller.managers.NumberFormatManager;
@@ -22,14 +23,12 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class PlayerPickupItem implements Listener {
     private final Main plugin;
-    private final EconomyProvider economy;
-    private final NumberFormatManager numberFormatManager;
+    private final SellManager sellManager;
     private final boolean inventorySell;
 
-    public PlayerPickupItem(Main plugin, boolean inventorySell) {
+    public PlayerPickupItem(Main plugin, SellManager sellManager, boolean inventorySell) {
         this.plugin = plugin;
-        this.economy = plugin.getEconomy();
-        this.numberFormatManager = plugin.getFormatManager();
+        this.sellManager = sellManager;
         this.inventorySell = inventorySell;
     }
 
@@ -49,7 +48,7 @@ public class PlayerPickupItem implements Listener {
                     ItemStack itemStack = inv.getItem(slot);
                     if (itemStack == null) continue;
 
-                    if (sellItem(player, itemStack)) {
+                    if (sellManager.autoSellItem(player, itemStack)) {
                         inv.setItem(slot, null);
                     }
                 }
@@ -58,72 +57,10 @@ public class PlayerPickupItem implements Listener {
         else {
             ItemStack itemStack = event.getItem().getItemStack();
 
-            if (sellItem(player, itemStack)) {
+            if (sellManager.autoSellItem(player, itemStack)) {
                 event.setCancelled(true);
                 event.getItem().remove();
             }
         }
     }
-
-
-    public boolean sellItem(Player player, ItemStack itemStack) {
-        Item item = plugin.getItemManager().search(itemStack);
-        if (item == null) return false;
-
-        PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
-        if (!playerData.isAutosell(item.id())) return false;
-
-        double price = item.price();
-        double points = item.points();
-
-        if (price <= 0 && points <= 0) return false;
-
-        int amount = itemStack.getAmount();
-
-        price *= amount;
-        points *= amount;
-
-        Booster booster = plugin.getBoosterManager().getBoosterByPlayer(player);
-        if (booster == null) {
-            booster = new Booster(1.0, 1.0);
-        }
-
-        double totalCoins = price * Math.max(1.0, booster.coinMultiplier());
-        double totalPoints = points * Math.max(1.0, booster.pointMultiplier());
-
-        if (totalCoins > 0) economy.deposit(player, totalCoins);
-        if (totalPoints > 0) playerData.addPoints(totalPoints);
-
-        if (totalCoins > 0 || totalPoints > 0) {
-
-            if (playerData.isAutosellMessage()) {
-                String typeMessage = plugin.getMainConfig().getAutosell().getTypeMessage();
-                if (typeMessage.equalsIgnoreCase("task")) {
-                    SellData sellData = SellDataCache.getOrCreate(player.getUniqueId());
-                    sellData.addMoney(totalCoins);
-                    sellData.addPoints(totalPoints);
-                    sellData.addCount(amount);
-                } else {
-
-                    MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
-                    plugin.playSound(player, sounds.getAutosell(), sounds.getAutosellVolume(), sounds.getAutosellPitch());
-
-                    String coinsFormat = numberFormatManager.format("messages.coins", totalCoins);
-                    String pointsFormat = numberFormatManager.format("messages.points", totalPoints);
-
-                    String msg = Colorizer.color(plugin.getMessageConfig().getAutoSell()
-                            .replace("{coins}", coinsFormat)
-                            .replace("{points}", pointsFormat)
-                            .replace("{item_name}", item.getDisplayName(plugin))
-                            .replace("{amount}", String.valueOf(amount)));
-                    if (msg != null && !msg.isEmpty()) {
-                        player.sendMessage(msg);
-                    }
-                }
-            }
-        }
-
-        return true;
-    }
-
 }
