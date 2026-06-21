@@ -61,7 +61,7 @@ dependencies {
 }
 
 group = 'my.reqqpe'
-version = '1.13.0'
+version = '1.14.0'
 description = 'rSeller'
 java.sourceCompatibility = JavaVersion.VERSION_16
 
@@ -80,4 +80,43 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+
+tasks.register("processRuResources", Copy) {
+    from("src/main/resources")
+    from("locale/ru/resources")
+    into(layout.buildDirectory.dir("generated/ru-resources"))
+}
+
+tasks.register("processEnResources", Copy) {
+    from("src/main/resources")
+    from("locale/en/resources")
+    into(layout.buildDirectory.dir("generated/en-resources"))
+}
+
+tasks.register("jarRu", Jar) {
+    archiveClassifier = "ru"
+
+    from(sourceSets.main.output.classesDirs)
+
+    from("src/main/resources")
+    from("locale/ru/resources")
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    dependsOn("classes")
+}
+
+tasks.register("jarEn", Jar) {
+    archiveClassifier = "en"
+
+    from(sourceSets.main.output.classesDirs)
+
+    from("src/main/resources")
+    from("locale/en/resources")
+
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    dependsOn("classes")
 }

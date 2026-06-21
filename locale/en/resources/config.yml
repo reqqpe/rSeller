@@ -1,0 +1,116 @@
+#                 .__               .__
+# _______  ______ |  |  __ __  ____ |__| ____   ______
+# \_  __ \ \____ \|  | |  |  \/ ___\|  |/    \ /  ___/
+#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \
+#  |__|    |   __/|____/____/\___  /|__|___|  /____  >
+#          |__|             /_____/         \/     \/
+#
+
+# Need help or want to stay updated and suggest ideas for future updates?
+# Plugin Wiki: https://reqqpe.gitbook.io/rseller
+# Discord: https://dsc.gg/rplugins
+
+# Which menu should the /<buyer|seller|sell> command open?
+sell-command: "mainGUI" # Same names as GUI files (allSellGUI, mainGUI, autoSellGUI)
+
+metrics: true
+update-check: true
+
+economy:
+  type: VAULT # VAULT, COINSENGINE or PLAYERPOINTS
+  coinsengine:
+    currency-name: money
+
+# Triggered when an item is picked up; only the picked-up item is sold
+autosell:
+  enable: true # Changes take effect only after a server restart/reload
+  message-settings: # How messages will be sent
+    # Changes take effect only after a server restart/reload
+    type: sell # sell (on sale) or task (periodically)
+    task-delay: 5 # in seconds (used if type = task)
+  settings:
+    # Changes take effect only after a server restart/reload
+    type: pickup # pickup (on item pickup) or task (checks each player periodically)
+    sell-inventory: false # sell inventory or only the picked-up item (used if type = pickup)
+    task-delay: 5 # in seconds (used if type = task)
+  type-list: false # false = world blacklist, true = world whitelist
+  worlds-list: # World list configured by type-list
+    - spawn
+  start_category: example # Category opened on first use
+  categories:
+    all:
+      name: "All Items"
+      items:
+        - all
+    example:
+      name: "Resources"
+      items:
+        - COAL
+        - LAPIS_LAZULI
+        - IRON_INGOT
+        - GOLD_INGOT
+        - DIAMOND
+        - EMERALD
+        - NETHERITE_INGOT
+
+numbers_format:
+  # Number format: %.Nf where N is the number of decimal places
+  # Add ~ at the end to trim trailing zeros:
+  # 20.00 -> 20, 20.10 -> 20.1
+  # Examples:
+  # "%.2f" -> 20.00
+  # "%.2f~" -> 20
+  # "%.1f~" -> 20.5
+  placeholders:
+    points: "%.2f~"
+    points_needed: "%.2f~"
+    multiplier_points: "%.2f~"
+    multiplier_coins: "%.2f~"
+    points_fornextlevel: "%.2f~"
+  mainGUI:
+    sell_price: "%.2f~"
+    sell_points: "%.2f~"
+  autoSellGUI:
+    sell_price: "%.2f~"
+    sell_points: "%.2f~"
+  messages:
+    points: "%.2f~"
+    coins: "%.2f~"
+
+# Permission-based boosters: rseller.booster.<key>
+boosters:
+
+  # Note: if you use something like donate.vip,
+  # the configuration will be invalid (YAML limitation).
+  # Also, if a player has all permissions,
+  # they automatically get all boosters as well.
+
+  donate: # Permission: rseller.booster.donate
+    coin-multiplier: 2.0 # Defaults to 1.0 if not specified
+    point-multiplier: 2.0 # Defaults to 1.0 if not specified
+
+  booster-coin: # Permission: rseller.booster.booster-coin
+    coin-multiplier: 1.5
+
+  booster-point: # Permission: rseller.booster.booster-point
+    point-multiplier: 1.5
+
+# Sounds played during selling events
+# Leave a sound name empty ("") to disable it
+# Full sound list:
+# https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
+sounds:
+  # Sound played on successful menu sale
+  sell: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  sell-volume: 1.0
+  sell-pitch: 1.0
+
+  # Sound played on auto-sell
+  autosell: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  autosell-volume: 1.0
+  autosell-pitch: 1.2
+
+  # Sound played when there is nothing to sell
+  no-sell: "BLOCK_NOTE_BLOCK_BASS"
+  no-sell-volume: 1.0
+  no-sell-pitch: 1.0

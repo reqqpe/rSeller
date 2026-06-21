@@ -1,0 +1,23 @@
+type: sqlite # sqlite, mysql, postgres
+table_prefix: "rseller_"
+
+# How often player data will be saved (in seconds)
+save-cache-timer: 1800 # 30 minutes
+
+# Connection pool settings.
+# If you don't know what these are, it is recommended not to change them.
+hikari:
+  max-pool-size: 10
+  minimum-idle: 2
+  keep-alive: 120000
+  idle-timeout: 60000
+  connection-timeout: 30000
+  max-life-time: 1800000
+
+# MySQL/PostgreSQL connection settings
+connection:
+  host: localhost
+  port: 3306
+  database: rseller
+  username: "username"
+  password: "password"

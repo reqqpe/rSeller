@@ -1,0 +1,55 @@
+#                 .__               .__
+# _______  ______ |  |  __ __  ____ |__| ____   ______
+# \_  __ \ \____ \|  | |  |  \/ ___\|  |/    \ /  ___/
+#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \
+#  |__|    |   __/|____/____/\___  /|__|___|  /____  >
+#          |__|             /_____/         \/     \/
+#
+#
+# Ready-made configuration (ru conf):
+# https://spigotmc.ru/resources/konfig-predmetov-dlja-plagina-rseller.3859
+#
+settings-check:
+  display-name: true
+  lore: true
+  enchants: true
+  model-data: true
+  nbt-tags: false # Requires the nbt-api plugin
+
+custom-items: {}
+
+items:
+  COAL:
+    price: 10
+    points: 0.1
+    name: "&fCoal"
+
+  LAPIS_LAZULI:
+    price: 12
+    points: 0.1
+    name: "&fLapis Lazuli"
+
+  GOLD_INGOT:
+    price: 25
+    points: 1.0
+    name: "&fGold Ingot"
+
+  IRON_INGOT:
+    price: 20
+    points: 1.0
+    name: "&fIron Ingot"
+
+  DIAMOND:
+    price: 45.0
+    points: 1.5
+    name: "&fDiamond"
+
+  EMERALD:
+    price: 65.0
+    points: 2.0
+    name: "&fEmerald"
+
+  NETHERITE_INGOT:
+    price: 90.0
+    points: 4.0
+    name: "&fNetherite Ingot"

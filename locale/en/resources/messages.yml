@@ -1,0 +1,84 @@
+reload:
+  all: "&#54F45F[✔] &fPlugin successfully reloaded"
+  guis: "&#54F45F[✔] &fGUI configuration successfully reloaded"
+  items: "&#54F45F[✔] &fItems configuration successfully reloaded"
+  config: "&#54F45F[✔] &fMain configuration successfully reloaded"
+
+no-permission: "&#FD4747[❌] &fYou do not have permission to use this command"
+no-arguments: "&#FD4747[❌] &fNot enough arguments"
+points-usage: "&#FD4747[❌] &fUsage: /sa points <add/remove/set> <amount> [player]"
+un-int: "&#FD4747[❌] &fInvalid number specified: {value}"
+not-found-player: "&#FD4747[❌] &fPlayer could not be found"
+
+update-points-sender: "&#54F45F[✔] &fPlayer &e{player} &fnow has &e{value} &fbuyer points"
+update-points-target: "&#54F45F[✔] &fYour buyer points have been updated to &e{value}"
+
+no-sell-items: "&#FD4747[❌] &fThere are no items available for sale"
+
+sell-items: "&#54F45F[✔] You successfully &fsold &e{amount} &fitem(s) for &e{coins} &fcoins and earned &e{points} &fbuyer points"
+
+auto-sell: "&#54F45F[✔] You successfully &fsold {item_name} &f[&ex{amount}&f] for &e{coins} &fcoins and &e{points} &fbuyer points." # If message type = sell
+
+auto-sell-task: "&#54F45F[✔] You successfully &fsold &e{amount} &fitem(s) for &e{coins} &fcoins and earned &e{points} &fbuyer points &8(Over the last 5 seconds)" # If message type = task
+
+autosell-enable: "&#54F45Fenabled"
+autosell-disable: "&#FD4747disabled"
+
+autosell-message-enable: "&#54F45Fenabled"
+autosell-message-disable: "&#FD4747disabled"
+
+negative-value: "&#FD4747[❌] Negative values cannot be used!"
+negative-set: "&#FD4747[❌] Cannot set a negative amount of points!"
+not-enough-points: "&#FD4747[❌] &fThe player does not have enough points! Current: &e{current}"
+
+already-exists-item: "&#FD4747[❌] &fFailed to create item: this ID already exists"
+
+only-player: "&#FD4747[❌] &fThis command can only be used by a player"
+only-console: "&#FD4747[❌] &fThis command can only be used from the console"
+
+no-item: "&#FD4747[❌] &fIt looks like you are not holding an item. Hold an item in your hand to create it."
+create-success: "&#54F45F[✔] Item successfully created and saved to the configuration"
+
+autosell-not-found-category: "&#FD4747[❌] Category &e{id} &fcould not be found"
+autosell-not-found-item: "&#FD4747[❌] Item &e{id} &fcould not be found"
+
+autosell-toggle-category: "&#54F45F[✔] You successfully &ftoggled category &e{id} &fto {state}"
+autosell-toggle-item: "&#54F45F[✔] You successfully &ftoggled item &e{id} &fto {state}"
+
+autosell-usage-admin: "&#FD4747[❌] &fUsage: /autosell <category/item> <id> [player]"
+autosell-usage-def: "&#FD4747[❌] &fUsage: /autosell <category/item> <id>"
+
+console:
+  database-initialized: "Database initialized: {type}"
+  bstats-initialized: "bStats initialized!"
+  placeholderapi-not-found: "PlaceholderAPI not found, disabling plugin"
+  economy-not-found: "Economy {type} not found, disabling plugin"
+  economy-unknown: "Unknown economy type: {type}, disabling plugin"
+
+  item-saved: "[ItemStorage] Item {id} saved"
+  item-deleted: "[ItemStorage] Item {id} deleted"
+
+  invalid-level-id: "Invalid level id: {id}"
+
+  autosell-section-missing: "Section 'autosell' is missing in config.yml!"
+  autosell-invalid-item: "Invalid item id in autosell list: {id}"
+
+  update-available: "Update available: current {current}, latest {latest}"
+  update-not-required: "No update required: current {current}, latest {latest}"
+  update-http-error: "HTTP error while checking for updates: {code}"
+  update-error: "Error while checking for updates: {error}"
+  update-version-format: "Invalid version format: current={current}, latest={latest}"
+
+  menu-not-found: "Menu not found, id: {id}"
+
+  sound-unknown: "Unknown sound: {sound}"
+  sound-error: "Error playing sound."
+
+  menu-slot-out-of-bounds: "[{menu}] Skipped slot {slot} for item {item}: out of bounds (0-{max})."
+  menu-slot-occupied: "[{menu}] Skipped slot {slot} for item {item}: slot already occupied."
+  menu-no-slots: "[{menu}] No available slots for item {item}."
+
+  menu-unknown-material: "[{menu}] Unknown material for item {item}: {material}"
+  menu-unknown-enchant: "[{menu}] Unknown enchantment for item {item}: {enchant}"
+  menu-invalid-enchant-level: "[{menu}] Invalid enchantment level for item {item}: {level} (must be > 0)"
+  menu-enchant-error: "[{menu}] Error adding enchantment {enchant}:{level} for item {item}: {error}"
