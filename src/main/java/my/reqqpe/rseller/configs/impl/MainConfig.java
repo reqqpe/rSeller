@@ -42,6 +42,7 @@ public class MainConfig extends CustomConfig {
     public class AutoSellSection {
         private final boolean enabled = getBoolean("autosell.enable", true);
         private final String typeMessage = getString("autosell.message-settings.type", "sell");
+        private final String sendType = getString("autosell.message-settings.send-type", "message");
         private final int delayMessage = getInt("autosell.message-settings.task-delay", 5);
         private final String typeSell = getString("autosell.settings.type", "pickup");
         private final boolean sellInventory = getBoolean("autosell.settings.sell-inventory", false);

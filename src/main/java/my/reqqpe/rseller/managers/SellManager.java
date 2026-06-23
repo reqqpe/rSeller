@@ -205,7 +205,13 @@ public class SellManager {
                             .replace("{item_name}", item.getDisplayName(plugin))
                             .replace("{amount}", String.valueOf(amount)));
                     if (msg != null && !msg.isEmpty()) {
-                        player.sendMessage(msg);
+                        String sendType = plugin.getMainConfig().getAutosell().getSendType();
+                        if (sendType.equalsIgnoreCase("actionbar")) {
+                            player.sendActionBar(msg);
+                        } else {
+                            player.sendMessage(msg);
+                        }
+
                     }
                 }
             }

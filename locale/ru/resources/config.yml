@@ -31,6 +31,7 @@ autosell:
   message-settings: # Как будет отправляться сообщение
     # Переключение работает только при перезагрузке сервера
     type: sell # sell(при продажи) или же task(раз в какое-то время)
+    send-type: message # message, actionbar
     task-delay: 5 # в секундах(работает если type = task)
   settings:
     # Переключение работает только при перезагрузке сервера

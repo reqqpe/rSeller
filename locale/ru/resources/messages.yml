@@ -12,12 +12,6 @@ update-points-sender: "&#54F45F[✔] &fУ игрока &e{player} &fтеперь
 update-points-target: "&#54F45F[✔] &fВаши очки скупщика были обновлены до &e{value}"
 no-sell-items: "&#FD4747[❌] &fНет предметов, которые можно продать"
 sell-items: "&#54F45F[✔] Вы успешно &fпродали &e{amount} &fпредмет(ов) на сумму &e{coins} &fи получили &e{points} &fочков скупщика"
-auto-sell: "&#54F45F[✔] Вы успешно &fпродали {item_name} &f[&ex{amount}&f] за &e{coins} &fмонет и &e{points} &fочков скупщика." # Если тип сообщения sell
-auto-sell-task: "&#54F45F[✔] Вы успешно &fпродали &e{amount} &fпредмет(ов) на сумму &e{coins} &fи получили &e{points} &fочков скупщика &8(За последние 5 секунд)" # Если тип сообщения task
-autosell-enable: "&#54F45Fвключена"
-autosell-disable: "&#FD4747выключена"
-autosell-message-enable: "&#54F45Fвключены"
-autosell-message-disable: "&#FD4747выключены"
 negative-value: "&#FD4747[❌] Нельзя использовать отрицательные значения!"
 negative-set: "&#FD4747[❌] Нельзя установить отрицательное количество поинтов!"
 not-enough-points: "&#FD4747[❌] &fУ игрока недостаточно поинтов! Текущие: &e{current}"
@@ -27,12 +21,18 @@ only-console: "&#FD4747[❌] &fЭту команду может использо
 no-item: "&#FD4747[❌] &f Похоже в вашей руке нет предмета, возьмите предмет в руку чтобы создать"
 create-success: "&#54F45F[✔] Предмет успешно создан и записан в конфигурацию"
 
+autosell-enable: "&#54F45Fвключена"
+autosell-disable: "&#FD4747выключена"
+autosell-message-enable: "&#54F45Fвключены"
+autosell-message-disable: "&#FD4747выключены"
 autosell-not-found-category: "&#FD4747[❌] Не удалось найти категорию &e{id}"
 autosell-not-found-item: "&#FD4747[❌] Не удалось найти предмет &e{id}"
 autosell-toggle-category: "&#54F45F[✔] Вы успешно &fпереключили категорию &e{id} &fна состояние {state}"
 autosell-toggle-item: "&#54F45F[✔] Вы успешно &fпереключили предмет &e{id} &fна состояние {state}"
 autosell-usage-admin: "&#FD4747[❌] &fИспользование: /autosell <category/item> <id> [игрок]"
 autosell-usage-def: "&#FD4747[❌] &fИспользование: /autosell <category/item> <id>"
+auto-sell: "&#54F45F[✔] Вы успешно &fпродали {item_name} &f[&ex{amount}&f] за &e{coins} &fмонет и &e{points} &fочков скупщика." # Если тип сообщения sell
+auto-sell-task: "&#54F45F[✔] Вы успешно &fпродали &e{amount} &fпредмет(ов) на сумму &e{coins} &fи получили &e{points} &fочков скупщика &8(За последние 5 секунд)" # Если тип сообщения task
 
 console:
   not-found-autosell-item: "Removed item {id} from player {player} because it was not found in any autosell category."

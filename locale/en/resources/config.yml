@@ -27,6 +27,7 @@ autosell:
   message-settings: # How messages will be sent
     # Changes take effect only after a server restart/reload
     type: sell # sell (on sale) or task (periodically)
+    send-type: message # message, actionbar
     task-delay: 5 # in seconds (used if type = task)
   settings:
     # Changes take effect only after a server restart/reload

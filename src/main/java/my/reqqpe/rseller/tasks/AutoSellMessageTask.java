@@ -31,12 +31,11 @@ public class AutoSellMessageTask {
 
     }
 
-
-
     public void startTask() {
 
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             String message = msg.getAutoSellTask();
+            String sendType = plugin.getMainConfig().getAutosell().getSendType();
 
             List<UUID> playerUUIDs = SellDataCache.getCache().keySet().stream().toList();
             for (UUID uuid : playerUUIDs) {
@@ -66,7 +65,16 @@ public class AutoSellMessageTask {
                         .replace("{points}", pointsFormat)
                         .replace("{amount}", String.valueOf(sellData.getCount())));
 
-                player.sendMessage(finalMessage);
+                if (finalMessage != null && !finalMessage.isEmpty()) {
+
+
+                    if (sendType.equalsIgnoreCase("actionbar")) {
+                        player.sendActionBar(finalMessage);
+                    } else {
+                        player.sendMessage(finalMessage);
+                    }
+                }
+
                 SellDataCache.remove(uuid);
             }
         }, 0L ,config.getAutosell().getDelayMessage() * 20L);

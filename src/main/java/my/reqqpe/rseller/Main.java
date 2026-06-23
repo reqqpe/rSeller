@@ -126,7 +126,7 @@ public final class Main extends JavaPlugin {
 
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new MenuListener(this), this);
-        pm.registerEvents(new DatabaseListener(playerRepository), this);
+        pm.registerEvents(new DatabaseListener(this,playerRepository, autoSellManager), this);
 
         getCommand("sell").setExecutor(new SellCommand(this));
 
