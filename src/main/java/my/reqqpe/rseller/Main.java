@@ -1,10 +1,7 @@
 package my.reqqpe.rseller;
 
 import lombok.Getter;
-import my.reqqpe.rseller.commands.AutoSellCommand;
-import my.reqqpe.rseller.commands.SellAdminCommand;
-import my.reqqpe.rseller.commands.SellCommand;
-import my.reqqpe.rseller.commands.TabCompleteAdmin;
+import my.reqqpe.rseller.commands.*;
 import my.reqqpe.rseller.configs.CustomConfig;
 import my.reqqpe.rseller.configs.impl.DataBaseConfig;
 import my.reqqpe.rseller.configs.impl.ItemsConfig;
@@ -139,6 +136,7 @@ public final class Main extends JavaPlugin {
 
         PluginCommand autosellCommand = getCommand("autosell");
         autosellCommand.setExecutor(new AutoSellCommand(this, autoSellManager, itemManager));
+        autosellCommand.setTabCompleter(new AutoSellTabComplete(autoSellManager, itemManager));
 
         new SavePlayerDataCacheTask(this, playerRepository, dataBaseConfig);
 

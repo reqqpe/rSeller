@@ -154,7 +154,7 @@ public class AutoSellCommand implements CommandExecutor {
         boolean itemState = playerData.isAutosell(itemId);
         playerData.setAutosell(itemId, !itemState);
 
-        String message = msg.getAutosellCategoryToggle();
+        String message = msg.getAutosellItemToggle();
         if (message == null || message.isEmpty()) return;
 
         String state = !itemState
