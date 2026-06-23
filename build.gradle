@@ -98,25 +98,23 @@ tasks.register("processEnResources", Copy) {
 tasks.register("jarRu", Jar) {
     archiveClassifier = "ru"
 
-    from(sourceSets.main.output.classesDirs)
+    dependsOn(classes)
+    dependsOn(processResources)
 
-    from("src/main/resources")
+    from(sourceSets.main.output)
     from("locale/ru/resources")
 
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-    dependsOn("classes")
 }
 
 tasks.register("jarEn", Jar) {
     archiveClassifier = "en"
 
-    from(sourceSets.main.output.classesDirs)
+    dependsOn(classes)
+    dependsOn(processResources)
 
-    from("src/main/resources")
+    from(sourceSets.main.output)
     from("locale/en/resources")
 
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-    dependsOn("classes")
 }
