@@ -34,6 +34,10 @@ public class PlayerData {
         autosellMap.put(id, enabled);
     }
 
+    public void removeAutosell(String id) {
+        autosellMap.remove(id);
+    }
+
     public boolean isAutosell(String id) {
         return autosellMap.getOrDefault(id, false);
     }

@@ -35,6 +35,7 @@ autosell-usage-admin: "&#FD4747[❌] &fИспользование: /autosell <ca
 autosell-usage-def: "&#FD4747[❌] &fИспользование: /autosell <category/item> <id>"
 
 console:
+  not-found-autosell-item: "Removed item {id} from player {player} because it was not found in any autosell category."
   database-initialized: "Database initialized: {type}"
   bstats-initialized: "bStats initialized!"
   placeholderapi-not-found: "PlaceholderAPI not found, disabling plugin"

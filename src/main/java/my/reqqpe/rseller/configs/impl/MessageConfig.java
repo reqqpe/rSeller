@@ -51,6 +51,7 @@ public class MessageConfig extends CustomConfig {
     private String createSuccess;
 
     // Console messages
+    private String consoleNotFoundAutoSellItem;
     private String consoleDatabaseInitialized;
     private String consoleBstatsInitialized;
     private String consolePlaceholderApiNotFound;
@@ -125,6 +126,7 @@ public class MessageConfig extends CustomConfig {
         noItem = getString("no-item", "");
         createSuccess = getString("create-success", "");
 
+        consoleNotFoundAutoSellItem = getString("console.not-found-autosell-item", "Removed item {id} from player {player} because it was not found in any autosell category.");
         consoleDatabaseInitialized = getString("console.database-initialized", "Database initialized: {type}");
         consoleBstatsInitialized = getString("console.bstats-initialized", "bStats успешно инициализирован!");
         consolePlaceholderApiNotFound = getString("console.placeholderapi-not-found", "PlaceholderAPI не найден, плагин отключён");

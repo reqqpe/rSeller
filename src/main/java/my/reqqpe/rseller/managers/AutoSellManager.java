@@ -4,10 +4,7 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.models.item.Item;
 import org.bukkit.configuration.ConfigurationSection;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AutoSellManager {
 
@@ -15,6 +12,7 @@ public class AutoSellManager {
 
     private final Map<String, List<Item>> categories = new HashMap<>();
     private final Map<String, String> categoryNames = new HashMap<>();
+    private final Set<String> categoriesItemIds = new HashSet<>();
 
     public AutoSellManager(Main plugin) {
         this.plugin = plugin;
@@ -30,6 +28,7 @@ public class AutoSellManager {
 
         categories.clear();
         categoryNames.clear();
+        categoriesItemIds.clear();
 
         var section = config.getConfigurationSection("categories");
         if (section == null) return;
@@ -43,6 +42,7 @@ public class AutoSellManager {
 
             List<String> itemsListConfig = new ArrayList<>();
 
+
             if (categorySection.contains("items")) {
                 itemsListConfig.addAll(categorySection.getStringList("items"));
             } else {
@@ -51,7 +51,12 @@ public class AutoSellManager {
                 }
             }
 
-            categories.put(category, parseItemList(itemsListConfig));
+            List<Item> items = parseItemList(itemsListConfig);
+
+            categories.put(category, items);
+            for (Item item : items) {
+                categoriesItemIds.add(item.id());
+            }
         }
     }
 
@@ -101,4 +106,13 @@ public class AutoSellManager {
     public List<Item> getCategoryItems(String category) {
         return categories.getOrDefault(category, List.of());
     }
+
+    public boolean isInAnyCategory(Item item) {
+        return categoriesItemIds.contains(item.id());
+    }
+
+    public boolean isInAnyCategory(String itemId) {
+        return categoriesItemIds.contains(itemId);
+    }
+
 }

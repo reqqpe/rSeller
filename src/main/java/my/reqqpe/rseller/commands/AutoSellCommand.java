@@ -92,6 +92,11 @@ public class AutoSellCommand implements CommandExecutor {
                         commandSender.sendMessage(Colorizer.color(msg.getNotFoundPlayer()));
                         break;
                     }
+                    if (!autoSellManager.isInAnyCategory(id)) {
+                        commandSender.sendMessage(Colorizer.color(msg.getAutosellNotFoundItem()));
+                        break;
+                    }
+
                     switchStateItem(target, id);
                 } else {
                     if (!(commandSender instanceof Player)) {
