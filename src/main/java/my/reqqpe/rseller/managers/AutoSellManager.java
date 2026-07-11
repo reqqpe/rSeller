@@ -107,6 +107,9 @@ public class AutoSellManager {
         return categories.getOrDefault(category, List.of());
     }
 
+    public Set<String> getAllItemIds() {
+        return Collections.unmodifiableSet(categoriesItemIds);
+    }
     public boolean isInAnyCategory(Item item) {
         return categoriesItemIds.contains(item.id());
     }

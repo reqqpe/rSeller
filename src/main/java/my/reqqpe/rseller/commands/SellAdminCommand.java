@@ -247,11 +247,9 @@ public class SellAdminCommand implements CommandExecutor {
     private void reloadGUIs() {
         HeadUtil.clearCache();
         plugin.getAutoSellGUIConfig().reload();
-        MenuManager.reloadMenu("autoSellGUI", new AutoSellMenu(plugin));
         plugin.getAllSellGUIConfig().reload();
-        MenuManager.reloadMenu("allSellGUI", new SellMenu(plugin));
-        plugin.getMainGUIConfig().reload();
-        MenuManager.reloadMenu("mainGUI", new MainMenu(plugin));
+
+        plugin.loadMenus();
     }
 
     private void reloadConfig() {

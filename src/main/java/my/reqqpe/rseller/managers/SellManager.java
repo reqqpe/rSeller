@@ -220,6 +220,86 @@ public class SellManager {
         return true;
     }
 
+
+    public boolean sellItem(Player player, String id, int amount) {
+        Inventory inv = player.getInventory();
+
+        int left = amount;
+        double coins = 0;
+        double points = 0;
+        int sold = 0;
+        List<Item> sellItems = new ArrayList<>();
+
+        for (int slot = 0; slot < inv.getSize() && left > 0; slot++) {
+            ItemStack stack = inv.getItem(slot);
+            if (stack == null || stack.getType() == Material.AIR) continue;
+
+            Item item = itemManager.search(stack);
+            if (item == null || !item.id().equalsIgnoreCase(id)) continue;
+
+            int sell = Math.min(stack.getAmount(), left);
+
+            if (item.price() > 0) {
+                coins += item.price() * sell;
+            }
+
+            if (item.points() > 0) {
+                points += item.points() * sell;
+            }
+
+            if (stack.getAmount() == sell) {
+                inv.setItem(slot, null);
+            } else {
+                stack.setAmount(stack.getAmount() - sell);
+            }
+
+            left -= sell;
+            sold += sell;
+            sellItems.add(item);
+        }
+
+        if (sold == 0) {
+            player.sendMessage(Colorizer.color(plugin.getMessageConfig().getNoSellItems()));
+
+            MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
+            plugin.playSound(player, sounds.getNoSell(), sounds.getNoSellVolume(), sounds.getNoSellPitch());
+
+            return false;
+        }
+
+        SellResult result = sellResult(player, coins, points);
+
+        if (result.coins() > 0) {
+            economy.deposit(player, result.coins());
+        }
+
+        if (result.points() > 0) {
+            PlayerData playerData = PlayerDataCache.getOrCreate(player.getUniqueId());
+            playerData.addPoints(result.points());
+
+            Bukkit.getPluginManager().callEvent(
+                    new PointsUpdateEvent(player, result.points(), false, "add")
+            );
+        }
+
+        String coinsFormat = numberFormatManager.format("messages.coins", result.coins());
+        String pointsFormat = numberFormatManager.format("messages.points", result.points());
+
+        String message = Colorizer.color(plugin.getMessageConfig().getSellItems()
+                .replace("{coins}", coinsFormat)
+                .replace("{points}", pointsFormat)
+                .replace("{amount}", String.valueOf(sold)));
+
+        player.sendMessage(message);
+
+        MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
+        plugin.playSound(player, sounds.getSell(), sounds.getSellVolume(), sounds.getSellPitch());
+
+        Bukkit.getPluginManager().callEvent(new SellEvent(player, sellItems));
+
+        return true;
+    }
+
     public record SellResult(double coins, double points) {
     }
 }

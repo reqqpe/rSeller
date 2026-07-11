@@ -6,20 +6,27 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
+import java.io.File;
+
 public class MainMenu extends AbstractMenu implements Listener {
 
-    public MainMenu(Main plugin) {
+    private final FileConfiguration fileConfiguration;
+    private final String id;
+
+    public MainMenu(Main plugin, FileConfiguration fileConfiguration, String id) {
         super(plugin);
+        this.fileConfiguration = fileConfiguration;
+        this.id = id;
     }
 
     @Override
     protected FileConfiguration getGuiConfig() {
-        return plugin.getMainGUIConfig().getConfig();
+        return fileConfiguration;
     }
 
     @Override
     protected String getMenuId() {
-        return "mainGUI";
+        return id;
     }
 
 

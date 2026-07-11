@@ -21,6 +21,9 @@ economy:
   coinsengine:
     currency-name: money
 
+registered-menus: # file names without .yml
+  - mainGUI
+
 # Triggered when an item is picked up; only the picked-up item is sold
 autosell:
   enable: true # Changes take effect only after a server restart/reload

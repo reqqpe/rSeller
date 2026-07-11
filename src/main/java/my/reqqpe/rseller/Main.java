@@ -38,6 +38,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -66,7 +67,7 @@ public final class Main extends JavaPlugin {
     @Getter
     private CustomConfig autoSellGUIConfig;
     @Getter
-    private CustomConfig mainGUIConfig;
+    private HashMap<String , CustomConfig> menusConfigs = new HashMap<>();
 
     @Getter
     private ItemManager itemManager;
@@ -118,11 +119,9 @@ public final class Main extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        new SellerPlaceholderAPI(this).register();
+        new SellerPlaceholderAPI(this, autoSellManager).register();
 
-        MenuManager.registerMenu("mainGUI", new MainMenu(this));
-        MenuManager.registerMenu("allSellGUI", new SellMenu(this));
-        MenuManager.registerMenu("autoSellGUI", new AutoSellMenu(this));
+        loadMenus();
 
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new MenuListener(this), this);
@@ -187,11 +186,6 @@ public final class Main extends JavaPlugin {
         };
         autoSellGUIConfig.setup();
 
-        mainGUIConfig = new CustomConfig(this, "GUI/mainGUI.yml") {
-            @Override protected void load() {}
-        };
-        mainGUIConfig.setup();
-
         itemStorage = new ItemStorage(this);
 
         dataBaseManager = new DataBaseManager(this, dataBaseConfig);
@@ -231,6 +225,24 @@ public final class Main extends JavaPlugin {
             player.playSound(player.getLocation(), sound, volume, pitch);
         } catch (IllegalArgumentException e) {
             getLogger().warning("Unknown sound: " + soundName);
+        }
+    }
+
+    public void loadMenus() {
+        MenuManager.unRegisterAllMenus();
+        menusConfigs.clear();
+
+
+        MenuManager.registerMenu("allSellGUI", new SellMenu(this));
+        MenuManager.registerMenu("autoSellGUI", new AutoSellMenu(this));
+
+        for (String name : mainConfig.getMenusIds()) {
+            CustomConfig customConfig = new CustomConfig(this, "GUI/" + name +".yml") {
+                @Override protected void load() {}
+            };
+            customConfig.setup();
+            menusConfigs.put(name, customConfig);
+            MenuManager.registerMenu(name, new MainMenu(this, customConfig.getConfig(), name));
         }
     }
 

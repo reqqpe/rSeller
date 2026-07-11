@@ -231,47 +231,92 @@ public abstract class AbstractMenu {
 
     protected void runMainActions(Player player, String cmdLine) {
         String cmd = cmdLine.trim();
-        if (cmd.startsWith("[console] ")) {
-            String command = cmd.substring(10);
-            command = PlaceholderAPI.setPlaceholders(player, command);
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
-        } else if (cmd.startsWith("[close]")) {
-            player.closeInventory();
+
+        if (!cmd.startsWith("[")) {
+            player.sendMessage(Colorizer.color(cmd));
+            return;
         }
-        else if (cmd.startsWith("[player] ")) {
-            String command = cmd.substring(9);
-            command = PlaceholderAPI.setPlaceholders(player, command);
-            player.performCommand(command);
-        } else if (cmd.startsWith("[text] ")) {
-            String command = Colorizer.color(cmd.substring(7));
-            command = PlaceholderAPI.setPlaceholders(player, command);
-            player.sendMessage(command);
-        } else if (cmd.startsWith("[opengui] ")) {
-            String guiId = cmd.substring(10).trim();
-            AbstractMenu menu = MenuManager.getMenu(guiId);
-            if (menu != null) {
-                menu.openMenu(player);
+
+        int end = cmd.indexOf(']');
+        if (end == -1) {
+            player.sendMessage(Colorizer.color(cmd));
+            return;
+        }
+
+        String action = cmd.substring(1, end).toLowerCase();
+        String value = cmd.substring(end + 1).trim();
+
+        switch (action) {
+            case "console" -> {
+                value = PlaceholderAPI.setPlaceholders(player, value);
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), value);
             }
-            else {
-                plugin.getLogger().warning(plugin.getMessageConfig().getConsoleMenuNotFound().replace("{id}", guiId));
+
+            case "close" -> player.closeInventory();
+
+            case "player" -> {
+                value = PlaceholderAPI.setPlaceholders(player, value);
+                player.performCommand(value);
             }
-        } else if (cmd.startsWith("[sound] ")) {
-            String[] parts = cmd.substring(8).split(";");
-            if (parts.length >= 1) {
+
+            case "text" -> {
+                value = PlaceholderAPI.setPlaceholders(player, Colorizer.color(value));
+                player.sendMessage(value);
+            }
+
+            case "opengui" -> {
+                AbstractMenu menu = MenuManager.getMenu(value);
+                if (menu != null) {
+                    menu.openMenu(player);
+                } else {
+                    plugin.getLogger().warning(
+                            plugin.getMessageConfig()
+                                    .getConsoleMenuNotFound()
+                                    .replace("{id}", value)
+                    );
+                }
+            }
+
+            case "sound" -> {
+                String[] parts = value.split(";");
                 try {
                     Sound sound = Sound.valueOf(parts[0].toUpperCase());
-                    float volume = parts.length >= 2 ? Float.parseFloat(parts[1]) : 1.0f;
-                    float pitch = parts.length >= 3 ? Float.parseFloat(parts[2]) : 1.0f;
+                    float volume = parts.length > 1 ? Float.parseFloat(parts[1]) : 1F;
+                    float pitch = parts.length > 2 ? Float.parseFloat(parts[2]) : 1F;
+
                     player.playSound(player.getLocation(), sound, volume, pitch);
                 } catch (IllegalArgumentException e) {
-                    plugin.getLogger().warning(plugin.getMessageConfig().getConsoleSoundUnknown().replace("{sound}", parts[0]));
+                    plugin.getLogger().warning(
+                            plugin.getMessageConfig()
+                                    .getConsoleSoundUnknown()
+                                    .replace("{sound}", parts[0])
+                    );
                 } catch (Exception e) {
                     plugin.getLogger().warning(plugin.getMessageConfig().getConsoleSoundError());
                     e.printStackTrace();
                 }
             }
-        } else {
-            player.sendMessage(Colorizer.color(cmd));
+
+            case "sell" -> {
+                String[] args = value.split(";");
+
+                int amount = 1;
+                if (args.length > 1) {
+                    switch (args[1].toLowerCase()) {
+                        case "all" -> amount = Integer.MAX_VALUE;
+                        default -> {
+                            try {
+                                amount = Math.max(1, Integer.parseInt(args[1]));
+                            } catch (NumberFormatException ignored) {
+                            }
+                        }
+                    }
+                }
+
+                plugin.getSellManager().sellItem(player, args[0], amount);
+            }
+
+            default -> player.sendMessage(Colorizer.color(cmd));
         }
     }
 
@@ -305,70 +350,88 @@ public abstract class AbstractMenu {
         Inventory clickedInv = e.getClickedInventory();
         Inventory menuInv = e.getInventory();
 
+        if (clickedInv != menuInv || rawSlot >= menuInv.getSize()) return;
 
-        if (clickedInv == menuInv && rawSlot < menuInv.getSize()) {
-            if (specialSlots.contains(rawSlot)) {
-                if (handleSpecialSlotClick(player, e)) return;
-            }
+        if (specialSlots.contains(rawSlot) && handleSpecialSlotClick(player, e)) {
+            return;
+        }
 
-            e.setCancelled(true);
+        e.setCancelled(true);
 
-            String itemId = slotToItemId.get(rawSlot);
-            if (itemId == null) return;
+        String itemId = slotToItemId.get(rawSlot);
+        if (itemId == null) return;
 
-            ConfigurationSection itemSection = guiConfig.getConfigurationSection("items." + itemId);
-            if (itemSection == null) return;
+        ConfigurationSection itemSection = guiConfig.getConfigurationSection("items." + itemId);
+        if (itemSection == null) return;
 
-            boolean isLeftClick = e.isLeftClick();
-            boolean isRightClick = e.isRightClick();
-
-            if (!isLeftClick && !isRightClick) {
+        String clickType;
+        if (e.isShiftClick()) {
+            if (e.isLeftClick()) {
+                clickType = "left_shift_click";
+            } else if (e.isRightClick()) {
+                clickType = "right_shift_click";
+            } else {
                 return;
             }
+        } else {
+            if (e.isLeftClick()) {
+                clickType = "left_click";
+            } else if (e.isRightClick()) {
+                clickType = "right_click";
+            } else {
+                return;
+            }
+        }
 
-            ConfigurationSection reqSection = itemSection.getConfigurationSection(
-                    isLeftClick ? "left_click_requaments" :
-                            "right_click_requaments"
-            );
+        List<String> requirementSections = List.of(
+                "click_requaments",
+                clickType + "_requaments"
+        );
 
-            boolean allRequirementsPassed = true;
+        for (String sectionName : requirementSections) {
+            ConfigurationSection reqSection = itemSection.getConfigurationSection(sectionName);
+            if (reqSection == null) continue;
 
-            if (reqSection != null) {
-                ConfigurationSection sub = reqSection.getConfigurationSection("requaments");
-                if (sub != null) {
-                    for (String key : sub.getKeys(false)) {
-                        ConfigurationSection entry = sub.getConfigurationSection(key);
-                        if (entry == null) continue;
+            boolean passed = true;
 
-                        String syntax = entry.getString("syntax");
-                        String typeRaw = entry.getString("type", "AUTO");
-                        SyntaxParser.Type type = SyntaxParser.Type.valueOf(typeRaw.toUpperCase());
+            for (String key : reqSection.getKeys(false)) {
+                if (key.equalsIgnoreCase("deny_actions")) {
+                    continue;
+                }
 
-                        if (!SyntaxParser.parse(syntax, type)) {
-                            player.sendMessage("§cУсловие не выполнено: " + syntax);
-                            allRequirementsPassed = false;
-                            break;
-                        }
-                    }
+                ConfigurationSection entry = reqSection.getConfigurationSection(key);
+                if (entry == null) continue;
+
+                String syntax = replacePlaceholders(
+                        player,
+                        entry.getString("syntax", ""),
+                        menuInv
+                );
+
+                SyntaxParser.Type type = SyntaxParser.Type.valueOf(
+                        entry.getString("type", "AUTO").toUpperCase()
+                );
+
+                if (!SyntaxParser.parse(syntax, type)) {
+                    passed = false;
+                    break;
                 }
             }
 
-            if (!allRequirementsPassed) {
-                List<String> denyCommands = reqSection.getStringList("deny_commands");
-                for (String cmd : denyCommands) {
-                    runMainActions(player, cmd);
+            if (!passed) {
+                for (String action : reqSection.getStringList("deny_actions")) {
+                    executeAction(player, action);
                 }
                 return;
             }
+        }
 
-            List<String> actions = itemSection.getStringList(
-                    isLeftClick ? "left_click_actions" :
-                            "right_click_actions"
-            );
+        List<String> actions = new ArrayList<>();
+        actions.addAll(itemSection.getStringList("click_actions"));
+        actions.addAll(itemSection.getStringList(clickType + "_actions"));
 
-            for (String action : actions) {
-                executeAction(player, action);
-            }
+        for (String action : actions) {
+            executeAction(player, action);
         }
     }
 

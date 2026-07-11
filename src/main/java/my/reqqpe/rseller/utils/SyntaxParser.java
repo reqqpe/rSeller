@@ -54,7 +54,7 @@ public class SyntaxParser {
             }
         }
 
-        Bukkit.getLogger().warning("Error: No valid operator found in expression: " + syntax);
+        Bukkit.getLogger().warning("[rseller] Error: No valid operator found in expression: " + syntax);
         return false;
     }
 
@@ -101,6 +101,6 @@ public class SyntaxParser {
     }
 
     private static void printTypeError(String left, String right, String message) {
-        Bukkit.getLogger().warning("Type mismatch: \"" + left + "\" vs \"" + right + "\" — " + message);
+        Bukkit.getLogger().warning("[rseller] Type mismatch: \"" + left + "\" vs \"" + right + "\" — " + message);
     }
 }

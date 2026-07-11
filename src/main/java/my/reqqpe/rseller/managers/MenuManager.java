@@ -1,5 +1,6 @@
 package my.reqqpe.rseller.managers;
 
+import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.menu.AbstractMenu;
 import my.reqqpe.rseller.menu.CustomInventoryHolder;
 import org.bukkit.Bukkit;
@@ -18,10 +19,11 @@ public class MenuManager {
 
     public static void registerMenu(String name, AbstractMenu menu) {
         menus.put(name, menu);
+        Bukkit.getLogger().info("register menu" + name);
     }
 
     public static void unRegisterMenu(String name) {
-        if (menus.containsKey(name)) {
+        if (hasMenu(name)) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.getOpenInventory().getTopInventory().getHolder() instanceof CustomInventoryHolder holder) {
                     if (holder.id().equals(name)) {
@@ -37,11 +39,27 @@ public class MenuManager {
         registerMenu(name, menu);
     }
 
+
     public static void openMenu(String name, Player player) {
         menus.get(name).openMenu(player);
     }
 
     public static boolean hasMenu(String name) {
         return menus.containsKey(name);
+    }
+
+
+
+    public static void unRegisterAllMenus() {
+        for (String name : menus.keySet()) {
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player.getOpenInventory().getTopInventory().getHolder() instanceof CustomInventoryHolder holder) {
+                    if (holder.id().equals(name)) {
+                        player.closeInventory();
+                        menus.remove(name);
+                    }
+                }
+            }
+        }
     }
 }

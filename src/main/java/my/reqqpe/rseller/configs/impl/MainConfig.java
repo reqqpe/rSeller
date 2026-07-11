@@ -4,7 +4,9 @@ import lombok.Getter;
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.configs.CustomConfig;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 public class MainConfig extends CustomConfig {
@@ -16,6 +18,7 @@ public class MainConfig extends CustomConfig {
     private boolean metrics;
     private boolean updateCheck;
     private String sellCommand;
+    private Set<String> menusIds;
 
     public MainConfig(Main plugin) {
         super(plugin, "config.yml");
@@ -30,6 +33,7 @@ public class MainConfig extends CustomConfig {
         metrics = getBoolean("metrics", true);
         updateCheck = getBoolean("update-check", true);
         sellCommand = getString("sell-command", "mainGUI");
+        menusIds = new HashSet<>(getStringList("registered-menus"));
     }
 
     @Getter
