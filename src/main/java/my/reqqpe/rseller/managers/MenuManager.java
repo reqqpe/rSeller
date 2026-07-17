@@ -1,6 +1,5 @@
 package my.reqqpe.rseller.managers;
 
-import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.menu.AbstractMenu;
 import my.reqqpe.rseller.menu.CustomInventoryHolder;
 import org.bukkit.Bukkit;
@@ -19,7 +18,6 @@ public class MenuManager {
 
     public static void registerMenu(String name, AbstractMenu menu) {
         menus.put(name, menu);
-        Bukkit.getLogger().info("register menu" + name);
     }
 
     public static void unRegisterMenu(String name) {

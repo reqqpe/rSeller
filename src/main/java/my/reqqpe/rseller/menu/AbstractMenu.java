@@ -71,6 +71,9 @@ public abstract class AbstractMenu {
 
 
     protected void loadItems(Inventory inv, Player player) {
+        slotToItemId.clear();
+        updatableItems.clear();
+
         IntList specialSlots = parseSlotList(guiConfig.getStringList("special-slots"));
         this.specialSlots = new IntArrayList(specialSlots);
         Set<Integer> usedSlots = new HashSet<>(specialSlots);

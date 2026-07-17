@@ -11,6 +11,8 @@ public class DataBaseConfig extends CustomConfig {
 
     private DataBaseType dbType;
     private String tablePrefix;
+    private boolean loggingEnabled;
+    private int logPurgeDays;
 
     private long saveCacheTimer;
 
@@ -36,6 +38,8 @@ public class DataBaseConfig extends CustomConfig {
 
         this.dbType = DataBaseType.from(config.getString("type"));
         this.tablePrefix = getString("table_prefix", "");
+        this.loggingEnabled = getBoolean("logging-enabled", true);
+        this.logPurgeDays = getInt("log-purge-days", 30);
 
         this.saveCacheTimer = getLong("save-cache-timer", 300);
 

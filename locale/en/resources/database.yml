@@ -1,6 +1,11 @@
 type: sqlite # sqlite, mysql, postgres
 table_prefix: "rseller_"
 
+# Enable sell transaction logging to the database
+logging-enabled: true
+# Automatically delete logs older than the specified number of days (0 — disabled)
+log-purge-days: 30
+
 # How often player data will be saved (in seconds)
 save-cache-timer: 1800 # 30 minutes
 

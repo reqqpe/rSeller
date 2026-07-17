@@ -5,12 +5,15 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.cache.PlayerDataCache;
 import my.reqqpe.rseller.cache.SellDataCache;
 import my.reqqpe.rseller.configs.impl.MainConfig;
+import my.reqqpe.rseller.database.repositories.SellLogRepository;
 import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.economy.EconomyProvider;
 import my.reqqpe.rseller.events.PointsUpdateEvent;
 import my.reqqpe.rseller.events.SellEvent;
 import my.reqqpe.rseller.models.Booster;
 import my.reqqpe.rseller.models.SellData;
+import my.reqqpe.rseller.models.SellLog;
+import my.reqqpe.rseller.models.SellSource;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Bukkit;
@@ -20,7 +23,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class SellManager {
@@ -58,6 +63,8 @@ public class SellManager {
         int finalAmount = 0;
         List<Item> sellItems = new ArrayList<>();
 
+        Map<String, long[]> logAccum = new LinkedHashMap<>();
+
         for (int slot : sellSlots) {
             ItemStack itemStack = inv.getItem(slot);
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
@@ -77,11 +84,18 @@ public class SellManager {
             if (points > 0) {
                 totalPoints += points * amount;
             }
-            
+
             if (price > 0 || points > 0) {
                 finalAmount += amount;
                 sellItems.add(item);
                 inv.setItem(slot, null);
+
+                // accumulate per item-id for logging
+                logAccum.computeIfAbsent(item.id(), k -> new long[]{0, 0, 0});
+                long[] acc = logAccum.get(item.id());
+                acc[0] += amount;
+                acc[1] += (long) (price * amount * 1_000_000);
+                acc[2] += (long) (points * amount * 1_000_000);
             }
         }
 
@@ -112,7 +126,40 @@ public class SellManager {
             MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
             plugin.playSound(player, sounds.getSell(), sounds.getSellVolume(), sounds.getSellPitch());
 
-            Bukkit.getPluginManager().callEvent(new SellEvent(player, sellItems));
+            Bukkit.getPluginManager().callEvent(new SellEvent(player, sellItems, sellResult.coins, sellResult.points, finalAmount, SellSource.GUI));
+
+            SellLogRepository repo = plugin.getSellLogRepository();
+            if (repo != null && !logAccum.isEmpty()) {
+                double coinRatio = totalCoins > 0 ? sellResult.coins / totalCoins : 1.0;
+                double pointRatio = totalPoints > 0 ? sellResult.points / totalPoints : 1.0;
+
+                int playerLevel = plugin.getLevelManager().getLevel(player);
+                double coinBooster = plugin.getBoosterManager().getBoosterByPlayer(player).coinMultiplier();
+                double pointBooster = plugin.getBoosterManager().getBoosterByPlayer(player).pointMultiplier();
+                String worldName = player.getWorld().getName();
+
+                List<SellLog> logs = new ArrayList<>();
+                for (Map.Entry<String, long[]> entry : logAccum.entrySet()) {
+                    long[] acc = entry.getValue();
+                    int amount = (int) acc[0];
+                    double rawCoins = acc[1] / 1_000_000.0;
+                    double rawPoints = acc[2] / 1_000_000.0;
+                    logs.add(SellLog.of(
+                            player.getUniqueId(),
+                            player.getName(),
+                            entry.getKey(),
+                            amount,
+                            rawCoins * coinRatio,
+                            rawPoints * pointRatio,
+                            SellSource.GUI,
+                            playerLevel,
+                            coinBooster,
+                            pointBooster,
+                            worldName
+                    ));
+                }
+                repo.logBatchAsync(logs);
+            }
 
         } else {
             player.sendMessage(Colorizer.color(msgNoSellItems));
@@ -182,6 +229,22 @@ public class SellManager {
         if (totalPoints > 0) playerData.addPoints(totalPoints);
 
         if (totalCoins > 0 || totalPoints > 0) {
+            SellLogRepository repo = plugin.getSellLogRepository();
+            if (repo != null) {
+                repo.logAsync(SellLog.of(
+                        player.getUniqueId(),
+                        player.getName(),
+                        item.id(),
+                        amount,
+                        totalCoins,
+                        totalPoints,
+                        SellSource.AUTOSELL,
+                        plugin.getLevelManager().getLevel(player),
+                        booster.coinMultiplier(),
+                        booster.pointMultiplier(),
+                        player.getWorld().getName()
+                ));
+            }
 
             if (playerData.isAutosellMessage()) {
 
@@ -223,6 +286,26 @@ public class SellManager {
 
     public boolean sellItem(Player player, String id, int amount) {
         Inventory inv = player.getInventory();
+
+        if (amount != Integer.MAX_VALUE) {
+            int available = 0;
+            for (int slot = 0; slot < inv.getSize(); slot++) {
+                ItemStack stack = inv.getItem(slot);
+                if (stack == null || stack.getType() == Material.AIR) continue;
+                Item item = itemManager.search(stack);
+                if (item == null || !item.id().equalsIgnoreCase(id)) continue;
+                available += stack.getAmount();
+            }
+            if (available < amount) {
+                String msg = Colorizer.color(plugin.getMessageConfig().getNotEnoughSellItems()
+                        .replace("{required}",  String.valueOf(amount))
+                        .replace("{available}", String.valueOf(available)));
+                player.sendMessage(msg);
+                MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
+                plugin.playSound(player, sounds.getNoSell(), sounds.getNoSellVolume(), sounds.getNoSellPitch());
+                return false;
+            }
+        }
 
         int left = amount;
         double coins = 0;
@@ -295,7 +378,24 @@ public class SellManager {
         MainConfig.SoundsSection sounds = plugin.getMainConfig().getSounds();
         plugin.playSound(player, sounds.getSell(), sounds.getSellVolume(), sounds.getSellPitch());
 
-        Bukkit.getPluginManager().callEvent(new SellEvent(player, sellItems));
+        Bukkit.getPluginManager().callEvent(new SellEvent(player, sellItems, result.coins(), result.points(), sold, SellSource.MENU_ACTION));
+
+        SellLogRepository repo = plugin.getSellLogRepository();
+        if (repo != null) {
+            repo.logAsync(SellLog.of(
+                    player.getUniqueId(),
+                    player.getName(),
+                    id,
+                    sold,
+                    result.coins(),
+                    result.points(),
+                    SellSource.MENU_ACTION,
+                    plugin.getLevelManager().getLevel(player),
+                    plugin.getBoosterManager().getBoosterByPlayer(player).coinMultiplier(),
+                    plugin.getBoosterManager().getBoosterByPlayer(player).pointMultiplier(),
+                    player.getWorld().getName()
+            ));
+        }
 
         return true;
     }

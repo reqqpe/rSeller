@@ -1,5 +1,6 @@
 package my.reqqpe.rseller;
 
+import my.reqqpe.rseller.api.rSeller;
 import lombok.Getter;
 import my.reqqpe.rseller.commands.*;
 import my.reqqpe.rseller.configs.CustomConfig;
@@ -12,6 +13,7 @@ import my.reqqpe.rseller.configs.storage.ItemStorage;
 import my.reqqpe.rseller.database.DataBaseManager;
 import my.reqqpe.rseller.listeners.DatabaseListener;
 import my.reqqpe.rseller.database.repositories.PlayerRepository;
+import my.reqqpe.rseller.database.repositories.SellLogRepository;
 import my.reqqpe.rseller.economy.CoinsEngineEconomyProvider;
 import my.reqqpe.rseller.economy.EconomyProvider;
 import my.reqqpe.rseller.economy.PlayerPointsEconomyProvider;
@@ -21,9 +23,11 @@ import my.reqqpe.rseller.listeners.PlayerPickupItem;
 import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menu.AutoSellMenu;
 import my.reqqpe.rseller.menu.MainMenu;
+import my.reqqpe.rseller.menu.SellLogMenu;
 import my.reqqpe.rseller.menu.SellMenu;
 import my.reqqpe.rseller.tasks.AutoSellMessageTask;
 import my.reqqpe.rseller.tasks.AutoSellTask;
+import my.reqqpe.rseller.tasks.PurgeLogsTask;
 import my.reqqpe.rseller.tasks.SavePlayerDataCacheTask;
 import my.reqqpe.rseller.updateCheker.UpdateChecker;
 import my.reqqpe.rseller.utils.Metrics;
@@ -48,6 +52,8 @@ public final class Main extends JavaPlugin {
 
     @Getter
     private PlayerRepository playerRepository;
+    @Getter
+    private SellLogRepository sellLogRepository;
 
     @Getter
     private ItemsConfig itemsConfig;
@@ -67,6 +73,8 @@ public final class Main extends JavaPlugin {
     @Getter
     private CustomConfig autoSellGUIConfig;
     @Getter
+    private CustomConfig sellLogGUIConfig;
+    @Getter
     private HashMap<String , CustomConfig> menusConfigs = new HashMap<>();
 
     @Getter
@@ -85,9 +93,6 @@ public final class Main extends JavaPlugin {
     @Getter
     private EconomyProvider economy;
 
-    @Getter
-    private Main instance;
-
     private DataBaseManager dataBaseManager;
 
     public static boolean useNBTAPI = false;
@@ -96,7 +101,7 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        instance = this;
+        rSeller.init(this);
 
         saveDefaultConfig();
         loadConfigs();
@@ -186,11 +191,24 @@ public final class Main extends JavaPlugin {
         };
         autoSellGUIConfig.setup();
 
+        sellLogGUIConfig = new CustomConfig(this, "GUI/sellLogGUI.yml") {
+            @Override protected void load() {}
+        };
+        sellLogGUIConfig.setup();
+
         itemStorage = new ItemStorage(this);
 
         dataBaseManager = new DataBaseManager(this, dataBaseConfig);
         playerRepository = new PlayerRepository(dataBaseManager);
         playerRepository.createTable();
+
+        if (dataBaseConfig.isLoggingEnabled()) {
+            sellLogRepository = new SellLogRepository(dataBaseManager);
+            sellLogRepository.createTable();
+            if (dataBaseConfig.getLogPurgeDays() > 0) {
+                new PurgeLogsTask(this, sellLogRepository, dataBaseConfig.getLogPurgeDays());
+            }
+        }
 
         for (Player pl : Bukkit.getOnlinePlayers()) {
             playerRepository.loadPlayerData(pl.getUniqueId());
@@ -235,6 +253,8 @@ public final class Main extends JavaPlugin {
 
         MenuManager.registerMenu("allSellGUI", new SellMenu(this));
         MenuManager.registerMenu("autoSellGUI", new AutoSellMenu(this));
+        SellLogMenu sellLogMenu = new SellLogMenu(this);
+        MenuManager.registerMenu("sellLogGUI", sellLogMenu);
 
         for (String name : mainConfig.getMenusIds()) {
             CustomConfig customConfig = new CustomConfig(this, "GUI/" + name +".yml") {

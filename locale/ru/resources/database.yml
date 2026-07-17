@@ -1,6 +1,11 @@
 type: sqlite # sqlite, mysql, postgres
 table_prefix: "rseller_"
 
+# Включить логирование продаж в базу данных
+logging-enabled: true
+# Автоматически удалять логи старше указанного кол-ва дней (0 — отключить)
+log-purge-days: 30
+
 
 # Раз в какое время будут сохраняться данные игроков (в секундах)
 save-cache-timer: 1800 # 30 мин

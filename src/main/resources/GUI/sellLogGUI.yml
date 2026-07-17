@@ -1,0 +1,115 @@
+#                 .__               .__
+# _______  ______ |  |  __ __  ____ |__| ____   ______
+# \_  __ \ \____ \|  | |  |  \/ ___\|  |/    \ /  ___/
+#  |  | \/ |  |_> >  |_|  |  / /_/  >  |   |  \\___ \
+#  |__|    |   __/|____/____/\___  /|__|___|  /____  >
+#          |__|             /_____/         \/     \/
+#
+# Discord: https://dsc.gg/rplugins
+
+# {target} — имя игрока, чьи логи просматриваются
+# {page}   — текущая страница
+# {total}  — всего страниц
+title: "&8Логи продаж: &f{target} &8[{page}/{total}]"
+size: 54
+
+# Слоты, в которые подставляются записи лога
+special-slots:
+  - 0-44
+
+# Шаблон одной записи лога
+# Материал берётся из item_id (если совпадает с Material) или fallback-material
+log_item:
+  fallback-material: PAPER   # используется если item_id не является валидным Material
+  name: "&e{item_id} &7x{amount}"
+  lore:
+    - ""
+    - "&#54A0F4* &fИгрок: &e{player}"
+    - "&#54A0F4* &fМонет получено: &a+{coins}"
+    - "&#54A0F4* &fОчков получено: &b+{points}"
+    - "&#54A0F4* &fИсточник: &f{source}"
+    - "&#54A0F4* &fДата: &f{date}"
+    - ""
+    - "&#54A0F4* &fУровень: &e{level}"
+    - "&#54A0F4* &fБустер монет: &6{coin_booster}"
+    - "&#54A0F4* &fБустер очков: &b{point_booster}"
+    - "&#54A0F4* &fМир: &7{world}"
+    - ""
+
+items:
+  prev_page:
+    material: ARROW
+    name: "&#54A0F4▶ Предыдущая страница"
+    slot: 49
+    lore:
+      - ""
+      - "&fНажмите, чтобы перейти"
+      - "&fна предыдущую страницу"
+      - ""
+    left_click_actions:
+      - "[prev_page]"
+    right_click_actions:
+      - "[prev_page]"
+
+  page_info:
+    material: BOOK
+    name: "&#54A0F4▶ Страница {page}/{total}"
+    slot: 50
+    lore:
+      - ""
+      - "&#54A0F4* &fВсего записей: &f{total_entries}"
+      - "&#54A0F4* &fФильтр от: &e{filter_from}"
+      - "&#54A0F4* &fФильтр до: &e{filter_to}"
+      - "&#54A0F4* &fСортировка: &e{sort_field} {sort_order}"
+      - ""
+
+  sort_field:
+    material: HOPPER
+    name: "&#54A0F4▶ Поле сортировки: &e{sort_field}"
+    slot: 47
+    lore:
+      - ""
+      - "&fТекущее: &e{sort_field}"
+      - "&7Нажмите чтобы переключить"
+      - "&7date → coins → points → amount"
+      - ""
+    left_click_actions:
+      - "[toggle_sort]"
+    right_click_actions:
+      - "[toggle_sort]"
+
+  sort_order:
+    material: COMPARATOR
+    name: "&#54A0F4▶ Порядок: &e{sort_order}"
+    slot: 48
+    lore:
+      - ""
+      - "&fТекущий: &e{sort_order}"
+      - "&7Нажмите чтобы переключить"
+      - "&7↓ убыв. ↔ ↑ возр."
+      - ""
+    left_click_actions:
+      - "[toggle_order]"
+    right_click_actions:
+      - "[toggle_order]"
+
+  next_page:
+    material: ARROW
+    name: "&#54A0F4▶ Следующая страница"
+    slot: 51
+    lore:
+      - ""
+      - "&fНажмите, чтобы перейти"
+      - "&fна следующую страницу"
+      - ""
+    left_click_actions:
+      - "[next_page]"
+    right_click_actions:
+      - "[next_page]"
+
+  decorate:
+    material: GRAY_STAINED_GLASS_PANE
+    name: " "
+    slots:
+      - 45-46
+      - 52-53

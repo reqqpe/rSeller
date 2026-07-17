@@ -5,21 +5,23 @@ import my.reqqpe.rseller.cache.PlayerDataCache;
 import my.reqqpe.rseller.configs.MigrateConfig;
 import my.reqqpe.rseller.configs.impl.MessageConfig;
 import my.reqqpe.rseller.models.PlayerData;
-import my.reqqpe.rseller.database.repositories.PlayerRepository;
 import my.reqqpe.rseller.events.PointsUpdateEvent;
 import my.reqqpe.rseller.managers.MenuManager;
-import my.reqqpe.rseller.menu.AutoSellMenu;
-import my.reqqpe.rseller.menu.MainMenu;
-import my.reqqpe.rseller.menu.SellMenu;
+import my.reqqpe.rseller.menu.SellLogMenu;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
-import my.reqqpe.rseller.utils.HeadUtil;import org.bukkit.Bukkit;
+import my.reqqpe.rseller.utils.HeadUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.UUID;
 
 public class SellAdminCommand implements CommandExecutor {
 
@@ -43,6 +45,95 @@ public class SellAdminCommand implements CommandExecutor {
             commandSender.sendMessage(Colorizer.color(msg.getNoArguments()));
             return true;
         }
+        if (args[0].equalsIgnoreCase("logs")) {
+            if (!(commandSender instanceof Player viewer)) {
+                commandSender.sendMessage(Colorizer.color(msg.getOnlyPlayer()));
+                return true;
+            }
+
+            if (plugin.getSellLogRepository() == null) {
+                viewer.sendMessage(Colorizer.color("&cЛоггирование продаж не включено."));
+                return true;
+            }
+
+            UUID targetUuid = null;
+            String targetName = "Все игроки";
+            long fromEpoch = -1;
+            long toEpoch = -1;
+            SellLogMenu.SortField sortField = SellLogMenu.SortField.DATE;
+            SellLogMenu.SortOrder sortOrder = SellLogMenu.SortOrder.DESC;
+
+            for (int i = 1; i < args.length; i++) {
+                String arg = args[i];
+
+                if (arg.toLowerCase().startsWith("player:")) {
+                    String name = arg.substring("player:".length());
+                    if (name.equalsIgnoreCase("me")) {
+                        targetUuid = viewer.getUniqueId();
+                        targetName = viewer.getName();
+                    } else {
+                        @SuppressWarnings("deprecation")
+                        org.bukkit.OfflinePlayer op = Bukkit.getOfflinePlayer(name);
+                        if (!op.hasPlayedBefore() && !op.isOnline()) {
+                            viewer.sendMessage(Colorizer.color(msg.getNotFoundPlayer()));
+                            return true;
+                        }
+                        targetUuid = op.getUniqueId();
+                        targetName = op.getName() != null ? op.getName() : name;
+                    }
+
+                } else if (arg.toLowerCase().startsWith("from:")) {
+                    String dateStr = arg.substring("from:".length());
+                    try {
+                        fromEpoch = LocalDate
+                                .parse(dateStr, SellLogMenu.INPUT_DATE_FMT)
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toEpochSecond();
+                    } catch (Exception ex) {
+                        viewer.sendMessage(Colorizer.color("&cНеверный формат даты &e" + dateStr + "&c. Используйте: &eдд.мм.гггг"));
+                        return true;
+                    }
+
+                } else if (arg.toLowerCase().startsWith("to:")) {
+                    String dateStr = arg.substring("to:".length());
+                    try {
+                        toEpoch = LocalDate
+                                .parse(dateStr, SellLogMenu.INPUT_DATE_FMT)
+                                .atTime(23, 59, 59)
+                                .atZone(ZoneId.systemDefault())
+                                .toEpochSecond();
+                    } catch (Exception ex) {
+                        viewer.sendMessage(Colorizer.color("&cНеверный формат даты &e" + dateStr + "&c. Используйте: &eдд.мм.гггг"));
+                        return true;
+                    }
+
+                } else if (arg.toLowerCase().startsWith("sort:")) {
+                    sortField = SellLogMenu.SortField.from(arg.substring("sort:".length()));
+
+                } else if (arg.toLowerCase().startsWith("order:")) {
+                    sortOrder = SellLogMenu.SortOrder.from(arg.substring("order:".length()));
+                }
+            }
+
+            SellLogMenu logMenu = (SellLogMenu) MenuManager.getMenu("sellLogGUI");
+            if (logMenu == null) {
+                viewer.sendMessage(Colorizer.color("&cМеню логов не зарегистрировано."));
+                return true;
+            }
+
+            SellLogMenu.DateFilter filter = (fromEpoch != -1 || toEpoch != -1)
+                    ? new SellLogMenu.DateFilter(fromEpoch, toEpoch)
+                    : null;
+
+            if (targetUuid == null) {
+                // режим «все логи»
+                logMenu.openForAll(viewer, targetName, filter, sortField, sortOrder);
+            } else {
+                logMenu.openFor(viewer, targetUuid, targetName, filter, sortField, sortOrder);
+            }
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("migrate")) {
 
             if (commandSender instanceof Player) {
@@ -248,6 +339,7 @@ public class SellAdminCommand implements CommandExecutor {
         HeadUtil.clearCache();
         plugin.getAutoSellGUIConfig().reload();
         plugin.getAllSellGUIConfig().reload();
+        plugin.getSellLogGUIConfig().reload();
 
         plugin.loadMenus();
     }

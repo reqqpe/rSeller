@@ -4,7 +4,6 @@ import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.configs.CustomConfig;
 
 import lombok.Getter;
-import my.reqqpe.rseller.Main;
 
 @Getter
 public class MessageConfig extends CustomConfig {
@@ -24,6 +23,7 @@ public class MessageConfig extends CustomConfig {
     private String updatePointsTarget;
 
     private String noSellItems;
+    private String notEnoughSellItems;
     private String sellItems;
     private String autoSell;
     private String autoSellTask;
@@ -100,6 +100,7 @@ public class MessageConfig extends CustomConfig {
         updatePointsTarget = getString("update-points-target", "");
 
         noSellItems = getString("no-sell-items", "");
+        notEnoughSellItems = getString("not-enough-sell-items", "");
         sellItems = getString("sell-items", "");
         autoSell = getString("auto-sell", "");
         autoSellTask = getString("auto-sell-task", "");
