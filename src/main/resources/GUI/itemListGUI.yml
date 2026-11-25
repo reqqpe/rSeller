@@ -5,6 +5,20 @@ special-slots:
   - 0-44
 
 items:
+  add_item:
+    material: NETHER_STAR
+    name: "&#54A0F4▶ Добавить предмет"
+    slot: 47
+    lore:
+      - ""
+      - "&fВозьмите предмет в руку"
+      - "&fи нажмите, чтобы добавить его"
+      - ""
+    left_click_actions:
+      - '[add_item]'
+    right_click_actions:
+      - '[add_item]'
+
   prev_page:
     material: ARROW
     name: "&#54A0F4▶ Предыдущая страница"
@@ -46,5 +60,6 @@ items:
     material: GRAY_STAINED_GLASS_PANE
     name: ""
     slots:
-      - 46-48
+      - 46-46
+      - 48-48
       - 50-52

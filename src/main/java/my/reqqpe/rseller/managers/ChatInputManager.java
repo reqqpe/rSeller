@@ -16,11 +16,9 @@ import java.util.function.Consumer;
 public class ChatInputManager implements Listener {
 
     private static class PendingInput {
-        final String field;
-        final Consumer<Double> callback;
+        final Consumer<String> callback;
 
-        PendingInput(String field, Consumer<Double> callback) {
-            this.field = field;
+        PendingInput(Consumer<String> callback) {
             this.callback = callback;
         }
     }
@@ -28,7 +26,32 @@ public class ChatInputManager implements Listener {
     private final Map<UUID, PendingInput> pending = new HashMap<>();
 
     public void awaitDouble(Player player, String field, Consumer<Double> callback) {
-        pending.put(player.getUniqueId(), new PendingInput(field, callback));
+        pending.put(player.getUniqueId(), new PendingInput(raw -> {
+            if (raw.equalsIgnoreCase("cancel")) {
+                player.sendMessage(Colorizer.color("&cВвод отменён."));
+                return;
+            }
+            try {
+                double value = Double.parseDouble(raw);
+                if (value < 0) {
+                    player.sendMessage(Colorizer.color("&cЗначение не может быть отрицательным."));
+                    return;
+                }
+                callback.accept(value);
+            } catch (NumberFormatException ex) {
+                player.sendMessage(Colorizer.color("&cНеверный формат числа: &e" + raw));
+            }
+        }));
+    }
+
+    public void awaitString(Player player, Consumer<String> callback) {
+        pending.put(player.getUniqueId(), new PendingInput(raw -> {
+            if (raw.equalsIgnoreCase("cancel")) {
+                player.sendMessage(Colorizer.color("&cВвод отменён."));
+                return;
+            }
+            callback.accept(raw);
+        }));
     }
 
     public void cancel(Player player) {
@@ -42,24 +65,7 @@ public class ChatInputManager implements Listener {
         if (input == null) return;
 
         e.setCancelled(true);
-
-        String msg = e.getMessage().trim();
-
-        if (msg.equalsIgnoreCase("cancel")) {
-            player.sendMessage(Colorizer.color("&cВвод отменён."));
-            return;
-        }
-
-        try {
-            double value = Double.parseDouble(msg);
-            if (value < 0) {
-                player.sendMessage(Colorizer.color("&cЗначение не может быть отрицательным."));
-                return;
-            }
-            input.callback.accept(value);
-        } catch (NumberFormatException ex) {
-            player.sendMessage(Colorizer.color("&cНеверный формат числа: &e" + msg));
-        }
+        input.callback.accept(e.getMessage().trim());
     }
 
     @EventHandler

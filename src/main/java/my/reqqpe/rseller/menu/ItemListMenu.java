@@ -154,9 +154,56 @@ public class ItemListMenu extends AbstractMenu implements Listener {
             changePage(player, 1);
         } else if (a.equals("[prev_page]")) {
             changePage(player, -1);
+        } else if (a.equals("[add_item]")) {
+            startAddItem(player);
         } else {
             runMainActions(player, action);
         }
+    }
+
+    private void startAddItem(Player player) {
+        ItemStack hand = player.getInventory().getItemInMainHand();
+        if (hand.getType().isAir()) {
+            player.sendMessage(Colorizer.color("&cВозьмите предмет в руку и повторите."));
+            return;
+        }
+
+        player.closeInventory();
+        player.sendMessage(Colorizer.color("&#54A0F4Введите ID для нового предмета &7(cancel — отмена)&f:"));
+
+        plugin.getChatInputManager().awaitString(player, id -> {
+            if (!id.matches("[a-zA-Z0-9_]+")) {
+                player.sendMessage(Colorizer.color("&cID может содержать только буквы, цифры и подчёркивания."));
+                return;
+            }
+
+            if (plugin.getItemManager().getById(id) != null) {
+                player.sendMessage(Colorizer.color("&cПредмет с ID &e" + id + " &cуже существует."));
+                return;
+            }
+
+            player.sendMessage(Colorizer.color("&#54A0F4Введите цену &7(0 — без цены)&f:"));
+
+            plugin.getChatInputManager().awaitDouble(player, "price", price -> {
+                player.sendMessage(Colorizer.color("&#54A0F4Введите количество очков &7(0 — без очков)&f:"));
+
+                plugin.getChatInputManager().awaitDouble(player, "points", points -> {
+                    Item item = Item.fromItemStack(id, hand, price, points, plugin);
+                    if (item == null) {
+                        player.sendMessage(Colorizer.color("&cОшибка при создании предмета, проверьте консоль."));
+                        return;
+                    }
+
+                    plugin.getItemStorage().save(item);
+                    plugin.getItemsConfig().reload();
+                    plugin.getItemManager().reload();
+
+                    player.sendMessage(Colorizer.color("&aПредмет &e" + id + " &aдобавлен. Цена: &f" + price + " &aОчки: &f" + points));
+
+                    org.bukkit.Bukkit.getScheduler().runTask(plugin, () -> openMenu(player));
+                });
+            });
+        });
     }
 
     private void changePage(Player player, int dir) {
