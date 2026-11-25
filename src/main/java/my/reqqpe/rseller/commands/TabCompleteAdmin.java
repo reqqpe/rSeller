@@ -103,8 +103,11 @@ public class TabCompleteAdmin implements TabCompleter {
             if (args.length == 4) return List.of("10", "50", "100", "500");
             if (args.length == 5) return List.of("0", "0.5", "1");
             if (args.length == 6) return List.of("0", "1", "5");
-            if (args.length == 7) return Stream.of("overwrite:false", "overwrite:true")
+            if (args.length == 7) return Stream.of("round", "overwrite:false", "overwrite:true")
                     .filter(s -> s.startsWith(args[6].toLowerCase()))
+                    .collect(Collectors.toList());
+            if (args.length == 8) return Stream.of("overwrite:false", "overwrite:true")
+                    .filter(s -> s.startsWith(args[7].toLowerCase()))
                     .collect(Collectors.toList());
         }
 

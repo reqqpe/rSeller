@@ -337,7 +337,7 @@ public class SellAdminCommand implements CommandExecutor {
         }
         if (args[0].equalsIgnoreCase("generate")) {
             if (args.length < 4) {
-                commandSender.sendMessage(Colorizer.color("&cИспользование: /rseller generate <категория> <minPrice> <maxPrice> [minPoints] [maxPoints] [overwrite:true/false]"));
+                commandSender.sendMessage(Colorizer.color("&cИспользование: /rseller generate <категория> <minPrice> <maxPrice> [minPoints] [maxPoints] [round] [overwrite:true/false]"));
                 commandSender.sendMessage(Colorizer.color("&7Категории: &e" + String.join("&7, &e", MaterialCategory.NAMES)));
                 return true;
             }
@@ -365,20 +365,30 @@ public class SellAdminCommand implements CommandExecutor {
 
             double minPoints = 0, maxPoints = 0;
             boolean overwrite = false;
+            boolean round = false;
+            boolean minPointsParsed = false;
 
             for (int i = 4; i < args.length; i++) {
                 String arg = args[i];
                 if (arg.toLowerCase().startsWith("overwrite:")) {
                     overwrite = Boolean.parseBoolean(arg.substring("overwrite:".length()));
-                } else if (minPoints == 0 && maxPoints == 0) {
+                } else if (arg.equalsIgnoreCase("round")) {
+                    round = true;
+                } else if (!minPointsParsed) {
                     try {
                         minPoints = Double.parseDouble(arg);
+                        minPointsParsed = true;
                     } catch (NumberFormatException ignored) {}
                 } else {
                     try {
                         maxPoints = Double.parseDouble(arg);
                     } catch (NumberFormatException ignored) {}
                 }
+            }
+
+            if (minPoints < 0 || maxPoints < 0) {
+                commandSender.sendMessage(Colorizer.color("&cminPoints и maxPoints должны быть >= 0!"));
+                return true;
             }
 
             if (minPoints > maxPoints) {
@@ -391,12 +401,16 @@ public class SellAdminCommand implements CommandExecutor {
 
             for (Material material : category.materials()) {
                 String id = material.name();
-                double price = minPrice == maxPrice
+                double rawPrice = minPrice == maxPrice
                         ? minPrice
-                        : Math.round((minPrice + (maxPrice - minPrice) * random.nextDouble()) * 100.0) / 100.0;
-                double points = minPoints == maxPoints
+                        : minPrice + (maxPrice - minPrice) * random.nextDouble();
+                double rawPoints = minPoints == maxPoints
                         ? minPoints
-                        : Math.round((minPoints + (maxPoints - minPoints) * random.nextDouble()) * 100.0) / 100.0;
+                        : minPoints + (maxPoints - minPoints) * random.nextDouble();
+
+                double price = round ? Math.round(rawPrice) : Math.round(rawPrice * 100.0) / 100.0;
+                double points = round ? Math.round(rawPoints) : Math.round(rawPoints * 100.0) / 100.0;
+
                 toSave.add(new Item(id, material, null, price, points));
             }
 
@@ -410,6 +424,7 @@ public class SellAdminCommand implements CommandExecutor {
             commandSender.sendMessage(Colorizer.color(
                     "&aГенерация завершена. Добавлено предметов: &e" + saved + "&a из &e" + toSave.size() +
                     "&a в категории &e" + category.name().toLowerCase() +
+                    (round ? " &7(round: on)" : "") +
                     (overwrite ? " &7(overwrite: on)" : " &7(overwrite: off)")
             ));
             return true;
