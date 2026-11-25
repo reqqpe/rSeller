@@ -29,7 +29,7 @@ public class ItemsConfig extends CustomConfig {
     }
 
     private SearchItemSettings loadSettings() {
-        var sec = config.getConfigurationSection("settings-check");
+        ConfigurationSection sec = config.getConfigurationSection("settings-check");
         if (sec == null) return new SearchItemSettings(true, true, true, true, false);
 
         return new SearchItemSettings(
@@ -42,37 +42,23 @@ public class ItemsConfig extends CustomConfig {
     }
 
     private void loadItems() {
-        var itemsSec = config.getConfigurationSection("items");
-        var customSec = config.getConfigurationSection("custom-items");
-
+        ConfigurationSection itemsSec = config.getConfigurationSection("items");
         if (itemsSec == null) return;
 
         for (String id : itemsSec.getKeys(false)) {
-            double price = itemsSec.getDouble(id + ".price");
-            double points = itemsSec.getDouble(id + ".points");
+            ConfigurationSection sec = itemsSec.getConfigurationSection(id);
+            if (sec == null) continue;
 
-            Material material = Material.getMaterial(id);
-            ItemData data = null;
-
-            if (material != null) {
-                String name = itemsSec.getString(id + ".name");
-                if (name != null && !name.isEmpty()) {
-                    data = new ItemData(name, List.of(), null, Map.of(), Map.of());
-                }
-            } else if (customSec != null) {
-                var c = customSec.getConfigurationSection(id);
-                if (c == null) continue;
-
-                material = Material.getMaterial(c.getString("material", ""));
-                if (material == null) continue;
-
-                var dataSec = c.getConfigurationSection("item-data");
-                if (dataSec != null) {
-                    data = loadItemData(dataSec);
-                }
+            String materialName = sec.getString("material", id);
+            Material material = Material.getMaterial(materialName.toUpperCase());
+            if (material == null) {
+                plugin.getLogger().warning("[Items] Unknown material '" + materialName + "' for item '" + id + "', skipping.");
+                continue;
             }
 
-            if (material == null) continue;
+            double price = sec.getDouble("price", 0);
+            double points = sec.getDouble("points", 0);
+            ItemData data = loadItemData(sec);
 
             items.add(new Item(id, material, data, price, points));
         }
@@ -81,18 +67,33 @@ public class ItemsConfig extends CustomConfig {
     private ItemData loadItemData(ConfigurationSection sec) {
         String name = sec.getString("name");
         List<String> lore = sec.getStringList("lore");
-        Integer model = sec.contains("model-data") ? sec.getInt("model-data") : null;
+        Integer modelData = sec.contains("model-data") ? sec.getInt("model-data") : null;
 
-        Map<Enchantment, Integer> ench = new HashMap<>();
-        var enchSec = sec.getConfigurationSection("enchantments");
+        Map<Enchantment, Integer> enchantments = new HashMap<>();
+        ConfigurationSection enchSec = sec.getConfigurationSection("enchantments");
         if (enchSec != null) {
-            for (String k : enchSec.getKeys(false)) {
-                Enchantment e = Enchantment.getByKey(NamespacedKey.minecraft(k));
-                if (e != null) ench.put(e, enchSec.getInt(k));
+            for (String key : enchSec.getKeys(false)) {
+                Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(key));
+                if (enchantment != null) enchantments.put(enchantment, enchSec.getInt(key));
             }
         }
 
-        return new ItemData(name, lore, model, ench, new HashMap<>());
+        Map<NamespacedKey, Object> nbtTags = new HashMap<>();
+        ConfigurationSection nbtSec = sec.getConfigurationSection("nbt-tags");
+        if (nbtSec != null) {
+            for (String key : nbtSec.getKeys(false)) {
+                NamespacedKey nsKey = NamespacedKey.fromString(key);
+                if (nsKey != null) nbtTags.put(nsKey, nbtSec.get(key));
+            }
+        }
+
+        boolean hasData = (name != null && !name.isEmpty())
+                || !lore.isEmpty()
+                || modelData != null
+                || !enchantments.isEmpty()
+                || !nbtTags.isEmpty();
+
+        return hasData ? new ItemData(name, lore, modelData, enchantments, nbtTags) : null;
     }
 
     public List<Item> getItems() {
