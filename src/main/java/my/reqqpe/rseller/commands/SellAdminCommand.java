@@ -9,9 +9,11 @@ import my.reqqpe.rseller.events.PointsUpdateEvent;
 import my.reqqpe.rseller.managers.MenuManager;
 import my.reqqpe.rseller.menu.SellLogMenu;
 import my.reqqpe.rseller.models.item.Item;
+import my.reqqpe.rseller.models.item.MaterialCategory;
 import my.reqqpe.rseller.utils.Colorizer;
 import my.reqqpe.rseller.utils.HeadUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,6 +23,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class SellAdminCommand implements CommandExecutor {
@@ -330,6 +335,86 @@ public class SellAdminCommand implements CommandExecutor {
             }
             Bukkit.getPluginManager().callEvent(new PointsUpdateEvent(target, amount, true, action));
         }
+        if (args[0].equalsIgnoreCase("generate")) {
+            if (args.length < 4) {
+                commandSender.sendMessage(Colorizer.color("&cИспользование: /rseller generate <категория> <minPrice> <maxPrice> [minPoints] [maxPoints] [overwrite:true/false]"));
+                commandSender.sendMessage(Colorizer.color("&7Категории: &e" + String.join("&7, &e", MaterialCategory.NAMES)));
+                return true;
+            }
+
+            MaterialCategory category = MaterialCategory.from(args[1]);
+            if (category == null) {
+                commandSender.sendMessage(Colorizer.color("&cНеизвестная категория: &e" + args[1]));
+                commandSender.sendMessage(Colorizer.color("&7Доступные: &e" + String.join("&7, &e", MaterialCategory.NAMES)));
+                return true;
+            }
+
+            double minPrice, maxPrice;
+            try {
+                minPrice = Double.parseDouble(args[2]);
+                maxPrice = Double.parseDouble(args[3]);
+            } catch (NumberFormatException e) {
+                commandSender.sendMessage(Colorizer.color("&cНеверный формат цены!"));
+                return true;
+            }
+
+            if (minPrice < 0 || maxPrice < 0 || minPrice > maxPrice) {
+                commandSender.sendMessage(Colorizer.color("&cminPrice должна быть >= 0 и <= maxPrice!"));
+                return true;
+            }
+
+            double minPoints = 0, maxPoints = 0;
+            boolean overwrite = false;
+
+            for (int i = 4; i < args.length; i++) {
+                String arg = args[i];
+                if (arg.toLowerCase().startsWith("overwrite:")) {
+                    overwrite = Boolean.parseBoolean(arg.substring("overwrite:".length()));
+                } else if (minPoints == 0 && maxPoints == 0) {
+                    try {
+                        minPoints = Double.parseDouble(arg);
+                    } catch (NumberFormatException ignored) {}
+                } else {
+                    try {
+                        maxPoints = Double.parseDouble(arg);
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+
+            if (minPoints > maxPoints) {
+                commandSender.sendMessage(Colorizer.color("&cminPoints должна быть <= maxPoints!"));
+                return true;
+            }
+
+            Random random = new Random();
+            List<Item> toSave = new ArrayList<>();
+
+            for (Material material : category.materials()) {
+                String id = material.name();
+                double price = minPrice == maxPrice
+                        ? minPrice
+                        : Math.round((minPrice + (maxPrice - minPrice) * random.nextDouble()) * 100.0) / 100.0;
+                double points = minPoints == maxPoints
+                        ? minPoints
+                        : Math.round((minPoints + (maxPoints - minPoints) * random.nextDouble()) * 100.0) / 100.0;
+                toSave.add(new Item(id, material, null, price, points));
+            }
+
+            int saved = plugin.getItemStorage().saveBatch(toSave, overwrite);
+
+            if (saved > 0) {
+                plugin.getItemsConfig().reload();
+                plugin.getItemManager().reload();
+            }
+
+            commandSender.sendMessage(Colorizer.color(
+                    "&aГенерация завершена. Добавлено предметов: &e" + saved + "&a из &e" + toSave.size() +
+                    "&a в категории &e" + category.name().toLowerCase() +
+                    (overwrite ? " &7(overwrite: on)" : " &7(overwrite: off)")
+            ));
+            return true;
+        }
+
         return true;
     }
 

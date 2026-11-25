@@ -7,6 +7,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 
+import java.util.List;
 import java.util.Map;
 
 public class ItemStorage {
@@ -51,6 +52,27 @@ public class ItemStorage {
         plugin.getItemsConfig().saveConfig();
         plugin.getLogger().info(plugin.getMessageConfig().getConsoleItemSaved().replace("{id}", item.id()));
         return true;
+    }
+
+    public int saveBatch(List<Item> items, boolean overwrite) {
+        FileConfiguration config = plugin.getItemsConfig().getConfig();
+        int count = 0;
+
+        for (Item item : items) {
+            String base = "items." + item.id() + ".";
+            if (!overwrite && config.contains("items." + item.id())) continue;
+
+            config.set(base + "material", item.material().name());
+            config.set(base + "price", item.price());
+            config.set(base + "points", item.points());
+            count++;
+        }
+
+        if (count > 0) {
+            plugin.getItemsConfig().saveConfig();
+        }
+
+        return count;
     }
 
     public boolean delete(String id) {

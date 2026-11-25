@@ -8,6 +8,8 @@ import org.bukkit.entity.HumanEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import my.reqqpe.rseller.models.item.MaterialCategory;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ public class TabCompleteAdmin implements TabCompleter {
         }
 
         if (args.length == 1) {
-            return Stream.of("reload", "points", "customitem", "logs", "migrate")
+            return Stream.of("reload", "points", "customitem", "logs", "migrate", "generate")
                     .filter(arg -> arg.toLowerCase().startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }
@@ -89,6 +91,21 @@ public class TabCompleteAdmin implements TabCompleter {
                         .filter(s -> s.toLowerCase().startsWith(current.toLowerCase()))
                         .collect(Collectors.toList());
             }
+        }
+
+        if (args[0].equalsIgnoreCase("generate")) {
+            if (args.length == 2) {
+                return MaterialCategory.NAMES.stream()
+                        .filter(c -> c.startsWith(args[1].toLowerCase()))
+                        .collect(Collectors.toList());
+            }
+            if (args.length == 3) return List.of("1", "10", "50", "100");
+            if (args.length == 4) return List.of("10", "50", "100", "500");
+            if (args.length == 5) return List.of("0", "0.5", "1");
+            if (args.length == 6) return List.of("0", "1", "5");
+            if (args.length == 7) return Stream.of("overwrite:false", "overwrite:true")
+                    .filter(s -> s.startsWith(args[6].toLowerCase()))
+                    .collect(Collectors.toList());
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("reload")) {
