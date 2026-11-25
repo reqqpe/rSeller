@@ -65,10 +65,22 @@ public class DataBaseManager {
 
                 String path = plugin.getDataFolder() + "/data.db";
                 hc.setJdbcUrl("jdbc:sqlite:" + path);
+
+                // SQLite не поддерживает параллельный доступ — фиксируем один поток
+                hc.setMaximumPoolSize(1);
+                hc.setMinimumIdle(1);
+
+                // WAL-режим: лучшая производительность и устойчивость к блокировкам
+                hc.addDataSourceProperty("journal_mode", "WAL");
+                hc.addDataSourceProperty("synchronous", "NORMAL");
             }
         }
 
-        hc.setMaximumPoolSize(config.getMaxPoolSize());
+        // Для MySQL и PostgreSQL используем значение из конфига
+        if (dbType != DataBaseType.SQLITE) {
+            hc.setMaximumPoolSize(config.getMaxPoolSize());
+        }
+
         hc.setIdleTimeout(config.getIdleTimeout());
         hc.setConnectionTimeout(config.getConnectionTimeout());
         hc.setKeepaliveTime(config.getKeepAlive());

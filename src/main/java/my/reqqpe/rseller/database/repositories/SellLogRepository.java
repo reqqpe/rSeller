@@ -177,12 +177,19 @@ public class SellLogRepository {
              PreparedStatement ps = c.prepareStatement(sql)) {
 
             c.setAutoCommit(false);
-            for (SellLog log : logs) {
-                bindLog(ps, log);
-                ps.addBatch();
+            try {
+                for (SellLog log : logs) {
+                    bindLog(ps, log);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+                c.commit();
+            } catch (SQLException e) {
+                c.rollback();
+                throw e;
+            } finally {
+                c.setAutoCommit(true);
             }
-            ps.executeBatch();
-            c.commit();
 
         } catch (SQLException e) {
             log("sell-log-batch-insert", e);
