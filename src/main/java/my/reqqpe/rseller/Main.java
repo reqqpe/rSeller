@@ -280,8 +280,8 @@ public final class Main extends JavaPlugin {
                 return true;
             }
             case "COINSENGINE": {
-                if (getServer().getPluginManager().getPlugin("CoinsEngine") == null) {
-                    getLogger().severe(getMessageConfig().getConsoleEconomyNotFound().replace("{type}", "CoinsEngine"));
+                if (getServer().getPluginManager().getPlugin("ExcellentEconomy") == null) {
+                    getLogger().severe(getMessageConfig().getConsoleEconomyNotFound().replace("{type}", "ExcellentEconomy"));
                     getServer().getPluginManager().disablePlugin(this);
                     return false;
                 }

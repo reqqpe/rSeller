@@ -4,7 +4,7 @@ main: my.reqqpe.rseller.Main
 api-version: '1.16'
 authors: [reqqpe]
 depend: [PlaceholderAPI]
-softdepend: [NBTAPI, Vault, CoinsEngine, PlayerPoints]
+softdepend: [NBTAPI, Vault, ExcellentEconomy, PlayerPoints]
 commands:
   sell:
     description: Открыть меню скупщика

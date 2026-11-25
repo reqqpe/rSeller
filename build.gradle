@@ -26,6 +26,9 @@ repositories {
 
     maven {
         url = uri('https://repo.bstats.org/repository/public/')
+        content {
+            includeGroup 'org.bstats'
+        }
     }
 
     maven {
@@ -51,19 +54,24 @@ dependencies {
     compileOnly libs.com.zaxxer.hikaricp
     compileOnly("com.mysql:mysql-connector-j:9.4.0")
     compileOnly("org.postgresql:postgresql:42.7.8")
-    compileOnly("org.projectlombok:lombok:1.18.46")
-    annotationProcessor("org.projectlombok:lombok:1.18.46")
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
     compileOnly libs.com.github.milkbowl.vaultapi
     compileOnly libs.de.tr7zw.item.nbt.api.plugin
     compileOnly libs.it.unimi.dsi.fastutil
-    compileOnly "su.nightexpress.coinsengine:CoinsEngine:2.7.0"
+    compileOnly libs.su.nightexpress.excellenteconomy
     compileOnly 'org.black_ixx:playerpoints:3.3.4'
 }
 
 group = 'my.reqqpe'
 version = '1.15.0'
 description = 'rSeller'
-java.sourceCompatibility = JavaVersion.VERSION_16
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
