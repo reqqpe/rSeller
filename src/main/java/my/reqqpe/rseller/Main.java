@@ -22,6 +22,8 @@ import my.reqqpe.rseller.listeners.MenuListener;
 import my.reqqpe.rseller.listeners.PlayerPickupItem;
 import my.reqqpe.rseller.managers.*;
 import my.reqqpe.rseller.menu.AutoSellMenu;
+import my.reqqpe.rseller.menu.ItemEditMenu;
+import my.reqqpe.rseller.menu.ItemListMenu;
 import my.reqqpe.rseller.menu.MainMenu;
 import my.reqqpe.rseller.menu.SellLogMenu;
 import my.reqqpe.rseller.menu.SellMenu;
@@ -75,6 +77,10 @@ public final class Main extends JavaPlugin {
     @Getter
     private CustomConfig sellLogGUIConfig;
     @Getter
+    private CustomConfig itemListGUIConfig;
+    @Getter
+    private CustomConfig itemEditGUIConfig;
+    @Getter
     private HashMap<String , CustomConfig> menusConfigs = new HashMap<>();
 
     @Getter
@@ -92,6 +98,9 @@ public final class Main extends JavaPlugin {
 
     @Getter
     private EconomyProvider economy;
+
+    @Getter
+    private ChatInputManager chatInputManager;
 
     private DataBaseManager dataBaseManager;
 
@@ -131,6 +140,7 @@ public final class Main extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new MenuListener(this), this);
         pm.registerEvents(new DatabaseListener(this,playerRepository, autoSellManager), this);
+        pm.registerEvents(chatInputManager, this);
 
         getCommand("sell").setExecutor(new SellCommand(this));
 
@@ -196,6 +206,16 @@ public final class Main extends JavaPlugin {
         };
         sellLogGUIConfig.setup();
 
+        itemListGUIConfig = new CustomConfig(this, "GUI/itemListGUI.yml") {
+            @Override protected void load() {}
+        };
+        itemListGUIConfig.setup();
+
+        itemEditGUIConfig = new CustomConfig(this, "GUI/itemEditGUI.yml") {
+            @Override protected void load() {}
+        };
+        itemEditGUIConfig.setup();
+
         itemStorage = new ItemStorage(this);
 
         dataBaseManager = new DataBaseManager(this, dataBaseConfig);
@@ -255,6 +275,8 @@ public final class Main extends JavaPlugin {
         MenuManager.registerMenu("autoSellGUI", new AutoSellMenu(this));
         SellLogMenu sellLogMenu = new SellLogMenu(this);
         MenuManager.registerMenu("sellLogGUI", sellLogMenu);
+        MenuManager.registerMenu("itemListGUI", new ItemListMenu(this));
+        MenuManager.registerMenu("itemEditGUI", new ItemEditMenu(this));
 
         for (String name : mainConfig.getMenusIds()) {
             CustomConfig customConfig = new CustomConfig(this, "GUI/" + name +".yml") {

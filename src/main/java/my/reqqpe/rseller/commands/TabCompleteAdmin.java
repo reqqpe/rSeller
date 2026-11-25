@@ -29,7 +29,7 @@ public class TabCompleteAdmin implements TabCompleter {
         }
 
         if (args.length == 1) {
-            return Stream.of("reload", "points", "customitem", "logs", "migrate", "generate")
+            return Stream.of("reload", "points", "customitem", "logs", "migrate", "generate", "items")
                     .filter(arg -> arg.toLowerCase().startsWith(args[0].toLowerCase()))
                     .collect(Collectors.toList());
         }

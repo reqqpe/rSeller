@@ -1,0 +1,50 @@
+title: "&8Редактор -> Список предметов"
+size: 54
+
+special-slots:
+  - 0-44
+
+items:
+  prev_page:
+    material: ARROW
+    name: "&#54A0F4▶ Предыдущая страница"
+    slot: 45
+    lore:
+      - ""
+      - "&fНажмите, чтобы перейти"
+      - "&fна предыдущую страницу"
+      - ""
+    left_click_actions:
+      - '[prev_page]'
+    right_click_actions:
+      - '[prev_page]'
+
+  next_page:
+    material: ARROW
+    name: "&#54A0F4▶ Следующая страница"
+    slot: 53
+    lore:
+      - ""
+      - "&fНажмите, чтобы перейти"
+      - "&fна следующую страницу"
+      - ""
+    left_click_actions:
+      - '[next_page]'
+    right_click_actions:
+      - '[next_page]'
+
+  page_info:
+    material: PAPER
+    name: "&#54A0F4▶ Страница {page}/{total_pages}"
+    slot: 49
+    lore:
+      - ""
+      - "&7Всего предметов: &f{total_items}"
+      - ""
+
+  decorate:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""
+    slots:
+      - 46-48
+      - 50-52

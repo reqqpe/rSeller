@@ -335,6 +335,21 @@ public class SellAdminCommand implements CommandExecutor {
             }
             Bukkit.getPluginManager().callEvent(new PointsUpdateEvent(target, amount, true, action));
         }
+        if (args[0].equalsIgnoreCase("items")) {
+            if (!(commandSender instanceof Player player)) {
+                commandSender.sendMessage(Colorizer.color(msg.getOnlyPlayer()));
+                return true;
+            }
+            my.reqqpe.rseller.menu.ItemListMenu listMenu =
+                    (my.reqqpe.rseller.menu.ItemListMenu) my.reqqpe.rseller.managers.MenuManager.getMenu("itemListGUI");
+            if (listMenu == null) {
+                player.sendMessage(Colorizer.color("&cМеню редактора не зарегистрировано."));
+                return true;
+            }
+            listMenu.openMenu(player);
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("generate")) {
             if (args.length < 4) {
                 commandSender.sendMessage(Colorizer.color("&cИспользование: /rseller generate <категория> <minPrice> <maxPrice> [minPoints] [maxPoints] [round] [overwrite:true/false]"));
