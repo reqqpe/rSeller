@@ -112,7 +112,7 @@ public class AutoSellMenu extends AbstractMenu implements Listener {
             ItemStack itemStack = item.getItemStack(plugin);
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
-            String itemName = item.getDisplayName(plugin);
+            String itemName = item.getDisplayName();
 
             double price = item.price();
             double points = item.points();

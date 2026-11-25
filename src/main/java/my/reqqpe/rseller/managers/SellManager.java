@@ -265,7 +265,7 @@ public class SellManager {
                     String msg = Colorizer.color(plugin.getMessageConfig().getAutoSell()
                             .replace("{coins}", coinsFormat)
                             .replace("{points}", pointsFormat)
-                            .replace("{item_name}", item.getDisplayName(plugin))
+                            .replace("{item_name}", item.getDisplayName())
                             .replace("{amount}", String.valueOf(amount)));
                     if (msg != null && !msg.isEmpty()) {
                         String sendType = plugin.getMainConfig().getAutosell().getSendType();

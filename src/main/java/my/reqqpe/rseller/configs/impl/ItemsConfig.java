@@ -23,11 +23,8 @@ public class ItemsConfig extends CustomConfig {
 
     @Override
     protected void load() {
-
         items.clear();
-
         searchSettings = loadSettings();
-
         loadItems();
     }
 
@@ -45,22 +42,24 @@ public class ItemsConfig extends CustomConfig {
     }
 
     private void loadItems() {
-
         var itemsSec = config.getConfigurationSection("items");
         var customSec = config.getConfigurationSection("custom-items");
 
         if (itemsSec == null) return;
 
         for (String id : itemsSec.getKeys(false)) {
-
             double price = itemsSec.getDouble(id + ".price");
             double points = itemsSec.getDouble(id + ".points");
 
             Material material = Material.getMaterial(id);
             ItemData data = null;
 
-            if (material == null && customSec != null) {
-
+            if (material != null) {
+                String name = itemsSec.getString(id + ".name");
+                if (name != null && !name.isEmpty()) {
+                    data = new ItemData(name, List.of(), null, Map.of(), Map.of());
+                }
+            } else if (customSec != null) {
                 var c = customSec.getConfigurationSection(id);
                 if (c == null) continue;
 
@@ -80,18 +79,12 @@ public class ItemsConfig extends CustomConfig {
     }
 
     private ItemData loadItemData(ConfigurationSection sec) {
-
         String name = sec.getString("name");
         List<String> lore = sec.getStringList("lore");
-        Integer model = null;
-
-        if (sec.contains("model-data")) {
-            model = sec.getInt("model-data");
-        }
+        Integer model = sec.contains("model-data") ? sec.getInt("model-data") : null;
 
         Map<Enchantment, Integer> ench = new HashMap<>();
         var enchSec = sec.getConfigurationSection("enchantments");
-
         if (enchSec != null) {
             for (String k : enchSec.getKeys(false)) {
                 Enchantment e = Enchantment.getByKey(NamespacedKey.minecraft(k));
@@ -102,7 +95,6 @@ public class ItemsConfig extends CustomConfig {
         return new ItemData(name, lore, model, ench, new HashMap<>());
     }
 
-    // GETTERS
     public List<Item> getItems() {
         return items;
     }

@@ -19,19 +19,13 @@ import static de.tr7zw.nbtapi.NBTType.NBTTagDouble;
 
 
 public record Item(String id, Material material, ItemData itemData, double price, double points) {
-    // Знаю кастыльно и лучше сделать это загружаемым в ItemData, но мне лень
-    public String getDisplayName(Main plugin) {
+
+    public String getDisplayName() {
         if (itemData != null && itemData.name() != null && !itemData.name().isEmpty()) {
             return itemData.name();
         }
-        String configName = plugin.getItemsConfig().getConfig().getString("items." + id + ".name");
-        if (configName != null && !configName.isEmpty()) {
-            return configName;
-        }
-
         return material.name().toLowerCase().replace("_", " ");
     }
-
 
     public ItemStack getItemStack(Main plugin) {
         Logger logger = plugin.getLogger();
