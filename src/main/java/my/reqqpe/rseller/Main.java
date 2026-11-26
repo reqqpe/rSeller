@@ -3,6 +3,7 @@ package my.reqqpe.rseller;
 import my.reqqpe.rseller.api.rSeller;
 import lombok.Getter;
 import my.reqqpe.rseller.commands.*;
+import my.reqqpe.rseller.configs.MigrateConfig;
 import my.reqqpe.rseller.configs.CustomConfig;
 import my.reqqpe.rseller.configs.impl.DataBaseConfig;
 import my.reqqpe.rseller.configs.impl.ItemsConfig;
@@ -113,6 +114,7 @@ public final class Main extends JavaPlugin {
         rSeller.init(this);
 
         saveDefaultConfig();
+        new MigrateConfig().migrate(this);
         loadConfigs();
 
         if (!setupEconomy()) return;

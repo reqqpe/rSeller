@@ -2,7 +2,6 @@ package my.reqqpe.rseller.commands;
 
 import my.reqqpe.rseller.Main;
 import my.reqqpe.rseller.cache.PlayerDataCache;
-import my.reqqpe.rseller.configs.MigrateConfig;
 import my.reqqpe.rseller.configs.impl.MessageConfig;
 import my.reqqpe.rseller.models.PlayerData;
 import my.reqqpe.rseller.events.PointsUpdateEvent;
@@ -136,18 +135,6 @@ public class SellAdminCommand implements CommandExecutor {
             } else {
                 logMenu.openFor(viewer, targetUuid, targetName, filter, sortField, sortOrder);
             }
-            return true;
-        }
-
-        if (args[0].equalsIgnoreCase("migrate")) {
-
-            if (commandSender instanceof Player) {
-                commandSender.sendMessage(Colorizer.color(msg.getOnlyConsole()));
-                return true;
-            }
-
-            MigrateConfig migrateConfig = new MigrateConfig();
-            migrateConfig.migrate(plugin);
             return true;
         }
 
