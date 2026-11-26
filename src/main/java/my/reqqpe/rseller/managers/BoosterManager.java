@@ -1,78 +1,65 @@
 package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.Main;
+import my.reqqpe.rseller.configs.BoosterConfig;
 import my.reqqpe.rseller.models.Booster;
-import org.bukkit.configuration.ConfigurationSection;
+import my.reqqpe.rseller.models.PermissionBooster;
+import my.reqqpe.rseller.models.SellSource;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 public class BoosterManager {
     private final Main plugin;
-    private final LevelManager levelManager;
-
-    private final Map<String, Booster> boosters = new HashMap<>();
-
+    private final BoosterConfig boosterConfig;
 
     public BoosterManager(Main plugin) {
         this.plugin = plugin;
-        this.levelManager = plugin.getLevelManager();
-        load();
+        this.boosterConfig = plugin.getBoosterConfig();
     }
 
+    public Booster getMultiplier(Player player, SellSource source) {
+        List<PermissionBooster> activeBoosters = boosterConfig.getBoosters().stream()
+                .filter(b -> b.source().appliesTo(source))
+                .filter(b -> player.hasPermission(b.permission()))
+                .toList();
 
-    public void load() {
-        ConfigurationSection section = plugin.getMainConfig().getConfig().getConfigurationSection("boosters");
+        double coins;
+        double points;
 
-        if (section == null) return;
-
-        boosters.clear();
-
-        for (String key : section.getKeys(false)) {
-            ConfigurationSection boosterSection = section.getConfigurationSection(key);
-            if (boosterSection == null) continue;
-
-            double coin = boosterSection.getDouble("coin-multiplier", 1.0);
-            double point = boosterSection.getDouble("point-multiplier", 1.0);
-
-            boosters.put(key.toLowerCase(), new Booster(coin, point));
-        }
-    }
-
-    public List<Booster> getActiveBoosters(Player player) {
-        List<Booster> active = new ArrayList<>();
-
-        for (Map.Entry<String, Booster> entry : boosters.entrySet()) {
-            String boosterKey = entry.getKey();
-            String permission = "rseller.booster." + boosterKey;
-
-            if (player.hasPermission(permission)) {
-                active.add(entry.getValue());
+        if (boosterConfig.isStackMode(source)) {
+            coins = 1.0;
+            points = 1.0;
+            for (PermissionBooster booster : activeBoosters) {
+                coins += booster.coinMultiplier() - 1.0;
+                points += booster.pointMultiplier() - 1.0;
+            }
+        } else {
+            if (activeBoosters.isEmpty()) {
+                coins = 1.0;
+                points = 1.0;
+            } else {
+                PermissionBooster best = activeBoosters.stream()
+                        .max(Comparator.comparingInt(PermissionBooster::priority)
+                                .thenComparingDouble(PermissionBooster::coinMultiplier))
+                        .orElse(null);
+                coins = best != null ? best.coinMultiplier() : 1.0;
+                points = best != null ? best.pointMultiplier() : 1.0;
             }
         }
-        return active;
-    }
 
-
-    public Booster getBoosterByPlayer(Player player) {
-        List<Booster> active = getActiveBoosters(player);
-        double perm_booster_points = 1.0;
-        double perm_booster_coins = 1.0;
-        for (Booster booster : active) {
-            if (booster == null) continue;
-            perm_booster_coins += booster.coinMultiplier() - 1;
-            perm_booster_points += booster.pointMultiplier() - 1;
+        if (boosterConfig.isLevelApply(source)) {
+            LevelManager levelManager = plugin.getLevelManager();
+            double levelCoinMult = levelManager.getCoinMultiplier(player);
+            double levelPointMult = levelManager.getPointMultiplier(player);
+            coins += levelCoinMult - 1.0;
+            points += levelPointMult - 1.0;
         }
 
-        double level_booster_coins = levelManager.getCoinMultiplier(player);
-        double level_booster_points = levelManager.getPointMultiplier(player);
+        coins = Math.max(1.0, coins);
+        points = Math.max(1.0, points);
 
-        double final_booster_coins = Math.max(1.0, perm_booster_coins + level_booster_coins - 1);
-        double final_booster_points = Math.max(1.0, perm_booster_points + level_booster_points - 1);
-
-        return new Booster(final_booster_coins, final_booster_points);
+        return new Booster(coins, points);
     }
 }

@@ -55,7 +55,7 @@ class rSellerAPIImpl implements rSellerAPI {
 
     @Override
     public Booster getBooster(Player player) {
-        return plugin.getBoosterManager().getBoosterByPlayer(player);
+        return plugin.getBoosterManager().getMultiplier(player, my.reqqpe.rseller.models.SellSource.GUI);
     }
 
     @Override

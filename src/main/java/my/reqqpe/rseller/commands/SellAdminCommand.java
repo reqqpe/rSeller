@@ -370,7 +370,7 @@ public class SellAdminCommand implements CommandExecutor {
         plugin.getLevelConfig().reload();
         plugin.getAutoSellManager().loadConfig();
         plugin.getLevelManager().reloadLevels();
-        plugin.getBoosterManager().load();
+        plugin.getBoosterConfig().reload();
         plugin.getFormatManager().reload();
         plugin.setupBlockWorlds();
     }

@@ -42,12 +42,8 @@ public class SellManager {
         this.itemManager = plugin.getItemManager();
     }
 
-    public SellResult sellResult(Player player, double price, double points) {
-        Booster booster = plugin.getBoosterManager().getBoosterByPlayer(player);
-        if (booster == null) {
-            booster = new Booster(1.0, 1.0);
-        }
-
+    public SellResult sellResult(Player player, double price, double points, SellSource source) {
+        Booster booster = plugin.getBoosterManager().getMultiplier(player, source);
 
         double finalPrice = price * Math.max(1.0, booster.coinMultiplier());
         double finalPoints = points * Math.max(1.0, booster.pointMultiplier());
@@ -99,7 +95,7 @@ public class SellManager {
             }
         }
 
-        SellResult sellResult = sellResult(player, totalCoins, totalPoints);
+        SellResult sellResult = sellResult(player, totalCoins, totalPoints, SellSource.GUI);
 
         if (sellResult.coins > 0) {
             economy.deposit(player, sellResult.coins);
@@ -134,8 +130,8 @@ public class SellManager {
                 double pointRatio = totalPoints > 0 ? sellResult.points / totalPoints : 1.0;
 
                 int playerLevel = plugin.getLevelManager().getLevel(player);
-                double coinBooster = plugin.getBoosterManager().getBoosterByPlayer(player).coinMultiplier();
-                double pointBooster = plugin.getBoosterManager().getBoosterByPlayer(player).pointMultiplier();
+                double coinBooster = plugin.getBoosterManager().getMultiplier(player, SellSource.GUI).coinMultiplier();
+                double pointBooster = plugin.getBoosterManager().getMultiplier(player, SellSource.GUI).pointMultiplier();
                 String worldName = player.getWorld().getName();
 
                 List<SellLog> logs = new ArrayList<>();
@@ -197,7 +193,7 @@ public class SellManager {
             }
         }
 
-        return sellResult(player, totalCoins, totalPoints);
+        return sellResult(player, totalCoins, totalPoints, SellSource.GUI);
     }
 
     public boolean autoSellItem(Player player, ItemStack itemStack) {
@@ -217,10 +213,7 @@ public class SellManager {
         price *= amount;
         points *= amount;
 
-        Booster booster = plugin.getBoosterManager().getBoosterByPlayer(player);
-        if (booster == null) {
-            booster = new Booster(1.0, 1.0);
-        }
+        Booster booster = plugin.getBoosterManager().getMultiplier(player, SellSource.AUTOSELL);
 
         double totalCoins = price * Math.max(1.0, booster.coinMultiplier());
         double totalPoints = points * Math.max(1.0, booster.pointMultiplier());
@@ -350,7 +343,7 @@ public class SellManager {
             return false;
         }
 
-        SellResult result = sellResult(player, coins, points);
+        SellResult result = sellResult(player, coins, points, SellSource.MENU_ACTION);
 
         if (result.coins() > 0) {
             economy.deposit(player, result.coins());
@@ -391,8 +384,8 @@ public class SellManager {
                     result.points(),
                     SellSource.MENU_ACTION,
                     plugin.getLevelManager().getLevel(player),
-                    plugin.getBoosterManager().getBoosterByPlayer(player).coinMultiplier(),
-                    plugin.getBoosterManager().getBoosterByPlayer(player).pointMultiplier(),
+                    plugin.getBoosterManager().getMultiplier(player, SellSource.MENU_ACTION).coinMultiplier(),
+                    plugin.getBoosterManager().getMultiplier(player, SellSource.MENU_ACTION).pointMultiplier(),
                     player.getWorld().getName()
             ));
         }

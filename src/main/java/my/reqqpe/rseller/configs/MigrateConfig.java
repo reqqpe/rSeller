@@ -13,6 +13,7 @@ public class MigrateConfig {
     public void migrate(Main plugin) {
         migrateOldConfig(plugin);
         migrateItemsFormat(plugin);
+        migrateBoostersFormat(plugin);
     }
 
     private void migrateOldConfig(Main plugin) {
@@ -163,6 +164,49 @@ public class MigrateConfig {
             } else {
                 target.set(fullKey, source.get(key));
             }
+        }
+    }
+
+    private void migrateBoostersFormat(Main plugin) {
+        File dataFolder = plugin.getDataFolder();
+        File configFile = new File(dataFolder, "config.yml");
+        if (!configFile.exists()) return;
+
+        FileConfiguration oldConfig = YamlConfiguration.loadConfiguration(configFile);
+        ConfigurationSection oldBoosters = oldConfig.getConfigurationSection("boosters");
+        if (oldBoosters == null) return;
+
+        File boostersFile = new File(dataFolder, "boosters.yml");
+        if (boostersFile.exists()) {
+            FileConfiguration existing = YamlConfiguration.loadConfiguration(boostersFile);
+            if (existing.contains("boosters.permission-boosters")) {
+                return;
+            }
+        }
+
+        FileConfiguration boostersConfig = boostersFile.exists()
+                ? YamlConfiguration.loadConfiguration(boostersFile)
+                : new YamlConfiguration();
+
+        int count = 0;
+        for (String key : oldBoosters.getKeys(false)) {
+            ConfigurationSection entry = oldBoosters.getConfigurationSection(key);
+            if (entry == null) continue;
+
+            String base = "boosters.permission-boosters." + key + ".";
+            boostersConfig.set(base + "permission", "rseller.booster." + key);
+            boostersConfig.set(base + "coins", entry.getDouble("coin-multiplier", 1.0));
+            boostersConfig.set(base + "points", entry.getDouble("point-multiplier", 1.0));
+            boostersConfig.set(base + "priority", 1);
+            boostersConfig.set(base + "source", "all");
+            count++;
+        }
+
+        try {
+            boostersConfig.save(boostersFile);
+            plugin.getLogger().info("[Migrate] Migrated " + count + " booster(s) from config.yml to boosters.yml.");
+        } catch (IOException e) {
+            plugin.getLogger().warning("[Migrate] Failed to save boosters.yml: " + e.getMessage());
         }
     }
 }

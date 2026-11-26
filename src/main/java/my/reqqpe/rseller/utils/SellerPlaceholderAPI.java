@@ -87,13 +87,13 @@ public class SellerPlaceholderAPI extends PlaceholderExpansion {
                     switch (args[1]) {
                         case "points": {
                             double multiplier = plugin.getBoosterManager()
-                                    .getBoosterByPlayer(player)
+                                    .getMultiplier(player, my.reqqpe.rseller.models.SellSource.GUI)
                                     .pointMultiplier();
                             return numberFormat.format("placeholders.multiplier_points", multiplier);
                         }
                         case "coins": {
                             double multiplier = plugin.getBoosterManager()
-                                    .getBoosterByPlayer(player)
+                                    .getMultiplier(player, my.reqqpe.rseller.models.SellSource.GUI)
                                     .coinMultiplier();
                             return numberFormat.format("placeholders.multiplier_coins", multiplier);
                         }

@@ -4,6 +4,7 @@ import my.reqqpe.rseller.api.rSeller;
 import lombok.Getter;
 import my.reqqpe.rseller.commands.*;
 import my.reqqpe.rseller.configs.MigrateConfig;
+import my.reqqpe.rseller.configs.BoosterConfig;
 import my.reqqpe.rseller.configs.CustomConfig;
 import my.reqqpe.rseller.configs.impl.DataBaseConfig;
 import my.reqqpe.rseller.configs.impl.ItemsConfig;
@@ -70,6 +71,9 @@ public final class Main extends JavaPlugin {
     private MainConfig mainConfig;
     @Getter
     private DataBaseConfig dataBaseConfig;
+
+    @Getter
+    private BoosterConfig boosterConfig;
 
     @Getter
     private CustomConfig allSellGUIConfig;
@@ -190,6 +194,9 @@ public final class Main extends JavaPlugin {
 
         itemsConfig = new ItemsConfig(this);
         itemsConfig.setup();
+
+        boosterConfig = new BoosterConfig(this);
+        boosterConfig.setup();
 
         levelConfig = new LevelConfig(this);
         levelConfig.setup();
