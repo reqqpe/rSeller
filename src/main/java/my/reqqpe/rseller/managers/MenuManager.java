@@ -21,16 +21,15 @@ public class MenuManager {
     }
 
     public static void unRegisterMenu(String name) {
-        if (hasMenu(name)) {
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.getOpenInventory().getTopInventory().getHolder() instanceof CustomInventoryHolder holder) {
-                    if (holder.id().equals(name)) {
-                        player.closeInventory();
-                        menus.remove(name);
-                    }
+        if (!hasMenu(name)) return;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof CustomInventoryHolder holder) {
+                if (holder.id().equals(name)) {
+                    player.closeInventory();
                 }
             }
         }
+        menus.remove(name);
     }
     public static void reloadMenu(String name, AbstractMenu menu) {
         unRegisterMenu(name);
@@ -49,15 +48,11 @@ public class MenuManager {
 
 
     public static void unRegisterAllMenus() {
-        for (String name : menus.keySet()) {
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.getOpenInventory().getTopInventory().getHolder() instanceof CustomInventoryHolder holder) {
-                    if (holder.id().equals(name)) {
-                        player.closeInventory();
-                        menus.remove(name);
-                    }
-                }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof CustomInventoryHolder) {
+                player.closeInventory();
             }
         }
+        menus.clear();
     }
 }

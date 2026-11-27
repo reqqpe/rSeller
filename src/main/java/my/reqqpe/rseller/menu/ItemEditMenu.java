@@ -5,7 +5,6 @@ import my.reqqpe.rseller.managers.MenuManager;
 import my.reqqpe.rseller.models.item.Item;
 import my.reqqpe.rseller.utils.Colorizer;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -69,11 +68,20 @@ public class ItemEditMenu extends AbstractMenu implements Listener {
         player.openInventory(inv);
     }
 
+    @Override
+    protected String replacePlaceholders(Player player, String text, Inventory inventory) {
+        EditSession session = sessions.get(player.getUniqueId());
+        if (session != null) {
+            text = applySession(text, session);
+        }
+        return super.replacePlaceholders(player, text, inventory);
+    }
+
     private void placeDisplayItem(Inventory inv, Player player, EditSession session) {
         Item item = plugin.getItemManager().getById(session.id);
         if (item == null) return;
 
-        int slot = guiConfig.getInt("items.item_display.slot", 13);
+        int slot = guiConfig.getInt("items.item_display.slot", 14);
 
         ItemStack stack = new ItemStack(item.material());
         ItemMeta meta = stack.getItemMeta();
@@ -99,7 +107,6 @@ public class ItemEditMenu extends AbstractMenu implements Listener {
         EditSession session = sessions.get(player.getUniqueId());
         if (session == null) return;
         placeDisplayItem(inv, player, session);
-
         refreshButton(inv, "price_info", session);
         refreshButton(inv, "points_info", session);
     }
@@ -178,15 +185,8 @@ public class ItemEditMenu extends AbstractMenu implements Listener {
             player.sendMessage(Colorizer.color("&#54A0F4Введите новую цену в чат:"));
             plugin.getChatInputManager().awaitDouble(player, "price", value -> {
                 session.price = Math.max(0, value);
-                openFor(player, plugin.getItemManager().getById(session.id) != null
-                        ? new Item(session.id, plugin.getItemManager().getById(session.id).material(),
-                                   plugin.getItemManager().getById(session.id).itemData(),
-                                   session.price, session.points)
-                        : null);
-                if (plugin.getItemManager().getById(session.id) != null) {
-                    sessions.put(player.getUniqueId(), session);
-                    openMenu(player);
-                }
+                sessions.put(player.getUniqueId(), session);
+                openMenu(player);
             });
             return;
         }

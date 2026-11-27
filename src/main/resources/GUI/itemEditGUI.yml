@@ -5,7 +5,7 @@ items:
   item_display:
     material: STONE
     name: "&f{item_name}"
-    slot: 13
+    slot: 4
     lore:
       - ""
       - "&#54A0F4* &fID: &e{item_id}"
@@ -17,7 +17,7 @@ items:
   price_decrease_big:
     material: RED_STAINED_GLASS_PANE
     name: "&c- 10 к цене"
-    slot: 19
+    slot: 20
     lore:
       - ""
       - "&fНажмите, чтобы уменьшить цену на &c10"
@@ -30,7 +30,7 @@ items:
   price_decrease:
     material: ORANGE_STAINED_GLASS_PANE
     name: "&c- 1 к цене"
-    slot: 20
+    slot: 21
     lore:
       - ""
       - "&fНажмите, чтобы уменьшить цену на &c1"
@@ -43,7 +43,7 @@ items:
   price_info:
     material: GOLD_INGOT
     name: "&#54A0F4▶ Цена"
-    slot: 21
+    slot: 22
     lore:
       - ""
       - "&fТекущая цена: &a{item_price}"
@@ -56,7 +56,7 @@ items:
   price_increase:
     material: LIME_STAINED_GLASS_PANE
     name: "&a+ 1 к цене"
-    slot: 22
+    slot: 23
     lore:
       - ""
       - "&fНажмите, чтобы увеличить цену на &a1"
@@ -69,7 +69,7 @@ items:
   price_increase_big:
     material: GREEN_STAINED_GLASS_PANE
     name: "&a+ 10 к цене"
-    slot: 23
+    slot: 24
     lore:
       - ""
       - "&fНажмите, чтобы увеличить цену на &a10"
@@ -82,7 +82,7 @@ items:
   points_decrease_big:
     material: RED_STAINED_GLASS_PANE
     name: "&c- 1 к очкам"
-    slot: 28
+    slot: 29
     lore:
       - ""
       - "&fНажмите, чтобы уменьшить очки на &c1"
@@ -95,7 +95,7 @@ items:
   points_decrease:
     material: ORANGE_STAINED_GLASS_PANE
     name: "&c- 0.1 к очкам"
-    slot: 29
+    slot: 30
     lore:
       - ""
       - "&fНажмите, чтобы уменьшить очки на &c0.1"
@@ -108,7 +108,7 @@ items:
   points_info:
     material: EXPERIENCE_BOTTLE
     name: "&#54A0F4▶ Очки"
-    slot: 30
+    slot: 31
     lore:
       - ""
       - "&fТекущие очки: &b{item_points}"
@@ -121,7 +121,7 @@ items:
   points_increase:
     material: LIME_STAINED_GLASS_PANE
     name: "&a+ 0.1 к очкам"
-    slot: 31
+    slot: 32
     lore:
       - ""
       - "&fНажмите, чтобы увеличить очки на &a0.1"
@@ -134,7 +134,7 @@ items:
   points_increase_big:
     material: GREEN_STAINED_GLASS_PANE
     name: "&a+ 1 к очкам"
-    slot: 32
+    slot: 33
     lore:
       - ""
       - "&fНажмите, чтобы увеличить очки на &a1"
@@ -147,7 +147,7 @@ items:
   save:
     material: EMERALD
     name: "&a▶ Сохранить"
-    slot: 40
+    slot: 49
     lore:
       - ""
       - "&fНажмите, чтобы сохранить изменения"
@@ -160,7 +160,7 @@ items:
   delete:
     material: BARRIER
     name: "&c▶ Удалить предмет"
-    slot: 42
+    slot: 53
     lore:
       - ""
       - "&cНажмите, чтобы удалить предмет"
@@ -174,7 +174,7 @@ items:
   back:
     material: basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTcyMjIwZjU0M2E2OTJhM2YyZjk0OWViMmE1MzQzNDk1NjEwMjY0ZTkxNmIxOWI3NzNjN2U0ZDIxYjg1ZDRjNyJ9fX0=
     name: "&#54A0F4▶ Назад"
-    slot: 36
+    slot: 45
     lore:
       - ""
       - "&fНажмите, чтобы вернуться"
@@ -189,10 +189,9 @@ items:
     material: GRAY_STAINED_GLASS_PANE
     name: ""
     slots:
-      - 0-12
-      - 14-18
-      - 24-27
-      - 33-35
-      - 37-39
-      - 41-41
-      - 43-53
+      - 0-3
+      - 5-19
+      - 25-28
+      - 34-44
+      - 46-48
+      - 50-52

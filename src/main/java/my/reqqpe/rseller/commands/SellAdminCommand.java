@@ -359,6 +359,8 @@ public class SellAdminCommand implements CommandExecutor {
         plugin.getAutoSellGUIConfig().reload();
         plugin.getAllSellGUIConfig().reload();
         plugin.getSellLogGUIConfig().reload();
+        plugin.getItemListGUIConfig().reload();
+        plugin.getItemEditGUIConfig().reload();
 
         plugin.loadMenus();
     }

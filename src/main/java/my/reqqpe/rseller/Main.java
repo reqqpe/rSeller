@@ -146,7 +146,7 @@ public final class Main extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new MenuListener(this), this);
         pm.registerEvents(new DatabaseListener(this,playerRepository, autoSellManager), this);
-        chatInputManager = new ChatInputManager();
+        chatInputManager = new ChatInputManager(this);
         pm.registerEvents(chatInputManager, this);
 
         getCommand("sell").setExecutor(new SellCommand(this));

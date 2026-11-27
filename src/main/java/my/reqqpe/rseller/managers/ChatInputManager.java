@@ -1,12 +1,14 @@
 package my.reqqpe.rseller.managers;
 
 import my.reqqpe.rseller.utils.Colorizer;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +16,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class ChatInputManager implements Listener {
+
+    private final Plugin plugin;
 
     private static class PendingInput {
         final Consumer<String> callback;
@@ -24,6 +28,10 @@ public class ChatInputManager implements Listener {
     }
 
     private final Map<UUID, PendingInput> pending = new HashMap<>();
+
+    public ChatInputManager(Plugin plugin) {
+        this.plugin = plugin;
+    }
 
     public void awaitDouble(Player player, String field, Consumer<Double> callback) {
         pending.put(player.getUniqueId(), new PendingInput(raw -> {
@@ -65,7 +73,8 @@ public class ChatInputManager implements Listener {
         if (input == null) return;
 
         e.setCancelled(true);
-        input.callback.accept(e.getMessage().trim());
+        String message = e.getMessage().trim();
+        Bukkit.getScheduler().runTask(plugin, () -> input.callback.accept(message));
     }
 
     @EventHandler
